@@ -8,32 +8,32 @@ import JoinGame from './components/JoinGame';
 import Board from './components/Board';
 
 const App = () => {
-	return (
-		<Router>
-			<div className="App">
-				<header className="App-header">
-					<img src={logo} className="App-logo" alt="logo" />
-					<Switch>
-						<Route path="/host">
-							<HostGame />
-						</Route>
-						<Route path="/join">
-							<JoinGame />
-						</Route>
-						<Route path="/game/:roomCode">
-							<Board />
-						</Route>
-						<Route exact path="/">
-							<div>
-								<Link to="/host">Host Game</Link>
-								<Link to="/join">Join Game</Link>
-							</div>
-						</Route>
-					</Switch>
-				</header>
-			</div>
-		</Router>
-	);
+  return (
+    <Router>
+      <div className="App">
+        <header className="App-header">
+          <img src={logo} className="App-logo" alt="logo" />
+          <Switch>
+            <Route path="/host">
+              <HostGame />
+            </Route>
+            <Route path="/join">
+              <JoinGame />
+            </Route>
+            <Route path="/game/:roomCode">
+              <Board />
+            </Route>
+            <Route exact path="/">
+              <div>
+                <Link to="/host">Host Game</Link>
+                <Link to="/join">Join Game</Link>
+              </div>
+            </Route>
+          </Switch>
+        </header>
+      </div>
+    </Router>
+  );
 };
 
 export default App;
