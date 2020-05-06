@@ -16,7 +16,13 @@ const HostGame = () => {
   }, []);
 
   const handleSubmit = () => {
-    socket.emit('hostGame', name, roomCode);
+    const menu = {
+      roll: 'Maki',
+      appetizer: ['Tempura', 'Sashimi', 'Dumpling'],
+      special: ['Chopsticks', 'Wasabi'],
+      dessert: 'Pudding',
+    };
+    socket.emit('hostGame', menu, 5, roomCode, name);
     setIsCreating(false);
   };
 
@@ -38,7 +44,14 @@ const HostGame = () => {
     <div>
       <p>Room code: {roomCode}</p>
       <p>Player name: {name}</p>
-      {players ? players.map(player => <div>{player}</div>) : <p>Loading...</p>}
+      {/* TODO: Display number of players missing, Move this code to a WaitingRoom component */}
+      {players ? (
+        players.map(player => (
+          <div key={player}>{`${player} has joined the game`}</div>
+        ))
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 

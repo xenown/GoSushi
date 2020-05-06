@@ -43,7 +43,13 @@ const JoinGame = () => {
     <div>
       <p>Room code: {roomCode}</p>
       <p>Player name: {name}</p>
-      {players && players.map(player => <div>{player}</div>)}
+      {players ? (
+        players.map(player => (
+          <div key={player}>{`${player} has joined the game`}</div>
+        ))
+      ) : (
+        <p>Loading...</p>
+      )}
     </div>
   );
 
