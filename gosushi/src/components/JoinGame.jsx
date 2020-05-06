@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
+import { useHistory } from 'react-router-dom';
 const ENDPOINT = 'http://127.0.0.1:4001';
 const socket = socketIOClient(ENDPOINT);
 
@@ -8,6 +9,7 @@ const JoinGame = () => {
   const [roomCode, setRoomCode] = useState('');
   const [players, setPlayers] = useState('');
   const [message, setMessage] = useState('');
+  const history = useHistory();
 
   useEffect(() => {
     socket.on('newPlayer', data => {
@@ -18,6 +20,12 @@ const JoinGame = () => {
       }
     });
   }, []);
+
+  useEffect(() => {
+    socket.on('startGame', code => {
+      history.push(`/game/${code}`);
+    });
+  }, [history]);
 
   const handleSubmit = () => {
     socket.emit('joinGame', name, roomCode);
@@ -43,13 +51,10 @@ const JoinGame = () => {
     <div>
       <p>Room code: {roomCode}</p>
       <p>Player name: {name}</p>
-      {players ? (
+      {players &&
         players.map(player => (
           <div key={player}>{`${player} has joined the game`}</div>
-        ))
-      ) : (
-        <p>Loading...</p>
-      )}
+        ))}
     </div>
   );
 
