@@ -12,26 +12,46 @@ const server = http.createServer(app);
 
 const io = socketIo(server);
 
-let interval;
-
 const TestClass = require('./test');
 const test = new TestClass();
+const rooms = {};
 
-io.on('connection', (socket) => {
-  console.log('New client connected');
-  if (interval) {
-    clearInterval(interval);
-  }
-  interval = setInterval(() => getApiAndEmit(socket), 1000);
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-    clearInterval(interval);
+io.on('connection', socket => {
+  socket.on('hostGame', (username, roomCode) => {
+    socket.join([roomCode], () => {
+      rooms[roomCode] = [username];
+      io.to(roomCode).emit(
+        'newPlayer',
+        rooms[roomCode].map(player => `${player} has joined the game`)
+      );
+    });
   });
+
+  socket.on('joinGame', (username, roomCode) => {
+    socket.join([roomCode], () => {
+      if (!rooms[roomCode]) {
+        io.to(socket.id).emit(
+          'newPlayer',
+          `Connection failed: Invalid room code "${roomCode}"`
+        );
+        return;
+      }
+
+      rooms[roomCode].push(username);
+
+      io.to(roomCode).emit(
+        'newPlayer',
+        rooms[roomCode].map(player => `${player} has joined the game`)
+      );
+    });
+  });
+
+  console.log('New client connected');
+  getApiAndEmit(socket);
 });
 
-const getApiAndEmit = (socket) => {
+const getApiAndEmit = socket => {
   const response = new Date();
-  // Emitting a new message. Will be consumed by the client
   socket.emit('FromAPI', response);
   test.printSomething('called FromAPI');
 };
