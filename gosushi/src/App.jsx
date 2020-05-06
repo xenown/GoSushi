@@ -5,6 +5,7 @@ import logo from './logo.svg';
 import './App.css';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
+import Board from './components/Board';
 
 const App = () => {
 	return (
@@ -18,6 +19,9 @@ const App = () => {
 						</Route>
 						<Route path="/join">
 							<JoinGame />
+						</Route>
+						<Route path="/game/:roomCode">
+							<Board />
 						</Route>
 						<Route exact path="/">
 							<div>

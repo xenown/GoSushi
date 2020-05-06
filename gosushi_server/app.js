@@ -14,18 +14,19 @@ const Game = require('./classes/game');
 const rooms = {};
 
 io.on('connection', socket => {
+  console.log('New client connected');
+
   socket.on('hostGame', (menu, numPlayers, roomCode, username) => {
     socket.join([roomCode], e => {
-      if (rooms[roomCode] && rooms[roomCode].numPlayers !== 0) {
-        io.to(socket.id).emit(
+      if (rooms[roomCode] && rooms[roomCode].playerNames.length !== 0) {
+        socket.emit(
           'newPlayer',
           `Connection failed: Room code "${roomCode}" is being used.`
         );
+        return;
       } else if (e) {
-        io.to(socket.id).emit(
-          'newPlayer',
-          `Connection failed: Erorr joining room: ${e}`
-        );
+        socket.emit('newPlayer', `Connection failed: Erorr joining room: ${e}`);
+        return;
       }
       rooms[roomCode] = new Game(menu, numPlayers, roomCode, username);
 
@@ -37,32 +38,40 @@ io.on('connection', socket => {
     socket.join([roomCode], e => {
       const game = rooms[roomCode];
       if (!game) {
-        io.to(socket.id).emit(
+        socket.emit(
           'newPlayer',
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
-      } else if (game.playerNames.size == game.numPlayers) {
-        io.to(socket.id).emit(
+      } else if (game.playerNames.length == game.numPlayers) {
+        socket.emit(
           'newPlayer',
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
         return;
       } else if (e) {
-        io.to(socket.id).emit(
-          'newPlayer',
-          `Connection failed: Erorr joining room: ${e}`
-        );
+        socket.emit('newPlayer', `Connection failed: Erorr joining room: ${e}`);
+        return;
       }
 
       const { playerNames } = game;
       playerNames.push(username);
 
       io.to(roomCode).emit('newPlayer', playerNames);
+
+      if (playerNames.length == game.numPlayers) {
+        console.log('start game');
+        io.to(roomCode).emit('startGame', roomCode);
+      }
     });
   });
-
-  console.log('New client connected');
 });
+
+const dealHand = () => {
+  const hand = [];
+  io.clients(roomCode).array.forEach((element, idx) => {
+    element.emit('dealHand', hand[idx]);
+  });
+};
 
 server.listen(port, () => console.log(`Listening on port ${port}`));
