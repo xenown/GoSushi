@@ -1,18 +1,22 @@
 const Card = require('./card');
+const _ = require('lodash');
 
 class Deck {
-  constructor(menu, playerNum) {
+  constructor(menu, numPlayers) {
     this.menu = menu;
-    this.cards = this.createNigiri()
+    this.playableCards = this.createNigiri()
       .concat(this.createRoll(menu.roll))
       .concat(this.createAppetizer(menu.appetizer[0]))
       .concat(this.createAppetizer(menu.appetizer[1]))
+      .concat(this.createAppetizer(menu.appetizer[2]))
       .concat(this.createSpecial(menu.special[0]))
       .concat(this.createSpecial(menu.special[1]));
-    this.dessert = this.createDesserts(menu.dessert, playerNum);
+    this.desserts = this.createDesserts(menu.dessert, numPlayers);
+    this.activeDeck = _.cloneDeep(this.playableCards);
   }
 
   shuffle() {
+    this.activeDeck = _.shuffle(this.activeDeck);
     console.log("shuffled deck");
   }
 
@@ -111,8 +115,7 @@ class Deck {
     return arr;
   }
 
-  createDesserts(dessertName, playerNum) {
-    const num = playerNum > 5 ? 15 : 10;
+  createDesserts(dessertName, numPlayers) {
     let arr = [];
     if (dessertName === Card.CardNameEnum.FRUIT) {
       for (let i = 0; i < 15; i++) {
@@ -124,10 +127,12 @@ class Deck {
         }
         arr[i] = new Card(Card.CardNameEnum.FRUIT, fruit);
       }
-      if (playerNum < 6) {
+      if (numPlayers < 6) {
+        arr = _.slice(_.shuffle(arr), 5);
       }
     } else if (dessertName === Card.CardNameEnum.PUDDING
       || dessertName === Card.CardNameEnum.GREEN_TEA_ICE_CREAM) {
+      const num = numPlayers > 5 ? 15 : 10;
       for (let i = 0; i < num; i++) {
         arr[i] = new Card(dessertName);
       }
@@ -135,6 +140,25 @@ class Deck {
       console.log('Invalid dessert name.');
     }
     return arr;
+  }
+
+  resetDeck(numDesserts) {
+    console.log(this.activeDeck);
+    _.remove(this.activeDeck, c => c.cardName !== this.menu.dessert);
+    console.log(this.activeDeck);
+    this.activeDeck = this.activeDeck.concat(this.playableCards);
+    this.addDesserts(numDesserts);
+  }
+
+  addDesserts(num) {
+    this.activeDeck = this.activeDeck.concat(this.desserts.slice(0, num));
+    this.desserts = this.desserts.slice(num);
+  }
+
+  dealHand(num) {
+    const hand = _.take(this.activeDeck, num);
+    this.activeDeck = _.drop(this.activeDeck, num);
+    return hand;
   }
 }
 

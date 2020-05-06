@@ -39,8 +39,12 @@ class Card {
     this.cardName = cardName;
     this.data = data;
   }
-  printSomething(text) {
-    console.log(text);
+
+  print() {
+    console.log(this.cardName);
+    if (!data) {
+      console.log(`data: ${this.data}`);
+    }
   }
 }
 

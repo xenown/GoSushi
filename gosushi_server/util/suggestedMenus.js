@@ -1,4 +1,4 @@
-export const suggestedMenus = {
+const suggestedMenus = {
   firstMeal: {
     roll: 'Maki',
     appetizer: ['Tempura', 'Sashimi', 'Miso Soup'],
@@ -48,3 +48,5 @@ export const suggestedMenus = {
     dessert: 'Fruit',
   },
 };
+
+module.exports = suggestedMenus;
