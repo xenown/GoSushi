@@ -37,6 +37,7 @@ const HostGame = () => {
         <input type="text" onChange={e => setRoomCode(e.target.value)} />
       </div>
       <button onClick={handleSubmit}>Submit</button>
+      {/* Add messages or loading... */}
     </div>
   );
 
