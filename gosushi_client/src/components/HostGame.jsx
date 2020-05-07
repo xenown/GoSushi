@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
 import { useHistory } from 'react-router-dom';
+import WaitingRoom from './WaitingRoom';
+import MenuSelection from './MenuSelection';
 const ENDPOINT = 'http://127.0.0.1:4001';
 const socket = socketIOClient(ENDPOINT);
 
@@ -9,40 +11,42 @@ const HostGame = () => {
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [numPlayers, setNumPlayers] = useState('');
-  const [players, setPlayers] = useState('');
+  const [isCreating, setIsCreating] = useState(true);
   const [message, setMessage] = useState('');
+  const [menu, setMenu] = useState({});
 
   useEffect(() => {
-    socket.on('newPlayer', data => {
+    const handleNewPlayer = data => {
       if (!Array.isArray(data)) {
         setMessage(data);
       } else {
-        setPlayers(data);
+        setIsCreating(false);
       }
-    });
+    };
+
+    socket.on('newPlayer', handleNewPlayer);
+
+    return () => {
+      socket.off('newPlayer', handleNewPlayer);
+    };
   }, []);
 
-  useEffect(() => {
-    socket.on('startGame', code => {
-      history.push(`/game/${code}`);
-    });
-  }, [history]);
-
   const handleSubmit = () => {
-    const menu = {
-      roll: 'Maki',
-      appetizer: ['Tempura', 'Sashimi', 'Dumpling'],
-      special: ['Chopsticks', 'Wasabi'],
-      dessert: 'Pudding',
-    };
     socket.emit('hostGame', menu, numPlayers, roomCode, name);
     setMessage('Loading...');
   };
 
-  const isCreating = !players;
+  const handleBack = () => {
+    history.push('/');
+  };
+
+  const handleMenu = menu => {
+    setMenu(menu);
+  };
 
   const createForm = (
     <div>
+      <MenuSelection handleMenu={handleMenu} />
       <div>
         Enter your name
         <input type="text" onChange={e => setName(e.target.value)} />
@@ -54,7 +58,7 @@ const HostGame = () => {
           min="2"
           max="8"
           onChange={e => {
-            setNumPlayers(e.target.value);
+            setNumPlayers(parseInt(e.target.value, 10));
           }}
         />
       </div>
@@ -62,27 +66,20 @@ const HostGame = () => {
         Enter your room code
         <input type="text" onChange={e => setRoomCode(e.target.value)} />
       </div>
+      <button onClick={handleBack}>Back</button>
       <button onClick={handleSubmit}>Submit</button>
       <p>{message}</p>
-    </div>
-  );
-
-  const roomDetails = (
-    <div>
-      <p>Room code: {roomCode}</p>
-      <p>Player name: {name}</p>
-      {/* TODO: Display number of players missing, Move this code to a WaitingRoom component */}
-      {players &&
-        players.map(player => (
-          <div key={player}>{`${player} has joined the game`}</div>
-        ))}
     </div>
   );
 
   return (
     <div className="HostGame" style={{ display: 'block' }}>
       <h1>Host Game</h1>
-      {isCreating ? createForm : roomDetails}
+      {isCreating ? (
+        createForm
+      ) : (
+        <WaitingRoom name={name} roomCode={roomCode} />
+      )}
       {/* TODO: Customize playing deck */}
     </div>
   );

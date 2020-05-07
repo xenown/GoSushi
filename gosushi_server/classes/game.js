@@ -15,14 +15,14 @@ class Game {
   }
 
   addPoints(playerName, points) {
-    if (!this.pointMap[player]) {
-      this.pointMap[player] = 0;
+    if (!this.pointMap[playerName]) {
+      this.pointMap[playerName] = 0;
       return;
     }
     this.pointMap[playerName] += points;
   }
 
-  handleRoundStart() {
+  startRound() {
     const map = this.numPlayers > 6 ? numDesserts.more : numDesserts.less;
     this.deck.resetDeck(map[this.round]);
 

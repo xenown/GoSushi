@@ -6,11 +6,11 @@ class Deck {
     this.menu = menu;
     this.playableCards = this.createNigiri()
       .concat(this.createRoll(menu.roll))
-      .concat(this.createAppetizer(menu.appetizer[0]))
-      .concat(this.createAppetizer(menu.appetizer[1]))
-      .concat(this.createAppetizer(menu.appetizer[2]))
-      .concat(this.createSpecial(menu.special[0]))
-      .concat(this.createSpecial(menu.special[1]));
+      .concat(this.createAppetizer(menu.appetizers[0]))
+      .concat(this.createAppetizer(menu.appetizers[1]))
+      .concat(this.createAppetizer(menu.appetizers[2]))
+      .concat(this.createSpecial(menu.specials[0]))
+      .concat(this.createSpecial(menu.specials[1]));
     this.desserts = this.createDesserts(menu.dessert, numPlayers);
     this.activeDeck = _.cloneDeep(this.playableCards);
   }

@@ -43,7 +43,7 @@ io.on('connection', socket => {
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
-      } else if (game.playerNames.length == game.numPlayers) {
+      } else if (game.playerNames.length === game.numPlayers) {
         socket.emit(
           'newPlayer',
           `Connection failed: Room with code "${roomCode}" is already full.`
@@ -59,11 +59,16 @@ io.on('connection', socket => {
 
       io.to(roomCode).emit('newPlayer', playerNames);
 
-      if (playerNames.length == game.numPlayers) {
+      if (playerNames.length === game.numPlayers) {
         console.log('start game');
+        game.startRound();
         io.to(roomCode).emit('startGame', roomCode);
       }
     });
+  });
+
+  socket.on('boardLoad', (roomCode) => {
+    io.to(roomCode).emit('dealHand');
   });
 });
 

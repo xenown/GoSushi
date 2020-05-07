@@ -1,35 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import socketIOClient from 'socket.io-client';
 import { useHistory } from 'react-router-dom';
+import WaitingRoom from './WaitingRoom';
 const ENDPOINT = 'http://127.0.0.1:4001';
 const socket = socketIOClient(ENDPOINT);
 
 const JoinGame = () => {
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [players, setPlayers] = useState('');
+  const [isJoining, setIsJoinging] = useState(true);
   const [message, setMessage] = useState('');
   const history = useHistory();
 
   useEffect(() => {
-    socket.on('newPlayer', data => {
+    const handleNewPlayer = data => {
       if (!Array.isArray(data)) {
         setMessage(data);
       } else {
-        setPlayers(data);
+        setIsJoinging(false);
       }
-    });
-  }, []);
+    };
 
-  useEffect(() => {
-    socket.on('startGame', code => {
-      history.push(`/game/${code}`);
-    });
-  }, [history]);
+    socket.on('newPlayer', handleNewPlayer);
+
+    return () => {
+      socket.off('newPlayer', handleNewPlayer);
+    };
+  }, []);
 
   const handleSubmit = () => {
     socket.emit('joinGame', name, roomCode);
     setMessage('Loading...');
+  };
+
+  const handleBack = () => {
+    history.push('/');
   };
 
   const joinForm = (
@@ -42,28 +47,16 @@ const JoinGame = () => {
         Enter the room code
         <input type="text" onChange={e => setRoomCode(e.target.value)} />
       </div>
+      <button onClick={handleBack}>Back</button>
       <button onClick={handleSubmit}>Submit</button>
       <p>{message}</p>
     </div>
   );
 
-  const roomDetails = (
-    <div>
-      <p>Room code: {roomCode}</p>
-      <p>Player name: {name}</p>
-      {players &&
-        players.map(player => (
-          <div key={player}>{`${player} has joined the game`}</div>
-        ))}
-    </div>
-  );
-
-  const isJoining = !players;
-
   return (
     <div className="JoinGame" style={{ display: 'block' }}>
       <h1>Join Game</h1>
-      {isJoining ? joinForm : roomDetails}
+      {isJoining ? joinForm : <WaitingRoom name={name} roomCode={roomCode} />}
     </div>
   );
 };

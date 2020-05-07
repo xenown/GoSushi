@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 
-import logo from './logo.svg';
 import './App.css';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
@@ -12,7 +11,6 @@ const App = () => {
     <Router>
       <div className="App">
         <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
           <Switch>
             <Route path="/host">
               <HostGame />
@@ -24,7 +22,7 @@ const App = () => {
               <Board />
             </Route>
             <Route exact path="/">
-              <div>
+              <div className="App-route-container">
                 <Link to="/host">Host Game</Link>
                 <Link to="/join">Join Game</Link>
               </div>
