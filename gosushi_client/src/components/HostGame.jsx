@@ -9,6 +9,7 @@ const HostGame = ({ socket }) => {
   const [roomCode, setRoomCode] = useState('');
   const [numPlayers, setNumPlayers] = useState('');
   const [isCreating, setIsCreating] = useState(true);
+  const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState('');
   const [menu, setMenu] = useState({});
 
@@ -22,10 +23,16 @@ const HostGame = ({ socket }) => {
       }
     };
 
-    socket.on('newPlayer', handleNewPlayer);
+    const handleRoomFilled = () => {
+      setIsReady(true);
+    };
+
+    socket.on('playerJoined', handleNewPlayer);
+    socket.on('roomFilled', handleRoomFilled);
 
     return () => {
-      socket.off('newPlayer', handleNewPlayer);
+      socket.off('playerJoined', handleNewPlayer);
+      socket.off('roomFilled', handleRoomFilled);
     };
   }, [socket]);
 
@@ -34,12 +41,12 @@ const HostGame = ({ socket }) => {
     setMessage('Loading...');
   };
 
-  const handleBack = () => {
-    history.push('/');
-  };
+  const handleBack = () => history.push('/');
 
-  const handleMenu = menu => {
-    setMenu(menu);
+  const handleMenu = menu => setMenu(menu);
+
+  const handleStartGame = () => {
+    socket.emit('gameInitiated', roomCode);
   };
 
   const createForm = (
@@ -75,7 +82,7 @@ const HostGame = ({ socket }) => {
       <h1>Host Game</h1>
       {isCreating && createForm}
       <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
-      {/* TODO: Customize playing deck */}
+      {isReady && <button onClick={handleStartGame}>Start Game</button>}
     </div>
   );
 };

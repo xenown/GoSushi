@@ -146,9 +146,7 @@ class Deck {
   }
 
   resetDeck(numDesserts) {
-    console.log(this.activeDeck);
     _.remove(this.activeDeck, c => c.cardName !== this.menu.dessert);
-    console.log(this.activeDeck);
     this.activeDeck = this.activeDeck.concat(this.playableCards);
     this.addDesserts(numDesserts);
   }

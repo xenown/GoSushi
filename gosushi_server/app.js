@@ -21,12 +21,12 @@ io.on('connection', socket => {
     socket.join([roomCode], e => {
       if (rooms[roomCode] && rooms[roomCode].players.length !== 0) {
         socket.emit(
-          'newPlayer',
+          'playerJoined',
           `Connection failed: Room code "${roomCode}" is being used.`
         );
         return;
       } else if (e) {
-        socket.emit('newPlayer', `Connection failed: Erorr joining room: ${e}`);
+        socket.emit('playerJoined', `Connection failed: Erorr joining room: ${e}`);
         return;
       }
       rooms[roomCode] = new Game(
@@ -37,7 +37,8 @@ io.on('connection', socket => {
         socket.id
       );
 
-      io.to(roomCode).emit('newPlayer', [`${username} has joined the game`]);
+      io.to(roomCode).emit('playerJoined', [username]);
+      socket.emit('getNumPlayers', numPlayers);
     });
   });
 
@@ -46,18 +47,18 @@ io.on('connection', socket => {
       const game = rooms[roomCode];
       if (!game) {
         socket.emit(
-          'newPlayer',
+          'playerJoined',
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
       } else if (game.players.length === game.numPlayers) {
         socket.emit(
-          'newPlayer',
+          'playerJoined',
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
         return;
       } else if (e) {
-        socket.emit('newPlayer', `Connection failed: Erorr joining room: ${e}`);
+        socket.emit('playerJoined', `Connection failed: Erorr joining room: ${e}`);
         return;
       }
 
@@ -65,15 +66,20 @@ io.on('connection', socket => {
       players.push(new Player(username, socket.id));
 
       io.to(roomCode).emit(
-        'newPlayer',
+        'playerJoined',
         players.map(p => p.name)
       );
+      socket.emit('getNumPlayers', game.numPlayers);
 
       if (players.length === game.numPlayers) {
         game.startRound();
-        io.to(roomCode).emit('startGame', roomCode);
+        io.to(roomCode).emit('roomFilled', roomCode);
       }
     });
+  });
+
+  socket.on('gameInitiated', roomCode => {
+    io.to(roomCode).emit('startGame', roomCode);
   });
 
   socket.on('boardLoaded', roomCode => {

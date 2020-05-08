@@ -23,10 +23,8 @@ const Board = ({ socket }) => {
     <div className="Board" style={{ display: 'block' }}>
       <h1>Board</h1>
       <p>Display cards somehow</p>
-      {hand.map(card => (
-        <div>
-          <p>{card.cardName}</p>
-        </div>
+      {hand.map((card, index) => (
+        <div key={index}>{card.cardName}</div>
       ))}
     </div>
   );
