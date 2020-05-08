@@ -1,6 +1,7 @@
 const CardNameEnum = require('../util/cardNameEnum');
 const Player = require('./player');
 const Deck = require('./deck');
+const handSize = require('../util/handSize');
 const { makiPoints, uramakiPoints } = require('../util/pointRules');
 
 class Game {
@@ -21,16 +22,20 @@ class Game {
   }
 
   startRound() {
-    const map = this.numPlayers > 6 ? numDesserts.more : numDesserts.less;
-    this.deck.resetDeck(map[this.round]);
+    const dessertsMap =
+      this.numPlayers > 6 ? numDesserts.more : numDesserts.less;
+    this.deck.resetDeck(dessertsMap[this.round]);
     const { menu } = this.deck;
+
+    this.deck.shuffle();
 
     if (menu.roll === CardNameEnum.URAMAKI)
       this.players.forEach(p => (this.uramakiCountMap[p.name] = 0));
 
     const hands = [];
     for (let i = 0; i < this.numPlayers; i++) {
-      hands.push(this.deck.dealHand());
+      const temp = this.deck.dealHand(handSize[this.numPlayers]);
+      hands.push(temp);
     }
     this.rotateHands(hands);
   }
