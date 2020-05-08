@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import socketIOClient from 'socket.io-client';
 import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
 import MenuSelection from './MenuSelection';
-const ENDPOINT = 'http://127.0.0.1:4001';
-const socket = socketIOClient(ENDPOINT);
 
-const HostGame = () => {
+const HostGame = ({ socket }) => {
   const history = useHistory();
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
@@ -20,6 +17,7 @@ const HostGame = () => {
       if (!Array.isArray(data)) {
         setMessage(data);
       } else {
+        setMessage(data);
         setIsCreating(false);
       }
     };
@@ -29,7 +27,7 @@ const HostGame = () => {
     return () => {
       socket.off('newPlayer', handleNewPlayer);
     };
-  }, []);
+  }, [socket]);
 
   const handleSubmit = () => {
     socket.emit('hostGame', menu, numPlayers, roomCode, name);
@@ -75,11 +73,8 @@ const HostGame = () => {
   return (
     <div className="HostGame" style={{ display: 'block' }}>
       <h1>Host Game</h1>
-      {isCreating ? (
-        createForm
-      ) : (
-        <WaitingRoom name={name} roomCode={roomCode} />
-      )}
+      {isCreating && createForm}
+      <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
       {/* TODO: Customize playing deck */}
     </div>
   );

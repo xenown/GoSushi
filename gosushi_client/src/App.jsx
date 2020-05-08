@@ -1,10 +1,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import socketIOClient from 'socket.io-client';
 
 import './App.css';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
 import Board from './components/Board';
+
+const ENDPOINT = 'http://127.0.0.1:4001';
+const socket = socketIOClient(ENDPOINT);
 
 const App = () => {
   return (
@@ -13,13 +17,13 @@ const App = () => {
         <header className="App-header">
           <Switch>
             <Route path="/host">
-              <HostGame />
+              <HostGame socket={socket} />
             </Route>
             <Route path="/join">
-              <JoinGame />
+              <JoinGame socket={socket} />
             </Route>
             <Route path="/game/:roomCode">
-              <Board />
+              <Board socket={socket} />
             </Route>
             <Route exact path="/">
               <div className="App-route-container">
