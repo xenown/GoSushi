@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import socketIOClient from 'socket.io-client';
 import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
-const ENDPOINT = 'http://127.0.0.1:4001';
-const socket = socketIOClient(ENDPOINT);
 
-const JoinGame = () => {
+const JoinGame = ({ socket }) => {
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [isJoining, setIsJoinging] = useState(true);
+  const [isJoining, setIsJoining] = useState(true);
   const [message, setMessage] = useState('');
   const history = useHistory();
 
@@ -17,7 +14,7 @@ const JoinGame = () => {
       if (!Array.isArray(data)) {
         setMessage(data);
       } else {
-        setIsJoinging(false);
+        setIsJoining(false);
       }
     };
 
@@ -26,7 +23,7 @@ const JoinGame = () => {
     return () => {
       socket.off('newPlayer', handleNewPlayer);
     };
-  }, []);
+  }, [socket]);
 
   const handleSubmit = () => {
     socket.emit('joinGame', name, roomCode);
@@ -56,7 +53,8 @@ const JoinGame = () => {
   return (
     <div className="JoinGame" style={{ display: 'block' }}>
       <h1>Join Game</h1>
-      {isJoining ? joinForm : <WaitingRoom name={name} roomCode={roomCode} />}
+      {isJoining && joinForm}
+      <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
     </div>
   );
 };

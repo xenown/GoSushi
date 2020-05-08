@@ -1,4 +1,5 @@
 const Card = require('./card');
+const CardNameEnum = require('../util/cardNameEnum');
 const _ = require('lodash');
 
 class Deck {
@@ -17,18 +18,18 @@ class Deck {
 
   shuffle() {
     this.activeDeck = _.shuffle(this.activeDeck);
-    console.log("shuffled deck");
+    console.log('shuffled deck');
   }
 
   createNigiri() {
     let arr = [];
     for (let i = 0; i < 12; i++) {
       if (i < 4) {
-        arr[i] = new Card(Card.CardNameEnum.EGG);
+        arr[i] = new Card(CardNameEnum.EGG);
       } else if (i > 8) {
-        arr[i] = new Card(Card.CardNameEnum.SQUID);
+        arr[i] = new Card(CardNameEnum.SQUID);
       } else {
-        arr[i] = new Card(Card.CardNameEnum.SALMON);
+        arr[i] = new Card(CardNameEnum.SALMON);
       }
     }
     return arr;
@@ -37,30 +38,30 @@ class Deck {
   createRoll(rollName) {
     let arr = [];
     switch (rollName) {
-      case Card.CardNameEnum.MAKI:
+      case CardNameEnum.MAKI:
         for (let i = 0; i < 12; i++) {
           if (i < 4) {
-            arr[i] = new Card(Card.CardNameEnum.MAKI, 1);
+            arr[i] = new Card(CardNameEnum.MAKI, 1);
           } else if (i > 8) {
-            arr[i] = new Card(Card.CardNameEnum.MAKI, 3);
+            arr[i] = new Card(CardNameEnum.MAKI, 3);
           } else {
-            arr[i] = new Card(Card.CardNameEnum.MAKI, 2);
+            arr[i] = new Card(CardNameEnum.MAKI, 2);
           }
         }
         break;
-      case Card.CardNameEnum.TEMAKI:
+      case CardNameEnum.TEMAKI:
         for (let i = 0; i < 12; i++) {
-          arr[i] = new Card(Card.CardNameEnum.TEMAKI);
+          arr[i] = new Card(CardNameEnum.TEMAKI);
         }
         break;
-      case Card.CardNameEnum.URAMAKI:
+      case CardNameEnum.URAMAKI:
         for (let i = 0; i < 12; i++) {
           if (i < 4) {
-            arr[i] = new Card(Card.CardNameEnum.URAMAKI, 3);
+            arr[i] = new Card(CardNameEnum.URAMAKI, 3);
           } else if (i > 7) {
-            arr[i] = new Card(Card.CardNameEnum.URAMAKI, 5);
+            arr[i] = new Card(CardNameEnum.URAMAKI, 5);
           } else {
-            arr[i] = new Card(Card.CardNameEnum.URAMAKI, 4);
+            arr[i] = new Card(CardNameEnum.URAMAKI, 4);
           }
         }
         break;
@@ -72,19 +73,19 @@ class Deck {
 
   createAppetizer(appetizerName) {
     let arr = [];
-    if (appetizerName === Card.CardNameEnum.ONIGIRI) {
+    if (appetizerName === CardNameEnum.ONIGIRI) {
       for (let i = 0; i < 8; i++) {
         if (i % 4 === 0) {
-          arr[i] = new Card(Card.CardNameEnum.ONIGIRI, Card.OnigiriEnum.CIRCLE);
+          arr[i] = new Card(CardNameEnum.ONIGIRI, Card.OnigiriEnum.CIRCLE);
         } else if (i % 4 === 1) {
-          arr[i] = new Card(Card.CardNameEnum.ONIGIRI, Card.OnigiriEnum.TRIANGLE);
+          arr[i] = new Card(CardNameEnum.ONIGIRI, Card.OnigiriEnum.TRIANGLE);
         } else if (i % 4 === 2) {
-          arr[i] = new Card(Card.CardNameEnum.ONIGIRI, Card.OnigiriEnum.SQUARE);
+          arr[i] = new Card(CardNameEnum.ONIGIRI, Card.OnigiriEnum.SQUARE);
         } else {
-          arr[i] = new Card(Card.CardNameEnum.ONIGIRI, Card.OnigiriEnum.RECTANGLE);
+          arr[i] = new Card(CardNameEnum.ONIGIRI, Card.OnigiriEnum.RECTANGLE);
         }
       }
-    } else if (Object.values(Card.CardNameEnum).includes(appetizerName)) {
+    } else if (Object.values(CardNameEnum).includes(appetizerName)) {
       for (let i = 0; i < 8; i++) {
         arr[i] = new Card(appetizerName);
       }
@@ -97,15 +98,15 @@ class Deck {
   createSpecial(specialName) {
     let arr = [];
     for (let i = 0; i < 3; i++) {
-      if (specialName === Card.CardNameEnum.CHOPSTICKS) {
-        arr[i] = new Card(Card.CardNameEnum.CHOPSTICKS, i + 1);
-      } else if (specialName === Card.CardNameEnum.SPOON) {
-        arr[i] = new Card(Card.CardNameEnum.SPOON, i + 4);
-      } else if (specialName === Card.CardNameEnum.MENU) {
-        arr[i] = new Card(Card.CardNameEnum.MENU, i + 7);
-      } else if (specialName === Card.CardNameEnum.TAKEOUT_BOX) {
-        arr[i] = new Card(Card.CardNameEnum.TAKEOUT_BOX, i + 10);
-      } else if (Object.values(Card.CardNameEnum).includes(specialName)) {
+      if (specialName === CardNameEnum.CHOPSTICKS) {
+        arr[i] = new Card(CardNameEnum.CHOPSTICKS, i + 1);
+      } else if (specialName === CardNameEnum.SPOON) {
+        arr[i] = new Card(CardNameEnum.SPOON, i + 4);
+      } else if (specialName === CardNameEnum.MENU) {
+        arr[i] = new Card(CardNameEnum.MENU, i + 7);
+      } else if (specialName === CardNameEnum.TAKEOUT_BOX) {
+        arr[i] = new Card(CardNameEnum.TAKEOUT_BOX, i + 10);
+      } else if (Object.values(CardNameEnum).includes(specialName)) {
         arr[i] = new Card(specialName);
       } else {
         console.log('Invalid special name.');
@@ -117,21 +118,23 @@ class Deck {
 
   createDesserts(dessertName, numPlayers) {
     let arr = [];
-    if (dessertName === Card.CardNameEnum.FRUIT) {
+    if (dessertName === CardNameEnum.FRUIT) {
       for (let i = 0; i < 15; i++) {
-        let fruit = {}
+        let fruit = {};
         if (i / 3 < 3) {
           fruit = fruitCombos[i / 3];
         } else {
-          fruit = fruitCombos[((i - 9) / 2) + 3];
+          fruit = fruitCombos[(i - 9) / 2 + 3];
         }
-        arr[i] = new Card(Card.CardNameEnum.FRUIT, fruit);
+        arr[i] = new Card(CardNameEnum.FRUIT, fruit);
       }
       if (numPlayers < 6) {
         arr = _.slice(_.shuffle(arr), 5);
       }
-    } else if (dessertName === Card.CardNameEnum.PUDDING
-      || dessertName === Card.CardNameEnum.GREEN_TEA_ICE_CREAM) {
+    } else if (
+      dessertName === CardNameEnum.PUDDING ||
+      dessertName === CardNameEnum.GREEN_TEA_ICE_CREAM
+    ) {
       const num = numPlayers > 5 ? 15 : 10;
       for (let i = 0; i < num; i++) {
         arr[i] = new Card(dessertName);
@@ -195,4 +198,4 @@ const fruitCombos = [
     pineapple: 0,
     orange: 2,
   },
-]
+];

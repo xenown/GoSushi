@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import socketIOClient from 'socket.io-client';
 import { useHistory } from 'react-router-dom';
-const ENDPOINT = 'http://127.0.0.1:4001';
-const socket = socketIOClient(ENDPOINT);
 
-const WaitingRoom = ({ name, roomCode }) => {
+const WaitingRoom = ({ name, roomCode, socket }) => {
   const history = useHistory();
-  const [players, setPlayers] = useState('');
+  const [players, setPlayers] = useState([]);
 
   useEffect(() => {
     const handleNewPlayer = data => {
@@ -26,18 +23,17 @@ const WaitingRoom = ({ name, roomCode }) => {
       socket.off('newPlayer', handleNewPlayer);
       socket.off('startGame', handleStartGame);
     };
-  }, [history]);
+  }, [history, socket]);
 
-  return (
+  return players ? (
     <div>
       <p>Room code: {roomCode}</p>
       <p>Player name: {name}</p>
-      {players &&
-        players.map(player => (
-          <div key={player}>{`${player} has joined the game`}</div>
-        ))}
+      {players.map(player => (
+        <div key={player}>{`${player} has joined the game`}</div>
+      ))}
     </div>
-  );
+  ) : null;
 };
 
 export default WaitingRoom;
