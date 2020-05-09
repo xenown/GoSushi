@@ -1,12 +1,12 @@
 class Card {
   constructor(card, data = null) {
-    if (typeof (card) === 'string') {
+    if (typeof card === 'string') {
       this.isFlipped = false;
       this.cardName = card;
       this.data = data;
-    } else if (typeof (card) === 'object') {
+    } else if (typeof card === 'object') {
       // copy constructor
-      Object.assign(this, card)
+      Object.assign(this, card);
     }
   }
 
@@ -19,4 +19,3 @@ class Card {
 }
 
 module.exports = Card;
-module.exports.OnigiriEnum = OnigiriEnum;

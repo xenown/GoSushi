@@ -109,7 +109,7 @@ io.on('connection', socket => {
       game.calculateTurnPoints();
       game.rotateHands(game.players.map(p => p.hand));
       game.players.forEach(p => {
-        io.to(p.socketId).emit('dealHand', p.hand)
+        io.to(p.socketId).emit('dealHand', p.hand);
       });
     }
   });
