@@ -3,8 +3,10 @@ const CardNameEnum = require('../util/cardNameEnum');
 const Player = require('./player');
 const Deck = require('./deck');
 const handSize = require('../util/handSize');
-const { makiPoints, uramakiPoints } = require('../util/pointRules');
-const { calculatePoints } = require('../util/calculatePoints');
+const {
+  calculateTurnPoints,
+  calculateRoundPoints,
+} = require('../util/calculatePoints');
 
 class Game {
   constructor(menu, playerNum, roomCode, hostPlayer, socketId) {
@@ -28,11 +30,17 @@ class Game {
     _.find(this.players, p => p.name === playerName).points += points;
   }
 
-  finishedTurn(sendHands) {
+  finishedTurn(sendHands, sendPoints) {
     this.playedTurn++;
     if (this.playedTurn === this.numPlayers) {
       this.playedTurn = 0;
-      this.calculateTurnPoints();
+      calculateTurnPoints(
+        this.players,
+        this.deck.menu,
+        this.uramakiCountMap,
+        this.uramakiStanding,
+        this.addPoints
+      );
       this.rotateHands(this.players.map(p => p.hand));
       if (this.players[0].hand.length === 0) {
         // no more cards in the hand
@@ -44,6 +52,7 @@ class Game {
           console.log('End of round');
           this.startRound();
           this.players.forEach(sendHands);
+          this.players.forEach(sendPoints); // may be changed later! Don't mere with above forEach just yet
         } else {
           // end game + display results
           console.log('End of game');
@@ -94,6 +103,7 @@ class Game {
   }
 
   calculateTurnPoints() {
+    // can delete this once test.js is changed to use the other function
     this.players.forEach(currPlyr => {
       while (currPlyr.turnCards.length !== 0) {
         const card = currPlyr.turnCards.pop();

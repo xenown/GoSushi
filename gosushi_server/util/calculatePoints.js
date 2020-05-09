@@ -1,5 +1,71 @@
+const _ = require('lodash');
 const cardNameEnum = require('./cardNameEnum');
 const onigiriNameEnum = require('./onigiriNameEnum');
+const { makiPoints, uramakiPoints } = require('../util/pointRules');
+
+calculateTurnPoints = (
+  players,
+  menu,
+  uramakiCountMap,
+  uramakiStanding,
+  addPoints
+) => {
+  players.forEach(currPlyr => {
+    while (currPlyr.turnCards.length !== 0) {
+      const card = currPlyr.turnCards.pop();
+      switch (card.cardName) {
+        case cardNameEnum.MISO_SOUP:
+          const repeats = players.filter(
+            otherPlyr =>
+              otherPlyr.name !== currPlyr.name &&
+              otherPlyr.turnCards.find(
+                c => c.cardName === cardNameEnum.MISO_SOUP
+              )
+          );
+          const value = repeats.length !== 0 ? 0 : 3;
+          repeats.forEach(repeat => {
+            const miso = _.remove(
+              repeat.turnCards,
+              el => el.cardName === cardNameEnum.MISO_SOUP
+            );
+            miso.data = value;
+            repeat.playedCards.push(miso);
+          });
+          card.data = value;
+          break;
+        case cardNameEnum.URAMAKI:
+          uramakiCountMap[currPlyr.name] += card.data;
+          break;
+        default:
+          break;
+      }
+      currPlyr.playedCards.push(card);
+    }
+  });
+
+  if (menu.roll === cardNameEnum.URAMAKI && uramakiStanding <= 3) {
+    const overTenArray = Object.entries(uramakiCountMap)
+      .filter(el => el[1] >= 10)
+      .sort((el1, el2) => el2[1] - el1[1]);
+
+    let prevValue = 0;
+    let equivStanding = uramakiStanding - 1;
+    overTenArray.forEach(el => {
+      if (equivStanding <= 3) {
+        equivStanding++;
+        if (el[1] === prevValue) {
+          equivStanding--;
+        } else if (equivStanding === 4) {
+          return;
+        }
+        addPoints(el[0], uramakiPoints[equivStanding]);
+        uramakiCountMap[el[0]] = 0;
+        uramakiStanding++;
+      }
+      prevValue = el[1];
+    });
+  }
+};
 
 // Base Function
 calculateRoundPoints = (players, menu) => {
@@ -276,5 +342,6 @@ calculateTeaPoints = players => {};
 calculateTakeoutBoxPoints = players => {};
 
 module.exports = {
+  calculateTurnPoints,
   calculateRoundPoints,
 };

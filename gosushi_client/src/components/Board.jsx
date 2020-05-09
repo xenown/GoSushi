@@ -5,6 +5,7 @@ const Board = ({ socket }) => {
   const params = useParams();
   const [hand, setHand] = useState([]);
   const [selectedCard, setSelectedCard] = useState(-1);
+  const [points, setPoints] = useState(0);
 
   useEffect(() => {
     socket.emit('boardLoaded', params.roomCode);
@@ -13,10 +14,17 @@ const Board = ({ socket }) => {
       setHand(data);
       setSelectedCard(-1);
     };
+
+    const handleUpdatePoints = data => {
+      setPoints(data);
+    };
+
     socket.on('dealHand', handleDealHand);
+    socket.on('updatePoints', handleUpdatePoints);
 
     return () => {
       socket.off('dealHand', handleDealHand);
+      socket.off('updatePoints', handleUpdatePoints);
     };
   }, [params.roomCode, socket]);
 
@@ -39,6 +47,7 @@ const Board = ({ socket }) => {
           {card.cardName}
         </button>
       ))}
+      <div>Your points: {points}</div>
     </div>
   );
 };
