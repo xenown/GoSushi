@@ -11,6 +11,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const Player = require('./classes/player');
+const Card = require('./classes/card')
 const Game = require('./classes/game');
 const rooms = {};
 
@@ -85,8 +86,23 @@ io.on('connection', socket => {
   socket.on('boardLoaded', roomCode => {
     const game = rooms[roomCode];
     const player = game.players.find(val => val.socketId === socket.id);
-    console.log(socket.id, player ? player.hand : 'no hand???');
     socket.emit('dealHand', player ? player.hand : []);
+  });
+
+  socket.on('cardSelected', (roomCode, card) => {
+    const game = rooms[roomCode];
+    const player = game.players.find(val => val.socketId === socket.id);
+    player.playCard(new Card(card));
+    game.playedTurn++;
+    if (game.playedTurn === game.numPlayers) {
+      game.playedTurn = 0;
+      game.calculateTurnPoints();
+      game.rotateHands(game.players.map(p => p.hand));
+      game.players.forEach(p => {
+        console.log(p, p.hand)
+        io.to(p.socketId).emit('dealHand', p.hand)
+      });
+    }
   });
 });
 

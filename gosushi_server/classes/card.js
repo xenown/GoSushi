@@ -6,14 +6,19 @@ const OnigiriEnum = Object.freeze({
 });
 
 class Card {
-  constructor(cardName, data = null) {
-    this.isFlipped = false;
-    this.cardName = cardName;
-    this.data = data;
+  constructor(card, data = null) {
+    if (typeof (card) === 'string') {
+      this.isFlipped = false;
+      this.cardName = card;
+      this.data = data;
+    } else if (typeof (card) === 'object') {
+      // copy constructor
+      Object.assign(this, card)
+    }
   }
 
   print() {
-    console.log(this.cardName);
+    console.log(this.card);
     if (!data) {
       console.log(`data: ${this.data}`);
     }

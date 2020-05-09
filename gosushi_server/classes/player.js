@@ -13,8 +13,8 @@ class Player {
   }
 
   playCard(card) {
-    const index = _.find(hand, card);
-    this.turnCards.push(_.remove(hand, (ele, i) => i === index));
+    const index = _.findIndex(this.hand, c => _.isEqual(c, card));
+    this.turnCards = this.turnCards.concat(this.hand.splice(index, 1));
   }
 }
 

@@ -27,8 +27,12 @@ const App = () => {
             </Route>
             <Route exact path="/">
               <div className="App-route-container">
-                <Link className="btn btn-outline-primary" to="/host">Host Game</Link>
-                <Link className="btn btn-outline-success" to="/join">Join Game</Link>
+                <Link className="btn btn-outline-primary" to="/host">
+                  Host Game
+                </Link>
+                <Link className="btn btn-outline-success" to="/join">
+                  Join Game
+                </Link>
               </div>
             </Route>
           </Switch>

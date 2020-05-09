@@ -13,6 +13,7 @@ class Game {
     this.players = [this.hostPlayer];
     this.round = 1;
     this.hands = [];
+    this.playedTurn = 0;
     this.uramakiCountMap = {};
     this.uramakiStanding = 1;
   }
@@ -25,11 +26,10 @@ class Game {
     const dessertsMap =
       this.numPlayers > 6 ? numDesserts.more : numDesserts.less;
     this.deck.resetDeck(dessertsMap[this.round]);
-    const { menu } = this.deck;
 
     this.deck.shuffle();
 
-    if (menu.roll === CardNameEnum.URAMAKI)
+    if (this.deck.menu.roll === CardNameEnum.URAMAKI)
       this.players.forEach(p => (this.uramakiCountMap[p.name] = 0));
 
     const hands = [];
@@ -47,7 +47,7 @@ class Game {
   rotateHands(hands) {
     const firstHand = hands.shift();
     hands.push(firstHand);
-    this.players.map((p, idx) => (p.hand = hands[idx]));
+    this.players.forEach((p, idx) => (p.hand = hands[idx]));
   }
 
   sumCardData(cardName, player) {
@@ -65,7 +65,7 @@ class Game {
             const repeats = this.players.filter(
               otherPlyr =>
                 otherPlyr.name !== currPlyr.name &&
-                otherPlyrs.turnCards.find(
+                otherPlyr.turnCards.find(
                   c => c.cardName === CardNameEnum.MISO_SOUP
                 )
             );
@@ -90,7 +90,7 @@ class Game {
       }
     });
 
-    if (this.menu.roll === CardNameEnum.URAMAKI && this.uramakiStanding <= 3) {
+    if (this.deck.menu.roll === CardNameEnum.URAMAKI && this.uramakiStanding <= 3) {
       const overTenArray = Object.entries(this.uramakiCountMap)
         .filter(el => el[1] >= 10)
         .sort((el1, el2) => el2[1] - el1[1]);

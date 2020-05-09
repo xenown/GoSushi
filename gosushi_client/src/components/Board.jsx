@@ -3,14 +3,15 @@ import { useParams } from 'react-router-dom';
 
 const Board = ({ socket }) => {
   const params = useParams();
-  console.log(params);
   const [hand, setHand] = useState([]);
+  const [selectedCard, setSelectedCard] = useState(-1);
 
   useEffect(() => {
     socket.emit('boardLoaded', params.roomCode);
 
     const handleDealHand = data => {
       setHand(data);
+      setSelectedCard(-1);
     };
     socket.on('dealHand', handleDealHand);
 
@@ -19,12 +20,24 @@ const Board = ({ socket }) => {
     };
   }, [params.roomCode, socket]);
 
+  const handleSelectCard = (card, index) => {
+    socket.emit('cardSelected', params.roomCode, card);
+    setSelectedCard(index);
+  };
+
   return (
     <div className="Board" style={{ display: 'block' }}>
       <h1>Board</h1>
       <p>Display cards somehow</p>
       {hand.map((card, index) => (
-        <div key={index}>{card.cardName}</div>
+        <button
+          key={index}
+          style={selectedCard === index ? { backgroundColor: 'yellow' } : null}
+          disabled={selectedCard > 0}
+          onClick={() => handleSelectCard(card, index)}
+        >
+          {card.cardName}
+        </button>
       ))}
     </div>
   );
