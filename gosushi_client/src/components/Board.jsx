@@ -44,7 +44,7 @@ const Board = ({ socket }) => {
           disabled={selectedCard > 0}
           onClick={() => handleSelectCard(card, index)}
         >
-          {card.cardName}
+          {card.name}
         </button>
       ))}
       <div>Your points: {points}</div>

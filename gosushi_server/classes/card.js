@@ -2,7 +2,7 @@ class Card {
   constructor(card, data = null) {
     if (typeof card === 'string') {
       this.isFlipped = false;
-      this.cardName = card;
+      this.name = card;
       this.data = data;
     } else if (typeof card === 'object') {
       // copy constructor

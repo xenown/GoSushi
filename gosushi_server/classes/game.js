@@ -19,15 +19,11 @@ class Game {
     this.hands = [];
     this.playedTurn = 0;
     this.uramakiCountMap = {};
-    this.uramakiStanding = 1;
+    this.uramakiStanding = { value: 1 };
   }
 
   addPlayer(name, socketId) {
     this.players.push(new Player(name, socketId));
-  }
-
-  addPoints(playerName, points) {
-    _.find(this.players, p => p.name === playerName).points += points;
   }
 
   finishedTurn(sendHands, sendPoints) {
@@ -39,7 +35,6 @@ class Game {
         this.deck.menu,
         this.uramakiCountMap,
         this.uramakiStanding,
-        this.addPoints
       );
       this.rotateHands(this.players.map(p => p.hand));
       if (this.players[0].hand.length === 0) {
@@ -96,72 +91,10 @@ class Game {
     this.players.forEach((p, idx) => (p.hand = hands[idx]));
   }
 
-  sumCardData(cardName, player) {
+  sumCardData(name, player) {
     return player.playedCards.reduce(
-      (accum, curr) => (accum += curr.cardName === cardName ? curr.data : 0)
+      (accum, curr) => (accum += curr.name === name ? curr.data : 0)
     );
-  }
-
-  calculateTurnPoints() {
-    // can delete this once test.js is changed to use the other function
-    this.players.forEach(currPlyr => {
-      while (currPlyr.turnCards.length !== 0) {
-        const card = currPlyr.turnCards.pop();
-        switch (card.cardName) {
-          case CardNameEnum.MISO_SOUP:
-            const repeats = this.players.filter(
-              otherPlyr =>
-                otherPlyr.name !== currPlyr.name &&
-                otherPlyr.turnCards.find(
-                  c => c.cardName === CardNameEnum.MISO_SOUP
-                )
-            );
-            const value = repeats.length !== 0 ? 0 : 3;
-            repeats.forEach(repeat => {
-              const miso = _.remove(
-                repeat.turnCards,
-                el => el.cardName === CardNameEnum.MISO_SOUP
-              );
-              miso.data = value;
-              repeat.playedCards.push(miso);
-            });
-            card.data = value;
-            break;
-          case CardNameEnum.URAMAKI:
-            this.uramakiCountMap[currPlyr.name] += card.data;
-            break;
-          default:
-            break;
-        }
-        currPlyr.playedCards.push(card);
-      }
-    });
-
-    if (
-      this.deck.menu.roll === CardNameEnum.URAMAKI &&
-      this.uramakiStanding <= 3
-    ) {
-      const overTenArray = Object.entries(this.uramakiCountMap)
-        .filter(el => el[1] >= 10)
-        .sort((el1, el2) => el2[1] - el1[1]);
-
-      let prevValue = 0;
-      let equivStanding = this.uramakiStanding - 1;
-      overTenArray.forEach(el => {
-        if (equivStanding <= 3) {
-          equivStanding++;
-          if (el[1] === prevValue) {
-            equivStanding--;
-          } else if (equivStanding === 4) {
-            return;
-          }
-          this.addPoints(el[0], uramakiPoints[equivStanding]);
-          this.uramakiCountMap[el[0]] = 0;
-          this.uramakiStanding++;
-        }
-        prevValue = el[1];
-      });
-    }
   }
 
   calculateEndPoints() {

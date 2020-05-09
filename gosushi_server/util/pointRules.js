@@ -16,6 +16,7 @@ const uramakiPoints = {
 };
 
 const dumplingPoints = {
+  0: 0,
   1: 1,
   2: 3,
   3: 6,

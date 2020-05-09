@@ -1,32 +1,35 @@
 const _ = require('lodash');
 const cardNameEnum = require('./cardNameEnum');
 const onigiriNameEnum = require('./onigiriNameEnum');
-const { makiPoints, uramakiPoints } = require('../util/pointRules');
+const { makiPoints, uramakiPoints, dumplingPoints } = require('../util/pointRules');
+
+const addPoints = (playerName, players, points) => {
+  _.find(players, p => p.name === playerName).points += points;
+}
 
 calculateTurnPoints = (
   players,
   menu,
   uramakiCountMap,
   uramakiStanding,
-  addPoints
 ) => {
   players.forEach(currPlyr => {
     while (currPlyr.turnCards.length !== 0) {
       const card = currPlyr.turnCards.pop();
-      switch (card.cardName) {
+      switch (card.name) {
         case cardNameEnum.MISO_SOUP:
           const repeats = players.filter(
             otherPlyr =>
               otherPlyr.name !== currPlyr.name &&
               otherPlyr.turnCards.find(
-                c => c.cardName === cardNameEnum.MISO_SOUP
+                c => c.name === cardNameEnum.MISO_SOUP
               )
           );
           const value = repeats.length !== 0 ? 0 : 3;
           repeats.forEach(repeat => {
             const miso = _.remove(
               repeat.turnCards,
-              el => el.cardName === cardNameEnum.MISO_SOUP
+              el => el.name === cardNameEnum.MISO_SOUP
             );
             miso.data = value;
             repeat.playedCards.push(miso);
@@ -43,35 +46,50 @@ calculateTurnPoints = (
     }
   });
 
-  if (menu.roll === cardNameEnum.URAMAKI && uramakiStanding <= 3) {
-    const overTenArray = Object.entries(uramakiCountMap)
-      .filter(el => el[1] >= 10)
-      .sort((el1, el2) => el2[1] - el1[1]);
-
-    let prevValue = 0;
-    let equivStanding = uramakiStanding - 1;
-    overTenArray.forEach(el => {
-      if (equivStanding <= 3) {
-        equivStanding++;
-        if (el[1] === prevValue) {
-          equivStanding--;
-        } else if (equivStanding === 4) {
-          return;
-        }
-        addPoints(el[0], uramakiPoints[equivStanding]);
-        uramakiCountMap[el[0]] = 0;
-        uramakiStanding++;
-      }
-      prevValue = el[1];
-    });
+  if (menu.roll === cardNameEnum.URAMAKI && uramakiStanding.value <= 3) {
+    calculateUramakiPoints(players, uramakiCountMap, uramakiStanding);
   }
 };
+
+calculateUramakiPoints = (players, uramakiCountMap, uramakiStanding) => {
+  const isLastTurnInRound = players[0].hand.length === 1; // only one card left
+  const potentialWinners = Object.entries(uramakiCountMap)
+    .filter(el => isLastTurnInRound ? true : el[1] >= 10)
+    // don't need to limit to only above 10 uramaki's if the round is over
+    .sort((el1, el2) => el2[1] - el1[1]);
+
+  let prevValue = 0;
+  let equivStanding = uramakiStanding.value;
+
+  // uramakiStanding is how many prizes are given out
+  // aka how many places on the standing list are already taken
+  // equivStanding is the prize the person receives
+  // If it is a tie for 1st places, both have equivStanding of 1
+  // In that case, those 2 would take up the 1st and 2nd uramakiStanding places
+
+  potentialWinners.forEach(el => {
+    if (el[1] === prevValue) {
+      equivStanding--;
+    } else if (equivStanding >= 4) {
+      return;
+    } else {
+      equivStanding = uramakiStanding.value;
+    }
+    if (equivStanding <= 3) {
+      addPoints(el[0], players, uramakiPoints[equivStanding]);
+      uramakiCountMap[el[0]] = 0;
+      uramakiStanding.value++;
+    }
+    prevValue = el[1];
+    equivStanding++;
+  });
+}
 
 // Base Function
 calculateRoundPoints = (players, menu) => {
   calculateNigiriPoints(players);
-  calculateAppetizersPoints(players, menu);
-  calculateRollsPoints(players, menu);
+  calculateAppetizerPoints(players, menu);
+  calculateRollPoints(players, menu);
   calculateSpecialPoints(players, menu);
 };
 
@@ -79,28 +97,30 @@ calculateRoundPoints = (players, menu) => {
 calculateNigiriPoints = players => {
   players.forEach(player => {
     player.points +=
-      player.cards.filter(card => card.name == cardNameEnum.EGG).length +
-      player.cards.filter(card => card.name == cardNameEnum.SALMON).length * 2 +
-      player.cards.filter(card => card.name == cardNameEnum.SQUID).length * 3;
+      player.playedCards.filter(card => card.name == cardNameEnum.EGG).length +
+      player.playedCards.filter(card => card.name == cardNameEnum.SALMON).length * 2 +
+      player.playedCards.filter(card => card.name == cardNameEnum.SQUID).length * 3;
   });
 };
 
-calculateAppetizersPoints = (players, menu) => {
-  if (menu.appetizer.contains(cardNameEnum.DUMPLING))
+calculateAppetizerPoints = (players, menu) => {
+  if (menu.appetizers.includes(cardNameEnum.DUMPLING))
     calculateDumplingPoints(players);
-  if (menu.appetizer.contains(cardNameEnum.EDAMAMEG))
+  if (menu.appetizers.includes(cardNameEnum.EDAMAME))
     calculateEdamamePoints(players);
-  if (menu.appetizer.contains(cardNameEnum.EEL)) calculateEelPoints(players);
-  if (menu.appetizer.contains(cardNameEnum.ONIGIRI))
+  if (menu.appetizers.includes(cardNameEnum.EEL)) calculateEelPoints(players);
+  if (menu.appetizers.includes(cardNameEnum.ONIGIRI))
     calculateOnigiriPoints(players);
-  if (menu.appetizer.contains(cardNameEnum.SASHIMI))
+  if (menu.appetizers.includes(cardNameEnum.MISO_SOUP))
+    calculateMisoSoupPoints(players);
+  if (menu.appetizers.includes(cardNameEnum.SASHIMI))
     calculateSashimiPoints(players);
-  if (menu.appetizer.contains(cardNameEnum.TEMPURA))
+  if (menu.appetizers.includes(cardNameEnum.TEMPURA))
     calculateTempuraPoints(players);
-  if (menu.appetizer.contains(cardNameEnum.TOFU)) calculateTofuPoints(players);
+  if (menu.appetizers.includes(cardNameEnum.TOFU)) calculateTofuPoints(players);
 };
 
-calculateRollsPoints = (players, menu) => {
+calculateRollPoints = (players, menu) => {
   switch (menu.roll) {
     case cardNameEnum.MAKI:
       return calculateMakiPoints(players);
@@ -109,64 +129,60 @@ calculateRollsPoints = (players, menu) => {
   }
 };
 
-calculateSpecialsPoints = (players, menu) => {
-  if (menu.specials.contains(cardNameEnum.SOY_SAUCE))
+calculateSpecialPoints = (players, menu) => {
+  if (menu.specials.includes(cardNameEnum.SOY_SAUCE))
     calculateSoySaucePoints(players);
-  if (menu.specials.contains(cardNameEnum.WASABI))
+  if (menu.specials.includes(cardNameEnum.WASABI))
     calculateWasabiPoints(players);
-  if (menu.specials.contains(cardNameEnum.TEA)) calculateTeaPoints(players);
-  if (menu.specials.contains(cardNameEnum.TAKEOUT_BOX))
+  if (menu.specials.includes(cardNameEnum.TEA)) calculateTeaPoints(players);
+  if (menu.specials.includes(cardNameEnum.TAKEOUT_BOX))
     calculateTakeoutBoxPoints(players);
 };
 
 //Roll Functions
 calculateMakiPoints = players => {
-  const mostMaki = 0;
-  const secondMostMaki = 0;
-  const thirdMostMaki = 0;
+  let mostMaki = 0;
+  let secondMostMaki = 0;
+  const makiCountMap = {};
+  const makiPointMap =
+    players.length > 5 ? makiPoints.more : makiPoints.less;
+
   players.forEach(player => {
-    const makiPoints = 0;
-    player.cards.forEach(card => {
+    let makiPoints = 0;
+    player.playedCards.forEach(card => {
       if (card.name == cardNameEnum.MAKI) {
         makiPoints += card.data;
       }
     });
     if (makiPoints > mostMaki) {
-      thirdMostMaki = secondMostMaki;
       secondMostMaki = mostMaki;
       mostMaki = makiPoints;
-    } else if (makiPoints > secondMostMaki) {
-      thirdMostMaki = secondMostMaki;
+    } else if (makiPoints > secondMostMaki && makiPoints < mostMaki) {
       secondMostMaki = makiPoints;
-    } else if (makiPoints > thirdMostMaki) {
-      thirdMostMaki = makiPoints;
     }
+    makiCountMap[player.name] = makiPoints;
   });
+
   players.forEach(player => {
-    const makiPoints = 0;
-    player.cards.forEach(card => {
-      if (card.name == cardNameEnum.MAKI) {
-        makiPoints += card.data;
-      }
-    });
+    const makiPoints = makiCountMap[player.name];
     if (makiPoints === mostMaki) {
-      player.points += 6;
+      player.points += makiPointMap[1];
     } else if (makiPoints === secondMostMaki) {
-      player.points += players.length > 5 ? 4 : 3;
-    } else if (makiPoints === thirdMostMaki && players.length > 5) {
-      player.points += 2;
+      player.points += makiPointMap[2]
     }
   });
 };
 
 calculateTemakiPoints = players => {
-  const mostTemaki = 0;
-  const leastTemaki = 0;
+  let mostTemaki = 0;
+  let leastTemaki = 12;
+  const temakiCountMap = {};
+
   players.forEach(player => {
-    const temakiPoints = 0;
-    player.cards.forEach(card => {
+    let temakiPoints = 0;
+    player.playedCards.forEach(card => {
       if (card.name == cardNameEnum.TEMAKI) {
-        temakiPoints += card.data;
+        temakiPoints++;
       }
     });
     if (temakiPoints > mostTemaki) {
@@ -175,19 +191,16 @@ calculateTemakiPoints = players => {
     if (temakiPoints < leastTemaki) {
       leastTemaki = temakiPoints;
     }
+    temakiCountMap[player.name] = temakiPoints;
   });
+
   if (mostTemaki != leastTemaki) {
     players.forEach(player => {
-      const temakiPoints = 0;
-      player.cards.forEach(card => {
-        if (card.name == cardNameEnum.TEMAKI) {
-          temakiPoints += card.data;
-        }
-      });
+      const temakiPoints = temakiCountMap[player.name];
       if (temakiPoints === mostTemaki) {
         player.points += 4;
-      } else if (temakiPoints === leastTemaki && players.legnth != 2) {
-        temakiPoints -= 4;
+      } else if (temakiPoints === leastTemaki && players.length != 2) {
+        player.points -= 4;
       }
     });
   }
@@ -196,38 +209,14 @@ calculateTemakiPoints = players => {
 //Appetizer Functions
 calculateDumplingPoints = players => {
   players.forEach(player => {
-    const dumplings = player.cards.filter(
+    const dumplings = player.playedCards.filter(
       card => card.name == cardNameEnum.DUMPLING
     ).length;
-    switch (dumplings) {
-      case 0: {
-        player.points += 0;
-        break;
-      }
-      case 1: {
-        player.points += 1;
-        break;
-      }
-      case 2: {
-        player.points += 3;
-        break;
-      }
-      case 3: {
-        player.points += 6;
-        break;
-      }
-      case 4: {
-        player.points += 10;
-        break;
-      }
-      case 5: {
-        player.points += 15;
-        break;
-      }
-      default: {
-        player.points += 15;
-        break;
-      }
+
+    if (dumplings > 5) {
+      player.points += 15;
+    } else {
+      player.points += dumplingPoints[dumplings];
     }
   });
 };
@@ -235,12 +224,12 @@ calculateDumplingPoints = players => {
 calculateEdamamePoints = players => {
   const totalEdamame = 0;
   players.forEach(player => {
-    totalEdamame = player.cards.filter(
+    totalEdamame = player.playedCards.filter(
       card => card.name == cardNameEnum.EDAMAME
     ).length;
   });
   players.forEach(player => {
-    playerEdamame = player.cards.filter(
+    playerEdamame = player.playedCards.filter(
       card => card.name == cardNameEnum.EDAMAME
     ).length;
     players.points += (totalEdamame - playerEdamame) * playerEdamame;
@@ -249,7 +238,7 @@ calculateEdamamePoints = players => {
 
 calculateEelPoints = players => {
   players.forEach(player => {
-    const eels = player.cards.filter(card => card.name == cardNameEnum.EEL)
+    const eels = player.playedCards.filter(card => card.name == cardNameEnum.EEL)
       .length;
     if (eels === 1) {
       player.points -= 3;
@@ -261,7 +250,7 @@ calculateEelPoints = players => {
 
 calculateOnigiriPoints = players => {
   players.forEach(player => {
-    const onigiri = player.cards.filter(
+    const onigiri = player.playedCards.filter(
       card => card.name == cardNameEnum.ONIGIRI
     );
     const square = onigiri.filter(card => card.data === onigiriNameEnum.SQUARE);
@@ -305,9 +294,19 @@ calculateOnigiriPoints = players => {
   });
 };
 
+calculateMisoSoupPoints = players => {
+  players.forEach(player => {
+    player.playedCards.forEach(c => {
+      if (c.name == cardNameEnum.MISO_SOUP) {
+        player.points += c.data;
+      }
+    });
+  });
+};
+
 calculateSashimiPoints = players => {
   players.forEach(player => {
-    const sashimi = player.cards.filter(
+    const sashimi = player.playedCards.filter(
       card => card.name == cardNameEnum.SASHIMI
     ).length;
     player.points += Math.floor(sashimi / 3) * 10;
@@ -316,7 +315,7 @@ calculateSashimiPoints = players => {
 
 calculateTempuraPoints = players => {
   players.forEach(player => {
-    const tempura = player.cards.filter(
+    const tempura = player.playedCards.filter(
       card => card.name == cardNameEnum.TEMPURA
     ).length;
     player.points += Math.floor(tempura / 2) * 5;
@@ -325,7 +324,7 @@ calculateTempuraPoints = players => {
 
 calculateTofuPoints = players => {
   players.forEach(player => {
-    const tofu = player.cards.filter(card => card.name == cardNameEnum.TOFU)
+    const tofu = player.playedCards.filter(card => card.name == cardNameEnum.TOFU)
       .length;
     if (tofu === 1) {
       player.points += 2;
@@ -336,10 +335,10 @@ calculateTofuPoints = players => {
 };
 
 //Special Functions
-calculateSoySaucePoints = players => {};
-calculateWasabiPoints = players => {};
-calculateTeaPoints = players => {};
-calculateTakeoutBoxPoints = players => {};
+calculateSoySaucePoints = players => { };
+calculateWasabiPoints = players => { };
+calculateTeaPoints = players => { };
+calculateTakeoutBoxPoints = players => { };
 
 module.exports = {
   calculateTurnPoints,
