@@ -36,6 +36,7 @@ class Game {
       const temp = this.deck.dealHand(handSize[this.numPlayers]);
       hands.push(temp);
     }
+    this.rotateHands(hands);
   }
 
   setupDeck() {
