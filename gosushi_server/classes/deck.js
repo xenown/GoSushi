@@ -18,7 +18,6 @@ class Deck {
 
   shuffle() {
     this.activeDeck = _.shuffle(this.activeDeck);
-    console.log('shuffled deck');
   }
 
   createNigiri() {

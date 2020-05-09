@@ -1,4 +1,5 @@
 const _ = require('lodash');
+const Card = require('./card');
 
 class Player {
   constructor(name, socketId) {
@@ -13,6 +14,9 @@ class Player {
   }
 
   playCard(card) {
+    if (typeof card !== Card) {
+      card = new Card(card);
+    }
     const index = _.findIndex(this.hand, c => _.isEqual(c, card));
     this.turnCards = this.turnCards.concat(this.hand.splice(index, 1));
   }

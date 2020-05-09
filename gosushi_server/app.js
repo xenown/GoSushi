@@ -10,10 +10,9 @@ app.use(index);
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const Player = require('./classes/player');
-const Card = require('./classes/card')
 const Game = require('./classes/game');
 const rooms = {};
+const socketToRoom = {};
 
 io.on('connection', socket => {
   console.log('New client connected');
@@ -27,7 +26,10 @@ io.on('connection', socket => {
         );
         return;
       } else if (e) {
-        socket.emit('playerJoined', `Connection failed: Erorr joining room: ${e}`);
+        socket.emit(
+          'playerJoined',
+          `Connection failed: Error joining room: ${e}`
+        );
         return;
       }
       rooms[roomCode] = new Game(
@@ -38,6 +40,8 @@ io.on('connection', socket => {
         socket.id
       );
 
+      socketToRoom[socket.id] = roomCode;
+      console.log(`joined ${socket.id}`);
       io.to(roomCode).emit('playerJoined', [username]);
       socket.emit('getNumPlayers', numPlayers);
     });
@@ -59,12 +63,18 @@ io.on('connection', socket => {
         );
         return;
       } else if (e) {
-        socket.emit('playerJoined', `Connection failed: Erorr joining room: ${e}`);
+        socket.emit(
+          'playerJoined',
+          `Connection failed: Error joining room: ${e}`
+        );
         return;
       }
 
+      game.addPlayer(username, socket.id);
       const { players } = game;
-      players.push(new Player(username, socket.id));
+
+      socketToRoom[socket.id] = roomCode;
+      console.log(`joined ${socket.id}`);
 
       io.to(roomCode).emit(
         'playerJoined',
@@ -92,17 +102,29 @@ io.on('connection', socket => {
   socket.on('cardSelected', (roomCode, card) => {
     const game = rooms[roomCode];
     const player = game.players.find(val => val.socketId === socket.id);
-    player.playCard(new Card(card));
+    player.playCard(card);
     game.playedTurn++;
     if (game.playedTurn === game.numPlayers) {
       game.playedTurn = 0;
       game.calculateTurnPoints();
       game.rotateHands(game.players.map(p => p.hand));
       game.players.forEach(p => {
-        console.log(p, p.hand)
         io.to(p.socketId).emit('dealHand', p.hand)
       });
     }
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`Socket ${socket.id} disconnected`);
+    // need to remove that player from the display
+    let roomCode = socketToRoom[socket.id];
+    const game = rooms[roomCode];
+    game.players = game.players.filter(p => p.socketId !== socket.id);
+    socket.to(roomCode).emit(
+      'playerJoined',
+      game.players.map(p => p.name)
+    );
+    // TODO: If the host leaves, end game
   });
 });
 
