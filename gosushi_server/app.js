@@ -116,11 +116,13 @@ io.on('connection', socket => {
     // need to remove that player from the display
     let roomCode = socketToRoom[socket.id];
     const game = rooms[roomCode];
-    game.players = game.players.filter(p => p.socketId !== socket.id);
-    socket.to(roomCode).emit(
-      'playerJoined',
-      game.players.map(p => p.name)
-    );
+    if (game) {
+      game.players = game.players.filter(p => p.socketId !== socket.id);
+      socket.to(roomCode).emit(
+        'playerJoined',
+        game.players.map(p => p.name)
+      );
+    }
     // TODO: If the host leaves, end game
   });
 });
