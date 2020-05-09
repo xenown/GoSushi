@@ -4,15 +4,17 @@ import { useParams } from 'react-router-dom';
 const Board = ({ socket }) => {
   const params = useParams();
   const [hand, setHand] = useState([]);
-  const [selectedCard, setSelectedCard] = useState(-1);
+  const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
   const [points, setPoints] = useState(0);
+  const [played, setPlayed] = useState(false);
 
   useEffect(() => {
     socket.emit('boardLoaded', params.roomCode);
 
     const handleDealHand = data => {
       setHand(data);
-      setSelectedCard(-1);
+      setSelectedCardIndex(-1);
+      setPlayed(false);
     };
 
     const handleUpdatePoints = data => {
@@ -28,25 +30,37 @@ const Board = ({ socket }) => {
     };
   }, [params.roomCode, socket]);
 
-  const handleSelectCard = (card, index) => {
-    socket.emit('cardSelected', params.roomCode, card);
-    setSelectedCard(index);
+  const handleSelectCard = index => {
+    setSelectedCardIndex(index);
   };
 
   return (
     <div className="Board" style={{ display: 'block' }}>
       <h1>Board</h1>
       <p>Display cards somehow</p>
-      {hand.map((card, index) => (
-        <button
-          key={index}
-          style={selectedCard === index ? { backgroundColor: 'yellow' } : null}
-          disabled={selectedCard > 0}
-          onClick={() => handleSelectCard(card, index)}
-        >
-          {card.name}
-        </button>
-      ))}
+      <div>
+        {hand.map((card, index) => (
+          <button
+            key={index}
+            style={
+              selectedCardIndex === index ? { backgroundColor: 'yellow' } : null
+            }
+            disabled={played}
+            onClick={() => handleSelectCard(index)}
+          >
+            {card.name}
+          </button>
+        ))}
+      </div>
+      <button
+        disabled={played}
+        onClick={() => {
+          setPlayed(true);
+          socket.emit('cardSelected', params.roomCode, hand[selectedCardIndex]);
+        }}
+      >
+        Play card (you cannot undo this action)
+      </button>
       <div>Your points: {points}</div>
     </div>
   );
