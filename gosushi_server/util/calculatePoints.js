@@ -52,7 +52,7 @@ calculateTurnPoints = (
 };
 
 calculateUramakiPoints = (players, uramakiCountMap, uramakiStanding) => {
-  const isLastTurnInRound = players[0].hand.length === 1; // only one card left
+  const isLastTurnInRound = players[0].hand.length === 0; // no cards left
   const potentialWinners = Object.entries(uramakiCountMap)
     .filter(el => isLastTurnInRound ? true : el[1] >= 10)
     // don't need to limit to only above 10 uramaki's if the round is over
