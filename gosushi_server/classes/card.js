@@ -1,10 +1,3 @@
-const OnigiriEnum = Object.freeze({
-  CIRCLE: 0,
-  TRIANGLE: 1,
-  SQUARE: 2,
-  RECTANGLE: 3,
-});
-
 class Card {
   constructor(card, data = null) {
     if (typeof (card) === 'string') {

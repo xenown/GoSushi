@@ -3,6 +3,7 @@ const Player = require('./player');
 const Deck = require('./deck');
 const handSize = require('../util/handSize');
 const { makiPoints, uramakiPoints } = require('../util/pointRules');
+const {calculatePoints} = require('../util/calculatePoints');
 
 class Game {
   constructor(menu, playerNum, roomCode, hostPlayer, socketId) {
@@ -110,10 +111,6 @@ class Game {
         prevValue = value;
       });
     }
-  }
-
-  calculateRoundPoints() {
-    // score normal foods
   }
 
   calculateEndPoints() {
