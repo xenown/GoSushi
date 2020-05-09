@@ -4,7 +4,7 @@ const Player = require('./player');
 const Deck = require('./deck');
 const handSize = require('../util/handSize');
 const { makiPoints, uramakiPoints } = require('../util/pointRules');
-const {calculatePoints} = require('../util/calculatePoints');
+const { calculatePoints } = require('../util/calculatePoints');
 
 class Game {
   constructor(menu, playerNum, roomCode, hostPlayer, socketId) {
@@ -28,6 +28,33 @@ class Game {
     _.find(this.players, p => p.name === playerName).points += points;
   }
 
+  finishedTurn(sendHands) {
+    this.playedTurn++;
+    if (this.playedTurn === this.numPlayers) {
+      this.playedTurn = 0;
+      this.calculateTurnPoints();
+      this.rotateHands(this.players.map(p => p.hand));
+      if (this.players[0].hand.length === 0) {
+        // no more cards in the hand
+        if (this.round < 3) {
+          // go to next round
+          this.round++;
+          // this.calculateRoundPoints()
+          // remove and add desserts
+          console.log('End of round');
+          this.startRound();
+          this.players.forEach(sendHands);
+        } else {
+          // end game + display results
+          console.log('End of game');
+        }
+      } else {
+        this.players.forEach(sendHands);
+        // for each player, emit the 'dealHand' event -> will send each player their hand
+      }
+    }
+  }
+
   startRound() {
     this.setupDeck();
 
@@ -46,7 +73,7 @@ class Game {
     this.deck.shuffle();
 
     if (this.deck.menu.roll === CardNameEnum.URAMAKI) {
-      this.players.forEach(p => this.uramakiCountMap[p.name] = 0);
+      this.players.forEach(p => (this.uramakiCountMap[p.name] = 0));
     }
   }
 
@@ -100,7 +127,10 @@ class Game {
       }
     });
 
-    if (this.deck.menu.roll === CardNameEnum.URAMAKI && this.uramakiStanding <= 3) {
+    if (
+      this.deck.menu.roll === CardNameEnum.URAMAKI &&
+      this.uramakiStanding <= 3
+    ) {
       const overTenArray = Object.entries(this.uramakiCountMap)
         .filter(el => el[1] >= 10)
         .sort((el1, el2) => el2[1] - el1[1]);
