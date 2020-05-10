@@ -116,12 +116,12 @@ const MenuSelection = props => {
           </a>
           <a
             className="nav-link"
-            id="v-pills-deserts-tab"
+            id="v-pills-desserts-tab"
             data-toggle="pill"
-            href="#v-pills-deserts"
+            href="#v-pills-desserts"
             role="tab"
           >
-            Deserts
+            Desserts
           </a>
         </div>
       </div>
@@ -188,7 +188,7 @@ const MenuSelection = props => {
                 />
               ))}
             </div>
-            <div className="tab-pane fade" id="v-pills-deserts" role="tabpanel">
+            <div className="tab-pane fade" id="v-pills-desserts" role="tabpanel">
               {Object.values(dessertsEnum).map(item => (
                 <img
                   src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
