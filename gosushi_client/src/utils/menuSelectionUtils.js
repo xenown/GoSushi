@@ -1,3 +1,5 @@
+import * as menuImages from './menuImages';
+
 export const rollsEnum = Object.freeze({
   MAKI: 'Maki',
   TEMAKI: 'Temaki',
@@ -33,29 +35,29 @@ export const dessertsEnum = Object.freeze({
 });
 
 export const menuCardImageMap = {
-  Nigiri: 'nigiri.png',
-  Maki: 'maki.png',
-  Temaki: 'temaki.png',
-  Uramaki: 'uramaki.png',
-  Dumpling: 'dumpling.png',
-  Edamame: 'edamame.png',
-  Eel: 'eel.png',
-  Onigiri: 'onigiri.png',
-  'Miso Soup': 'misosoup.png',
-  Sashimi: 'sashimi.png',
-  Tempura: 'tempura.png',
-  Tofu: 'tofu.png',
-  Chopsticks: 'chopsticks.png',
-  Spoon: 'spoon.png',
-  Menu: 'menu.png',
-  'Takeout Box': 'takeoutbox.png',
-  'Soy Sauce': 'soysauce.png',
-  Tea: 'tea.png',
-  Wasabi: 'wasabi.png',
-  'Special Order': 'specialorder.png',
-  Pudding: 'pudding.png',
-  'Green Tea Ice Cream': 'greenteaicecream.png',
-  Fruit: 'fruit.png',
+  Nigiri: menuImages.nigiri,
+  Maki: menuImages.maki,
+  Temaki: menuImages.temaki,
+  Uramaki: menuImages.uramaki,
+  Dumpling: menuImages.dumpling,
+  Edamame: menuImages.edamame,
+  Eel: menuImages.eel,
+  Onigiri: menuImages.onigiri,
+  'Miso Soup': menuImages.misosoup,
+  Sashimi: menuImages.sashimi,
+  Tempura: menuImages.tempura,
+  Tofu: menuImages.tofu,
+  Chopsticks: menuImages.chopsticks,
+  Spoon: menuImages.spoon,
+  Menu: menuImages.menu,
+  'Takeout Box': menuImages.takeoutbox,
+  'Soy Sauce': menuImages.soysauce,
+  Tea: menuImages.tea,
+  Wasabi: menuImages.wasabi,
+  'Special Order': menuImages.specialorder,
+  Pudding: menuImages.pudding,
+  'Green Tea Ice Cream': menuImages.greenteaicecream,
+  Fruit: menuImages.fruit,
 };
 
 export const MENU_APPETIZER_COUNT = 3;

@@ -8,36 +8,20 @@ const DisplayMenu = ({ menu }) => {
     <div>
       <h4>Selected Menu</h4>
       <div style={{ fontSize: 'medium' }}>
+        <img src={menuCardImageMap['Nigiri']} alt="Nigiri" key="Nigiri" />
         <img
-          src={require(`../assets/images/MenuImages/${menuCardImageMap['Nigiri']}`)}
-          alt="Nigiri"
-          key="Nigiri"
-        />
-        <img
-          src={require(`../assets/images/MenuImages/${
-            menuCardImageMap[menu.roll]
-          }`)}
+          src={menuCardImageMap[menu.roll]}
           alt={menu.roll}
           key={menu.roll}
         />
         {menu.appetizers.map(item => (
-          <img
-            src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
-            alt={item}
-            key={item}
-          />
+          <img src={menuCardImageMap[item]} alt={item} key={item} />
         ))}
         {menu.specials.map(item => (
-          <img
-            src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
-            alt={item}
-            key={item}
-          />
+          <img src={menuCardImageMap[item]} alt={item} key={item} />
         ))}
         <img
-          src={require(`../assets/images/MenuImages/${
-            menuCardImageMap[menu.dessert]
-          }`)}
+          src={menuCardImageMap[menu.dessert]}
           alt={menu.dessert}
           key={menu.dessert}
         />

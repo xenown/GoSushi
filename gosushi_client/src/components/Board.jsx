@@ -48,7 +48,11 @@ const Board = ({ socket }) => {
             disabled={played}
             onClick={() => handleSelectCard(index)}
           >
-            {card.name}
+            <div>
+              {/* will be the actual image later */}
+              {card.name}
+              {card.data && `Card data: ${card.data}`}
+            </div>
           </button>
         ))}
       </div>
