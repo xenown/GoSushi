@@ -2,7 +2,11 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 
+<<<<<<< HEAD
 const port = process.env.SERVERPORT;
+=======
+const port = process.env.PORT;
+>>>>>>> 82189579e3ca8bb3f030e9899728bda245f4e124
 const index = require('./routes/index');
 
 const app = express();
