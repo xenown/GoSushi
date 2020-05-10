@@ -79,7 +79,7 @@ const MenuSelection = props => {
   const selectDessert = item => setDessert(item);
 
   return isDeciding ? (
-    <div className="row mt-3 mb-3 menu-selector">
+    <div className="row mt-3 mb-3 menu-left-pane">
       <div className="col-3 menu-tabs">
         <div
           className="nav flex-column nav-pills"
@@ -125,7 +125,7 @@ const MenuSelection = props => {
           </a>
         </div>
       </div>
-      <div className="col-9">
+      <div className="col-9 menu-right-pane">
         <div className="menu-items">
           <div className="tab-content" id="v-pills-tabContent">
             <div
