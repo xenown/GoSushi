@@ -1,32 +1,43 @@
 .menu-selector {
-    background-color: grey;
-    border-radius: 1rem;
-    padding: 1rem;
-    width: 900px;
-    margin: auto;
+  background-color: grey;
+  border-radius: 1rem;
+  padding: 1rem;
+  width: 900px;
+  margin: auto;
 }
 
 .menu-tabs {
-    padding: 1rem;
-    background-color: lightgrey;
-    border-radius: 1rem;
+  padding: 1rem;
+  background-color: lightgrey;
+  border-radius: 1rem;
 }
 
 .submit-menu {
-    margin: auto;
+  margin: auto;
 }
 
 .menu-items {
-    padding: 0.5rem;
-    background-color: lightgrey;
-    border-radius: 1rem;
-    height: 100%
+  padding: 0.5rem;
+  background-color: lightgrey;
+  border-radius: 1rem;
+  height: 100%;
+}
+
+.tab-content {
+  height: 100%;
+}
+
+.tab-pane {
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
 .menu-item {
-    float: left;
-    margin: 0.5rem;
-    border-radius: 0.5rem;
-    height: 80px;
-    width: 130px;
+  float: left;
+  margin: 0.5rem;
+  border-radius: 0.5rem;
+  height: 150px;
 }

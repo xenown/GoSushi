@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
 import _ from 'lodash';
 import './menuSelection.css';
+import {
+  rollsEnum,
+  appetizersEnum,
+  specialsEnum,
+  dessertsEnum,
+  menuCardImageMap,
+} from '../utils/menuSelectionUtils';
 
 const MenuSelection = props => {
   const [roll, setRoll] = useState('');
@@ -128,17 +135,18 @@ const MenuSelection = props => {
                 role="tabpanel"
               >
                 {Object.values(rollsEnum).map(item => (
-                  <button
+                  <img
+                    src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
+                    alt={item}
                     className="menu-item"
                     key={item}
                     onClick={() => selectRoll(item)}
                     style={
-                      roll === item ? { backgroundColor: '#741b47' } : null
+                      roll === item
+                        ? { border: '4px solid #741b47', borderRadius: '18px' }
+                        : null
                     }
-                  >
-                    {' '}
-                    {item}
-                  </button>
+                  />
                 ))}
               </div>
               <div
@@ -147,19 +155,18 @@ const MenuSelection = props => {
                 role="tabpanel"
               >
                 {Object.values(appetizersEnum).map(item => (
-                  <button
+                  <img
+                    src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
+                    alt={item}
                     className="menu-item"
                     key={item}
                     onClick={() => selectAppetizer(item)}
                     style={
                       appetizers.includes(item)
-                        ? { backgroundColor: '#3c9fa7' }
+                        ? { border: '4px solid #3c9fa7', borderRadius: '18px' }
                         : null
                     }
-                  >
-                    {' '}
-                    {item}
-                  </button>
+                  />
                 ))}
               </div>
               <div
@@ -168,19 +175,18 @@ const MenuSelection = props => {
                 role="tabpanel"
               >
                 {Object.values(specialsEnum).map(item => (
-                  <button
+                  <img
+                    src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
+                    alt={item}
                     className="menu-item"
                     key={item}
                     onClick={() => selectSpecial(item)}
                     style={
                       specials.includes(item)
-                        ? { backgroundColor: '#ff9900' }
+                        ? { border: '4px solid #ff9900', borderRadius: '18px' }
                         : null
                     }
-                  >
-                    {' '}
-                    {item}
-                  </button>
+                  />
                 ))}
               </div>
               <div
@@ -189,17 +195,18 @@ const MenuSelection = props => {
                 role="tabpanel"
               >
                 {Object.values(dessertsEnum).map(item => (
-                  <button
+                  <img
+                    src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
+                    alt={item}
                     className="menu-item"
                     key={item}
                     onClick={() => selectDessert(item)}
                     style={
-                      dessert === item ? { backgroundColor: '#b90064' } : null
+                      dessert === item
+                        ? { border: '4px solid #b90064', borderRadius: '18px' }
+                        : null
                     }
-                  >
-                    {' '}
-                    {item}
-                  </button>
+                  />
                 ))}
               </div>
             </div>
@@ -235,37 +242,3 @@ const MenuSelection = props => {
 };
 
 export default MenuSelection;
-
-const rollsEnum = Object.freeze({
-  MAKI: 'Maki',
-  TEMAKI: 'Temaki',
-  URAMAKI: 'Uramaki',
-});
-
-const appetizersEnum = Object.freeze({
-  DUMPLING: 'Dumpling',
-  EDAMAME: 'Edamame',
-  EEL: 'Eel',
-  ONIGIRI: 'Onigiri',
-  MISO_SOUP: 'Miso Soup',
-  SASHIMI: 'Sashimi',
-  TEMPURA: 'Tempura',
-  TOFU: 'Tofu',
-});
-
-const specialsEnum = Object.freeze({
-  CHOPSTICKS: 'Chopsticks',
-  SPOON: 'Spoon',
-  MENU: 'Menu',
-  TAKEOUT_BOX: 'Takeout Box',
-  SOY_SAUCE: 'Soy Sauce',
-  TEA: 'Tea',
-  WASABI: 'Wasabi',
-  SPECIAL_ORDER: 'Special Order',
-});
-
-const dessertsEnum = Object.freeze({
-  PUDDING: 'Pudding',
-  GREEN_TEA_ICE_CREAM: 'Green Tea Ice Cream',
-  FRUIT: 'Fruit',
-});
