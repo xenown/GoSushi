@@ -27,11 +27,15 @@
   height: 100%;
 }
 
+.tab-content .active {
+  display: flex;
+}
+
 .tab-pane {
   height: 100%;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
 }
 
@@ -39,5 +43,8 @@
   float: left;
   margin: 0.5rem;
   border-radius: 0.5rem;
+}
+
+img {
   height: 150px;
 }

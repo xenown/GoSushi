@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
 import MenuSelection from './MenuSelection';
+import DisplayMenu from './DisplayMenu';
 
 const HostGame = ({ socket }) => {
   const history = useHistory();
@@ -43,7 +44,10 @@ const HostGame = ({ socket }) => {
 
   const handleBack = () => history.push('/');
 
-  const handleMenu = menu => setMenu(menu);
+  const handleMenu = menu => {
+    console.log(menu);
+    setMenu(menu);
+  };
 
   const handleStartGame = () => {
     socket.emit('gameInitiated', roomCode);
@@ -52,6 +56,7 @@ const HostGame = ({ socket }) => {
   const createForm = (
     <div>
       <MenuSelection handleMenu={handleMenu} />
+      <DisplayMenu menu={menu} />
       <div>
         Enter your name
         <input type="text" onChange={e => setName(e.target.value)} />
@@ -76,6 +81,8 @@ const HostGame = ({ socket }) => {
       <p>{message}</p>
     </div>
   );
+
+  console.log('state of: ', menu);
 
   return (
     <div className="HostGame" style={{ display: 'block' }}>

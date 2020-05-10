@@ -78,167 +78,144 @@ const MenuSelection = props => {
 
   const selectDessert = item => setDessert(item);
 
-  if (isDeciding) {
-    return (
-      <div className="row mt-3 mb-3 menu-selector">
-        <div className="col-3 menu-tabs">
-          <div
-            className="nav flex-column nav-pills"
-            id="v-pills-tab"
-            role="tablist"
-            aria-orientation="vertical"
+  return isDeciding ? (
+    <div className="row mt-3 mb-3 menu-selector">
+      <div className="col-3 menu-tabs">
+        <div
+          className="nav flex-column nav-pills"
+          id="v-pills-tab"
+          role="tablist"
+          aria-orientation="vertical"
+        >
+          <a
+            className="nav-link active"
+            id="v-pills-rolls-tab"
+            data-toggle="pill"
+            href="#v-pills-rolls"
+            role="tab"
           >
-            <a
-              className="nav-link active"
-              id="v-pills-rolls-tab"
-              data-toggle="pill"
-              href="#v-pills-rolls"
-              role="tab"
-            >
-              Rolls
-            </a>
-            <a
-              className="nav-link"
-              id="v-pills-appetizers-tab"
-              data-toggle="pill"
-              href="#v-pills-appetizers"
-              role="tab"
-            >
-              Appetizers
-            </a>
-            <a
-              className="nav-link"
-              id="v-pills-specials-tab"
-              data-toggle="pill"
-              href="#v-pills-specials"
-              role="tab"
-            >
-              Specials
-            </a>
-            <a
-              className="nav-link"
-              id="v-pills-deserts-tab"
-              data-toggle="pill"
-              href="#v-pills-deserts"
-              role="tab"
-            >
-              Deserts
-            </a>
-          </div>
+            Rolls
+          </a>
+          <a
+            className="nav-link"
+            id="v-pills-appetizers-tab"
+            data-toggle="pill"
+            href="#v-pills-appetizers"
+            role="tab"
+          >
+            Appetizers
+          </a>
+          <a
+            className="nav-link"
+            id="v-pills-specials-tab"
+            data-toggle="pill"
+            href="#v-pills-specials"
+            role="tab"
+          >
+            Specials
+          </a>
+          <a
+            className="nav-link"
+            id="v-pills-deserts-tab"
+            data-toggle="pill"
+            href="#v-pills-deserts"
+            role="tab"
+          >
+            Deserts
+          </a>
         </div>
-        <div className="col-9">
-          <div className="menu-items">
-            <div className="tab-content" id="v-pills-tabContent">
-              <div
-                className="tab-pane fade show active"
-                id="v-pills-rolls"
-                role="tabpanel"
-              >
-                {Object.values(rollsEnum).map(item => (
-                  <img
-                    src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
-                    alt={item}
-                    className="menu-item"
-                    key={item}
-                    onClick={() => selectRoll(item)}
-                    style={
-                      roll === item
-                        ? { border: '4px solid #741b47', borderRadius: '18px' }
-                        : null
-                    }
-                  />
-                ))}
-              </div>
-              <div
-                className="tab-pane fade"
-                id="v-pills-appetizers"
-                role="tabpanel"
-              >
-                {Object.values(appetizersEnum).map(item => (
-                  <img
-                    src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
-                    alt={item}
-                    className="menu-item"
-                    key={item}
-                    onClick={() => selectAppetizer(item)}
-                    style={
-                      appetizers.includes(item)
-                        ? { border: '4px solid #3c9fa7', borderRadius: '18px' }
-                        : null
-                    }
-                  />
-                ))}
-              </div>
-              <div
-                className="tab-pane fade"
-                id="v-pills-specials"
-                role="tabpanel"
-              >
-                {Object.values(specialsEnum).map(item => (
-                  <img
-                    src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
-                    alt={item}
-                    className="menu-item"
-                    key={item}
-                    onClick={() => selectSpecial(item)}
-                    style={
-                      specials.includes(item)
-                        ? { border: '4px solid #ff9900', borderRadius: '18px' }
-                        : null
-                    }
-                  />
-                ))}
-              </div>
-              <div
-                className="tab-pane fade"
-                id="v-pills-deserts"
-                role="tabpanel"
-              >
-                {Object.values(dessertsEnum).map(item => (
-                  <img
-                    src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
-                    alt={item}
-                    className="menu-item"
-                    key={item}
-                    onClick={() => selectDessert(item)}
-                    style={
-                      dessert === item
-                        ? { border: '4px solid #b90064', borderRadius: '18px' }
-                        : null
-                    }
-                  />
-                ))}
-              </div>
+      </div>
+      <div className="col-9">
+        <div className="menu-items">
+          <div className="tab-content" id="v-pills-tabContent">
+            <div
+              className="tab-pane fade show active"
+              id="v-pills-rolls"
+              role="tabpanel"
+            >
+              {Object.values(rollsEnum).map(item => (
+                <img
+                  src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
+                  alt={item}
+                  className="menu-item"
+                  key={item}
+                  onClick={() => selectRoll(item)}
+                  style={
+                    roll === item
+                      ? { border: '4px solid #741b47', borderRadius: '18px' }
+                      : null
+                  }
+                />
+              ))}
+            </div>
+            <div
+              className="tab-pane fade"
+              id="v-pills-appetizers"
+              role="tabpanel"
+            >
+              {Object.values(appetizersEnum).map(item => (
+                <img
+                  src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
+                  alt={item}
+                  className="menu-item"
+                  key={item}
+                  onClick={() => selectAppetizer(item)}
+                  style={
+                    appetizers.includes(item)
+                      ? { border: '4px solid #3c9fa7', borderRadius: '18px' }
+                      : null
+                  }
+                />
+              ))}
+            </div>
+            <div
+              className="tab-pane fade"
+              id="v-pills-specials"
+              role="tabpanel"
+            >
+              {Object.values(specialsEnum).map(item => (
+                <img
+                  src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
+                  alt={item}
+                  className="menu-item"
+                  key={item}
+                  onClick={() => selectSpecial(item)}
+                  style={
+                    specials.includes(item)
+                      ? { border: '4px solid #ff9900', borderRadius: '18px' }
+                      : null
+                  }
+                />
+              ))}
+            </div>
+            <div className="tab-pane fade" id="v-pills-deserts" role="tabpanel">
+              {Object.values(dessertsEnum).map(item => (
+                <img
+                  src={require(`../assets/images/MenuImages/${menuCardImageMap[item]}`)}
+                  alt={item}
+                  className="menu-item"
+                  key={item}
+                  onClick={() => selectDessert(item)}
+                  style={
+                    dessert === item
+                      ? { border: '4px solid #b90064', borderRadius: '18px' }
+                      : null
+                  }
+                />
+              ))}
             </div>
           </div>
         </div>
-        <button
-          className="submit-menu btn btn-primary mt-3 mb-2"
-          onClick={handleSubmit}
-        >
-          Submit Menu
-        </button>
-        <div className="col-12">{message}</div>
       </div>
-    );
-  } else {
-    return (
-      <div>
-        <h4>Selected Menu</h4>
-        <div style={{ fontSize: 'medium' }}>
-          <div>Nigiri</div>
-          <div>{roll}</div>
-          {appetizers.map((item, index) => (
-            <div key={'appetizer' + index}>{item}</div>
-          ))}
-          {specials.map((item, index) => (
-            <div key={'specials' + index}>{item}</div>
-          ))}
-          <div>{dessert}</div>
-        </div>
-      </div>
-    );
-  }
+      <button
+        className="submit-menu btn btn-primary mt-3 mb-2"
+        onClick={handleSubmit}
+      >
+        Submit Menu
+      </button>
+      <div className="col-12">{message}</div>
+    </div>
+  ) : null;
 };
 
 export default MenuSelection;

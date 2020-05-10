@@ -33,9 +33,7 @@ export const dessertsEnum = Object.freeze({
 });
 
 export const menuCardImageMap = {
-  EGG: 'nigiri.png',
-  SALMON: 'nigiri.png',
-  SQUID: 'nigiri.png',
+  Nigiri: 'nigiri.png',
   Maki: 'maki.png',
   Temaki: 'temaki.png',
   Uramaki: 'uramaki.png',

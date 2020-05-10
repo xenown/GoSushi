@@ -42,7 +42,7 @@ io.on('connection', socket => {
 
       socketToRoom[socket.id] = roomCode;
       console.log(`joined ${socket.id}`);
-      io.to(roomCode).emit('playerJoined', [username]);
+      io.to(roomCode).emit('playerJoined', [username], menu);
       socket.emit('getNumPlayers', numPlayers);
     });
   });
@@ -78,7 +78,8 @@ io.on('connection', socket => {
 
       io.to(roomCode).emit(
         'playerJoined',
-        players.map(p => p.name)
+        players.map(p => p.name),
+        game.deck.menu
       );
       socket.emit('getNumPlayers', game.numPlayers);
 
