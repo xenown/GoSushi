@@ -7,7 +7,33 @@ import {
   specialsEnum,
   dessertsEnum,
   menuCardImageMap,
+  MENU_APPETIZER_COUNT,
+  MENU_SPECIAL_COUNT
 } from '../utils/menuSelectionUtils';
+import {suggestedMenus} from '../utils/suggestedMenus'
+
+
+const SideList = props =>
+  (
+    <div
+      className="nav flex-column nav-pills"
+      id="v-pills-tab"
+      role="tablist"
+      aria-orientation="vertical"
+    >
+      {
+        props.list.map((value, index) =>
+          (<button
+            onClick={props.onclicks[index]}
+            key={index}
+            >
+            {value}
+          </button>)
+        )
+      }
+    </div>
+  )
+
 
 const MenuSelection = props => {
   const [roll, setRoll] = useState('');
@@ -29,14 +55,16 @@ const MenuSelection = props => {
     if (roll === '') {
       msg += 'Missing a roll.\n';
     }
-    if (appetizers.length < 3) {
-      msg += `Missing ${3 - appetizers.length} appetizer${
-        appetizers.length < 2 ? 's' : ''
+    if (appetizers.length < MENU_APPETIZER_COUNT) {
+      let diff = MENU_APPETIZER_COUNT - appetizers.length;
+      msg += `Missing ${diff} appetizer${
+        diff > 1 ? 's' : ''
       }.\n`;
     }
-    if (specials.length < 2) {
-      msg += `Missing ${2 - specials.length} special${
-        specials.length === 0 ? 's' : ''
+    if (specials.length < MENU_SPECIAL_COUNT) {
+      let diff = MENU_SPECIAL_COUNT - specials.length;
+      msg += `Missing ${diff} special${
+        diff > 1 ? 's' : ''
       }.\n`;
     }
     if (dessert === '') {
@@ -78,8 +106,23 @@ const MenuSelection = props => {
 
   const selectDessert = item => setDessert(item);
 
+  const suggestedMenuOnClicks = Object.keys(suggestedMenus).map((name, index) => {
+    return () => {
+      setRoll(suggestedMenus[name]['roll']);
+      setAppetizers(suggestedMenus[name]['appetizers']);
+      setSpecials(suggestedMenus[name]['specials']);
+      setDessert(suggestedMenus[name]['dessert']);
+    }
+  });
+
+
   return isDeciding ? (
-    <div className="row mt-3 mb-3 menu-left-pane">
+    <div className="row">
+    <div className="col-2 gameformats">
+      <SideList list={Object.keys(suggestedMenus)} onclicks={suggestedMenuOnClicks}/>
+    </div>
+    <div className="col-8">
+    <div className="row mt-3 mb-3 menu-selector">
       <div className="col-3 menu-tabs">
         <div
           className="nav flex-column nav-pills"
@@ -214,6 +257,11 @@ const MenuSelection = props => {
         Submit Menu
       </button>
       <div className="col-12">{message}</div>
+    </div>
+    </div>
+    <div className="col-2 gameformats">
+      {/* <SideList list={["Test1" , "Test2"]}/> */}
+    </div>
     </div>
   ) : null;
 };

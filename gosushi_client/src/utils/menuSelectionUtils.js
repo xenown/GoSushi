@@ -57,3 +57,6 @@ export const menuCardImageMap = {
   'Green Tea Ice Cream': 'greenteaicecream.png',
   Fruit: 'fruit.png',
 };
+
+export const MENU_APPETIZER_COUNT = 3;
+export const MENU_SPECIAL_COUNT = 2;

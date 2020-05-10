@@ -7,7 +7,9 @@ import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
 import Board from './components/Board';
 
-const ENDPOINT = 'http://127.0.0.1:4001';
+const serverport = process.env.SERVERPORT || 4001;
+const ENDPOINT = 'http://127.0.0.1:' + serverport;
+console.log(ENDPOINT);
 const socket = socketIOClient(ENDPOINT);
 
 const App = () => {
