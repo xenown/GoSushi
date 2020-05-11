@@ -35,7 +35,7 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
 
   return (
     <div>
-      {players.length > 0 ? (
+      {players.length > 0 && roomCode !== "" ? (
         <div>
           <p>Room code: {roomCode}</p>
           <p>Player name: {name}</p>
