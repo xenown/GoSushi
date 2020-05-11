@@ -3,6 +3,10 @@ import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
 import MenuSelection from './MenuSelection';
 import DisplayMenu from './DisplayMenu';
+import {
+  MENU_APPETIZER_COUNT,
+  MENU_SPECIAL_COUNT,
+} from '../utils/menuSelectionUtils';
 
 const HostGame = ({ socket }) => {
   const history = useHistory();
@@ -12,7 +16,7 @@ const HostGame = ({ socket }) => {
   const [isCreating, setIsCreating] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState('');
-  const [menu, setMenu] = useState({});
+  const [menu, setMenu] = useState({roll: '', appetizers: [], specials: [], dessert: ""});
 
   useEffect(() => {
     const handleNewPlayer = data => {
@@ -38,6 +42,27 @@ const HostGame = ({ socket }) => {
   }, [socket]);
 
   const handleSubmit = () => {
+    let msg = '';
+    if (menu.roll === '') {
+      msg += 'Missing a roll.\n';
+    }
+    if (menu.appetizers.length < MENU_APPETIZER_COUNT) {
+      let diff = MENU_APPETIZER_COUNT - menu.appetizers.length;
+      msg += `Missing ${diff} appetizer${diff > 1 ? 's' : ''}.\n`;
+    }
+    if (menu.specials.length < MENU_SPECIAL_COUNT) {
+      let diff = MENU_SPECIAL_COUNT - menu.specials.length;
+      msg += `Missing ${diff} special${diff > 1 ? 's' : ''}.\n`;
+    }
+    if (menu.dessert === '') {
+      msg += 'Missing a dessert.\n';
+    }
+  
+    if (msg !== '') {
+      setMessage(msg);
+      return;
+    }
+  
     socket.emit('hostGame', menu, numPlayers, name);
     setMessage('Loading...');
   };
@@ -56,7 +81,7 @@ const HostGame = ({ socket }) => {
 
   const createForm = (
     <div>
-      <MenuSelection handleMenu={handleMenu} />
+      <MenuSelection handleMenu={handleMenu} menu={menu} />
       <DisplayMenu menu={menu} />
       <div>
         Enter your name

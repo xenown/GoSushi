@@ -7,8 +7,6 @@ import {
   specialsEnum,
   dessertsEnum,
   menuCardImageMap,
-  MENU_APPETIZER_COUNT,
-  MENU_SPECIAL_COUNT,
 } from '../utils/menuSelectionUtils';
 import { suggestedMenus } from '../utils/suggestedMenus';
 
@@ -22,86 +20,52 @@ const SideList = ({ menuList, handleSuggestedMenu }) => (
   </div>
 );
 
-const MenuSelection = ({ handleMenu }) => {
-  const [roll, setRoll] = useState('');
-  const [appetizers, setAppetizers] = useState([]);
-  const [specials, setSpecials] = useState([]);
-  const [dessert, setDessert] = useState('');
-  const [isDeciding, setIsDeciding] = useState(true);
-  const [message, setMessage] = useState('');
-
-  const handleSubmit = () => {
-    const menu = {
-      roll: roll,
-      appetizers: appetizers,
-      specials: specials,
-      dessert: dessert,
-    };
-
-    let msg = '';
-    if (roll === '') {
-      msg += 'Missing a roll.\n';
-    }
-    if (appetizers.length < MENU_APPETIZER_COUNT) {
-      let diff = MENU_APPETIZER_COUNT - appetizers.length;
-      msg += `Missing ${diff} appetizer${diff > 1 ? 's' : ''}.\n`;
-    }
-    if (specials.length < MENU_SPECIAL_COUNT) {
-      let diff = MENU_SPECIAL_COUNT - specials.length;
-      msg += `Missing ${diff} special${diff > 1 ? 's' : ''}.\n`;
-    }
-    if (dessert === '') {
-      msg += 'Missing a dessert.\n';
-    }
-
-    if (msg !== '') {
-      setMessage(msg);
-      return;
-    }
-
-    handleMenu(menu);
-    setIsDeciding(false);
-  };
-
-  const selectRoll = item => setRoll(item);
+const MenuSelection = ({ handleMenu, menu }) => {
+  const selectRoll = item => { let menucopy = _.clone(menu); menucopy.roll = item; handleMenu(menucopy); }
 
   const selectAppetizer = item => {
-    let newAppetizer = appetizers.slice();
-    if (appetizers.includes(item)) {
+    let menucopy = _.clone(menu);
+    let newAppetizer = menu.appetizers.slice();
+    if (menu.appetizers.includes(item)) {
       _.remove(newAppetizer, i => i === item);
-      setAppetizers(newAppetizer);
-    } else if (appetizers.length < 3) {
+      menucopy.appetizers = newAppetizer;
+    } else if (menu.appetizers.length < 3) {
       newAppetizer.push(item);
-      setAppetizers(newAppetizer);
+      menucopy.appetizers = newAppetizer;
     }
+    handleMenu(menucopy);
   };
 
   const selectSpecial = item => {
-    let newSpecial = specials.slice();
-    if (specials.includes(item)) {
+    let menucopy = _.clone(menu);
+    let newSpecial = menu.specials.slice();
+    if (menu.specials.includes(item)) {
       _.remove(newSpecial, i => i === item);
-      setSpecials(newSpecial);
-    } else if (specials.length < 2) {
+      menucopy.specials = newSpecial;
+    } else if (menu.specials.length < 2) {
       newSpecial.push(item);
-      setSpecials(newSpecial);
+      menucopy.specials = newSpecial;
     }
+    handleMenu(menucopy);
   };
 
-  const selectDessert = item => setDessert(item);
+  const selectDessert = item => { let menucopy = _.clone(menu); menucopy.dessert = item; handleMenu(menucopy); }
 
   const suggestedMenuOnClicks = Object.keys(suggestedMenus).map(name => {
     return () => {
-      setRoll(suggestedMenus[name]['roll']);
-      setAppetizers(suggestedMenus[name]['appetizers']);
-      setSpecials(suggestedMenus[name]['specials']);
-      setDessert(suggestedMenus[name]['dessert']);
+      let menu = {};
+      menu.roll = suggestedMenus[name]['roll'];
+      menu.appetizers = suggestedMenus[name]['appetizers'];
+      menu.specials = suggestedMenus[name]['specials'];
+      menu.dessert = suggestedMenus[name]['dessert'];
+      handleMenu(menu);
     };
   });
 
-  return isDeciding ? (
+  return (
     <div className="menu-wrapper mt-3 mb-3">
       <div className="pt-1 pb-1 menu-header">Menu</div>
-      <div className="row ml-3 mr-3">
+      <div className="row ml-3 mr-3" style={{paddingBottom: '1rem'}}>
         <div className="col-3 menu-left-pane">
           <div className='menu-subheader'>Courses</div>
           <div
@@ -163,7 +127,7 @@ const MenuSelection = ({ handleMenu }) => {
                     key={item}
                     onClick={() => selectRoll(item)}
                     style={
-                      roll === item
+                      menu.roll === menu.item
                         ? {
                             border: '4px solid #741b47',
                             borderRadius: '18px',
@@ -186,7 +150,7 @@ const MenuSelection = ({ handleMenu }) => {
                     key={item}
                     onClick={() => selectAppetizer(item)}
                     style={
-                      appetizers.includes(item)
+                      menu.appetizers.includes(item)
                         ? {
                             border: '4px solid #3c9fa7',
                             borderRadius: '18px',
@@ -209,7 +173,7 @@ const MenuSelection = ({ handleMenu }) => {
                     key={item}
                     onClick={() => selectSpecial(item)}
                     style={
-                      specials.includes(item)
+                      menu.specials.includes(item)
                         ? {
                             border: '4px solid #ff9900',
                             borderRadius: '18px',
@@ -232,7 +196,7 @@ const MenuSelection = ({ handleMenu }) => {
                     key={item}
                     onClick={() => selectDessert(item)}
                     style={
-                      dessert === item
+                      menu.dessert === item
                         ? {
                             border: '4px solid #b90064',
                             borderRadius: '18px',
@@ -252,16 +216,8 @@ const MenuSelection = ({ handleMenu }) => {
             handleSuggestedMenu={suggestedMenuOnClicks}
           />
         </div>
-      </div>
-      <div className="mt-2">{message}</div>
-      <button
-        className="submit-menu btn btn-primary mt-2 mb-3"
-        onClick={handleSubmit}
-      >
-        Submit Menu
-      </button>     
-    </div>
-  ) : null;
+      </div> 
+    </div>)
 };
 
 export default MenuSelection;
