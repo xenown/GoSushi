@@ -57,7 +57,7 @@ const Board = ({ socket }) => {
         ))}
       </div>
       <button
-        disabled={played}
+        disabled={selectedCardIndex === -1 || played}
         onClick={() => {
           setPlayed(true);
           socket.emit('cardSelected', params.roomCode, hand[selectedCardIndex]);
