@@ -1,6 +1,6 @@
 import {rollsEnum, appetizersEnum, specialsEnum, dessertsEnum } from './menuSelectionUtils'
 
-export const suggestedMenus = {
+export const suggestedMenus = Object.freeze({
   firstMeal: {
     roll: rollsEnum.MAKI,
     appetizers: [appetizersEnum.TEMPURA, appetizersEnum.SASHIMI, appetizersEnum.MISO_SOUP],
@@ -57,4 +57,4 @@ export const suggestedMenus = {
     dessert: dessertsEnum.FRUIT,
     name: 'Dinner For Two'
   },
-};
+});

@@ -10,6 +10,7 @@ app.use(index);
 const server = http.createServer(app);
 const io = socketIo(server);
 
+const generateRoomCode = require('./util/roomCodes');
 const Game = require('./classes/game');
 const rooms = {};
 const socketToRoom = {};
@@ -17,15 +18,18 @@ const socketToRoom = {};
 io.on('connection', socket => {
   console.log('New client connected');
 
-  socket.on('hostGame', (menu, numPlayers, roomCode, username) => {
+  socket.on('hostGame', (menu, numPlayers, username) => {
+    //Assuming menu contains roll, appetizers, specials, dessert
+    roomCode = generateRoomCode(new Set(Object.keys(rooms)));
+    if (roomCode === false) {
+      socket.emit(
+        'playerJoined',
+        `Connection failed: Could not generate unique room code.`
+      );
+      return;
+    }
     socket.join([roomCode], e => {
-      if (rooms[roomCode] && rooms[roomCode].players.length !== 0) {
-        socket.emit(
-          'playerJoined',
-          `Connection failed: Room code "${roomCode}" is being used.`
-        );
-        return;
-      } else if (e) {
+      if (e) {
         socket.emit(
           'playerJoined',
           `Connection failed: Error joining room: ${e}`
@@ -42,6 +46,7 @@ io.on('connection', socket => {
 
       socketToRoom[socket.id] = roomCode;
       console.log(`joined ${socket.id}`);
+      io.to(roomCode).emit('getRoomCode', roomCode);
       io.to(roomCode).emit('playerJoined', [username], menu);
       socket.emit('getNumPlayers', numPlayers);
     });

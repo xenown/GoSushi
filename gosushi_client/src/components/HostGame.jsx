@@ -27,7 +27,7 @@ const HostGame = ({ socket }) => {
     const handleRoomFilled = () => {
       setIsReady(true);
     };
-
+    socket.on('getRoomCode', (data) => setRoomCode(data));
     socket.on('playerJoined', handleNewPlayer);
     socket.on('roomFilled', handleRoomFilled);
 
@@ -38,13 +38,14 @@ const HostGame = ({ socket }) => {
   }, [socket]);
 
   const handleSubmit = () => {
-    socket.emit('hostGame', menu, numPlayers, roomCode, name);
+    socket.emit('hostGame', menu, numPlayers, name);
     setMessage('Loading...');
   };
 
   const handleBack = () => history.push('/');
 
   const handleMenu = menu => {
+    console.log("HOSTGAME MENU:");
     console.log(menu);
     setMenu(menu);
   };
@@ -71,10 +72,6 @@ const HostGame = ({ socket }) => {
             setNumPlayers(parseInt(e.target.value, 10));
           }}
         />
-      </div>
-      <div>
-        Enter your room code
-        <input type="text" onChange={e => setRoomCode(e.target.value)} />
       </div>
       <button onClick={handleBack}>Back</button>
       <button onClick={handleSubmit}>Submit</button>
