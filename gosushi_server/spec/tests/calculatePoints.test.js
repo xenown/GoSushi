@@ -3,6 +3,7 @@ const Card = require('../../classes/card');
 const Game = require('../../classes/game');
 const { calculateRoundPoints, calculateTurnPoints } = require('../../util/calculatePoints');
 const cardNameEnum = require('../../util/cardNameEnum');
+const onigiriEnum = require('../../util/onigiriNameEnum');
 const menus = require('../../util/suggestedMenus');
 
 const addPlayers = (game, players) => {
@@ -233,21 +234,67 @@ describe('calculateAppetizerPoints', function () {
     ],
     [
       new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.CIRCLE),
     ],
     [
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.CIRCLE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.SQUARE),
     ],
     [
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.CIRCLE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.SQUARE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.TRIANGLE),
     ],
     [
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.CIRCLE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.SQUARE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.TRIANGLE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.RECTANGLE),
     ],
     [
       new Card(cardNameEnum.DUMPLING),
@@ -256,6 +303,23 @@ describe('calculateAppetizerPoints', function () {
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.TEMPURA),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.CIRCLE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.CIRCLE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.SQUARE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.SQUARE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.TRIANGLE),
+      new Card(cardNameEnum.ONIGIRI, onigiriEnum.RECTANGLE),
     ],
   ];
 
@@ -326,6 +390,36 @@ describe('calculateAppetizerPoints', function () {
     game.deck.menu.appetizers = ["Dumpling"];
     calculateRoundPoints(game.players, game.deck.menu);
     expect(game.players.map(p => p.points)).toEqual([0, 1, 3, 6, 10, 15]);
+  });
+
+  it('should give Eel points correctly', () => {
+    game.deck.menu.appetizers = ["Eel"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([0, -3, 7, 7, 7, 0]);
+  });
+
+  it('should give Onigiri points correctly', () => {
+    game.deck.menu.appetizers = ["Onigiri"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([0, 1, 4, 9, 16, 20]);
+  });
+
+  it('should give Sashimi points correctly', () => {
+    game.deck.menu.appetizers = ["Sashimi"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([0, 0, 0, 10, 10, 20]);
+  });
+
+  it('should give Tempura points correctly', () => {
+    game.deck.menu.appetizers = ["Tempura"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([0, 0, 5, 5, 10, 10]);
+  });
+
+  it('should give Tofu points correctly', () => {
+    game.deck.menu.appetizers = ["Tofu"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([0, 2, 6, 0, 0, 0]);
   });
 
   it('should give 0 points per card when only one player has Edamame', () => {

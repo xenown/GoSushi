@@ -261,14 +261,14 @@ calculateOnigiriPoints = players => {
     const onigiri = player.playedCards.filter(
       card => card.name == cardNameEnum.ONIGIRI
     );
-    const square = onigiri.filter(card => card.data === onigiriNameEnum.SQUARE);
-    const triangle = onigiri.filter(
+    let square = onigiri.filter(card => card.data === onigiriNameEnum.SQUARE).length;
+    let triangle = onigiri.filter(
       card => card.data === onigiriNameEnum.TRIANGLE
-    );
-    const rectangle = onigiri.filter(
+    ).length;
+    let rectangle = onigiri.filter(
       card => card.data === onigiriNameEnum.RECTANGLE
-    );
-    const circle = onigiri.filter(card => card.data === onigiriNameEnum.CIRCLE);
+    ).length;
+    let circle = onigiri.filter(card => card.data === onigiriNameEnum.CIRCLE).length;
     let set = 0;
     do {
       set = (square > 0) + (triangle > 0) + (rectangle > 0) + (circle > 0);
