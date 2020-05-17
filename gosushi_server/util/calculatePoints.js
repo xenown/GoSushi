@@ -165,9 +165,9 @@ calculateMakiPoints = players => {
 
   players.forEach(player => {
     const makiPoints = makiCountMap[player.name];
-    if (makiPoints === mostMaki) {
+    if (makiPoints === mostMaki && mostMaki !== 0) {
       player.points += makiPointMap[1];
-    } else if (makiPoints === secondMostMaki) {
+    } else if (makiPoints === secondMostMaki && secondMostMaki !== 0) {
       player.points += makiPointMap[2]
     }
   });
@@ -222,17 +222,25 @@ calculateDumplingPoints = players => {
 };
 
 calculateEdamamePoints = players => {
-  const totalEdamame = 0;
+  let totalEdamame = 0;
+  let playerEdamameCount = -1;
+  const edamameCountMap = {};
   players.forEach(player => {
     totalEdamame = player.playedCards.filter(
       card => card.name == cardNameEnum.EDAMAME
     ).length;
+    if (totalEdamame > 0) {
+      playerEdamameCount++;
+    }
+    edamameCountMap[player.name] = totalEdamame;
   });
+
+  if (playerEdamameCount > 4) {
+    playerEdamameCount = 4;
+  }
+
   players.forEach(player => {
-    playerEdamame = player.playedCards.filter(
-      card => card.name == cardNameEnum.EDAMAME
-    ).length;
-    players.points += (totalEdamame - playerEdamame) * playerEdamame;
+    player.points += playerEdamameCount * edamameCountMap[player.name];
   });
 };
 

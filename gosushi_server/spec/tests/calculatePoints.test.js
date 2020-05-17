@@ -5,6 +5,12 @@ const { calculateRoundPoints, calculateTurnPoints } = require('../../util/calcul
 const cardNameEnum = require('../../util/cardNameEnum');
 const menus = require('../../util/suggestedMenus');
 
+const addPlayers = (game, players) => {
+  for (let i = 1; i < players.length; i++) {
+    game.addPlayer(players[i], players[i]);
+  }
+}
+
 describe('calculateTurnPoints', function () {
   const roomCode = "code";
   const players = ["P1", "P2", "P3"];
@@ -43,14 +49,10 @@ describe('calculateTurnPoints', function () {
     players[0]
   );
 
-  beforeAll(() => {
-    game.addPlayer(players[1], players[1]);
-    game.addPlayer(players[2], players[2]);
-
-    game.setupDeck();
-    game.players.forEach((p, index) => {
-      p.hand = hands[index].reverse();
-    });
+  addPlayers(game, players);
+  game.setupDeck();
+  game.players.forEach((p, index) => {
+    p.hand = hands[index].reverse();
   });
 
   beforeEach(() => {
@@ -93,6 +95,7 @@ describe('calculateRollPoints', function () {
   const players = [
     ["P1", "P2", "P3", "P4", "P5", "P6"],
     ["P1", "P2"],
+    ["P1", "P2", "P3"],
   ];
 
   const hands = [[
@@ -141,6 +144,11 @@ describe('calculateRollPoints', function () {
       new Card(cardNameEnum.TEMAKI),
       new Card(cardNameEnum.TEMAKI),
     ],
+  ],
+  [
+    [],
+    [],
+    [new Card(cardNameEnum.MAKI, 3)],
   ]
   ];
 
@@ -162,9 +170,7 @@ describe('calculateRollPoints', function () {
       players[num][0]
     );
 
-    for (let i = 1; i < players[num].length; i++) {
-      game.addPlayer(players[num][i], players[num][i]);
-    }
+    addPlayers(game, players[num]);
 
     game.deck.menu.roll = num === 0 ? cardNameEnum.URAMAKI : cardNameEnum.MAKI;
     game.setupDeck();
@@ -176,7 +182,7 @@ describe('calculateRollPoints', function () {
     return game;
   }
 
-  const games = [setupGame(0), setupGame(1)];
+  const games = [setupGame(0), setupGame(1), setupGame(2)];
 
   it('should give Uramaki points correctly at the end of last turn', () => {
     calculateTurnPoints(games[0].players, games[0].deck.menu, games[0].uramakiCountMap, games[0].uramakiStanding);
@@ -204,5 +210,146 @@ describe('calculateRollPoints', function () {
     games[1].deck.menu.roll = cardNameEnum.TEMAKI;
     calculateRoundPoints(games[1].players, games[1].deck.menu);
     expect(games[1].players.map(p => p.points)).toEqual([6, 7]);
+  });
+
+  it('should give no Maki points if second place has no Maki', () => {
+    calculateRoundPoints(games[2].players, games[2].deck.menu);
+    expect(games[2].players.map(p => p.points)).toEqual([0, 0, 6]);
+  });
+
+  it('should give no Temaki points if all have equal amounts of Temaki', () => {
+    games[2].deck.menu.roll = cardNameEnum.TEMAKI;
+    calculateRoundPoints(games[2].players, games[2].deck.menu);
+    expect(games[2].players.map(p => p.points)).toEqual([0, 0, 6]);
+  });
+});
+
+describe('calculateAppetizerPoints', function () {
+  const roomCode = "code";
+  const players = ["P1", "P2", "P3", "P4", "P5", "P6"];
+
+  const hands = [
+    [
+    ],
+    [
+      new Card(cardNameEnum.DUMPLING),
+    ],
+    [
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+    ],
+    [
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+    ],
+    [
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+    ],
+    [
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+      new Card(cardNameEnum.DUMPLING),
+    ],
+  ];
+
+  const edamameHands = [[
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ], [], [], [], [], []
+  ],
+  [
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [
+      new Card(cardNameEnum.EDAMAME),
+      new Card(cardNameEnum.EDAMAME),
+    ],
+  ],
+  [
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [
+      new Card(cardNameEnum.EDAMAME),
+      new Card(cardNameEnum.EDAMAME),
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [
+      new Card(cardNameEnum.EDAMAME),
+    ],
+    [],
+    [],
+  ]];
+
+  const game = new Game(
+    _.clone(menus.firstMeal),
+    players.length,
+    roomCode,
+    players[0],
+    players[0]
+  );
+
+  addPlayers(game, players);
+
+  game.players.forEach((p, index) => {
+    p.playedCards = hands[index];
+  });
+
+  beforeEach(() => {
+    game.players.forEach(p => p.points = 0);
+  })
+
+  it('should give Dumpling points correctly', () => {
+    game.deck.menu.appetizers = ["Dumpling"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([0, 1, 3, 6, 10, 15]);
+  });
+
+  it('should give 0 points per card when only one player has Edamame', () => {
+    game.deck.menu.appetizers = ["Edamame"];
+    game.players.forEach((p, index) => {
+      p.playedCards = edamameHands[0][index];
+    });
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([0, 0, 0, 0, 0, 0]);
+  });
+
+  it('should give 4 points per card when 6 players have any Edamame', () => {
+    game.players.forEach((p, index) => {
+      p.playedCards = edamameHands[1][index];
+    });
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([4, 4, 4, 4, 4, 8]);
+  });
+
+  it('should give 3 points per card when 4 players have any Edamame', () => {
+    game.players.forEach((p, index) => {
+      p.playedCards = edamameHands[2][index];
+    });
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([3, 9, 3, 3, 0, 0]);
   });
 });
