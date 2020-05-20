@@ -138,7 +138,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className="menu-item"
+                    className="menu-item game-card"
                     key={item}
                     onClick={() => selectRoll(item)}
                     style={
@@ -161,7 +161,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className="menu-item"
+                    className="menu-item game-card"
                     key={item}
                     onClick={() => selectAppetizer(item)}
                     style={
@@ -184,7 +184,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className="menu-item"
+                    className="menu-item game-card"
                     key={item}
                     onClick={() => selectSpecial(item)}
                     style={
@@ -207,7 +207,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className="menu-item"
+                    className="menu-item game-card"
                     key={item}
                     onClick={() => selectDessert(item)}
                     style={

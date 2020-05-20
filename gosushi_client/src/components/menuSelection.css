@@ -65,10 +65,13 @@
 
 .tab-content {
   height: 100%;
+  transition: max-height 0.7s linear;
+  max-height: 700px;
 }
 
 .tab-content .active {
   display: flex;
+  max-height: 1000px;
 }
 
 .tab-pane {
@@ -90,7 +93,7 @@
   border-radius: 0.5rem;
 }
 
-img {
+.game-card {
   height: 150px;
   width: 125px;
 }

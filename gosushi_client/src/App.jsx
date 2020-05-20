@@ -6,6 +6,8 @@ import './App.css';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
 import Board from './components/Board';
+const logo = require('./assets/sushigologo.jpg');
+
 
 const serverport = process.env.SERVERPORT || 4001;
 const ENDPOINT = 'http://127.0.0.1:' + serverport;
@@ -28,6 +30,10 @@ const App = () => {
               <Board socket={socket} />
             </Route>
             <Route exact path="/">
+              <div className="App-logo">
+                <img src={logo} style={{height: "40vh"}}/>
+              </div>
+              <div className="transition"></div>
               <div className="App-route-container">
                 <Link className="btn btn-outline-primary" to="/host">
                   Host Game

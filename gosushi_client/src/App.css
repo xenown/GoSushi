@@ -3,15 +3,16 @@
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+  background-color: black;
+  width: 100%;
+  padding: 10vh 0 10vh 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
+/* @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
-}
+} */
 
 .App-header {
   background-color: #282c34;
@@ -19,7 +20,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
 }
@@ -37,7 +37,14 @@
   }
 }
 
+.transition {
+  width:100%;
+  height: 10vh;
+  background: linear-gradient(black, #282c34);
+}
+
 .App-route-container {
+  padding-top: 10vh;
   width: 225px;
   display: flex;
   justify-content: space-between;

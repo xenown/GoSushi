@@ -83,23 +83,25 @@ const HostGame = ({ socket }) => {
     <div>
       <MenuSelection handleMenu={handleMenu} menu={menu} />
       <DisplayMenu menu={menu} />
-      <div>
-        Enter your name
-        <input type="text" onChange={e => setName(e.target.value)} />
+      <br/>
+      
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="inputGroup-sizing-default">Name</span>
+        </div>
+        <input type="text" class="form-control" aria-label="Name" aria-describedby="inputGroup-sizing-default" onChange={e => setName(e.target.value)}/>
       </div>
-      <div>
-        Enter number of players (2-8):
-        <input
-          type="number"
-          min="2"
-          max="8"
-          onChange={e => {
-            setNumPlayers(parseInt(e.target.value, 10));
-          }}
-        />
+
+      <div class="mb-3">
+          {
+            [2,3,4,5,6,7,8].map((players, index) => 
+            <button type="button" class="btn btn-primary ml-2 mr-2" onClick={() => setNumPlayers(players)}>{players}-player</button>
+            )
+          }        
       </div>
-      <button onClick={handleBack}>Back</button>
-      <button onClick={handleSubmit}>Submit</button>
+
+      <button className="btn btn-danger ml-2 mr-2" onClick={handleBack}>Back</button>
+      <button className="btn btn-success ml-2 mr-2" onClick={handleSubmit}>Submit</button>
       <p>{message}</p>
     </div>
   );
