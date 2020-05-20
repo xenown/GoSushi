@@ -4,29 +4,24 @@ import { useParams } from 'react-router-dom';
 const Board = ({ socket }) => {
   const params = useParams();
   const [hand, setHand] = useState([]);
+  const [playersData, setPlayersData] = useState([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
-  const [points, setPoints] = useState(0);
   const [played, setPlayed] = useState(false);
 
   useEffect(() => {
     socket.emit('boardLoaded', params.roomCode);
 
-    const handleDealHand = data => {
-      setHand(data);
+    const handleDealHand = (hand, playersData) => {
+      setHand(hand);
+      setPlayersData(playersData);
       setSelectedCardIndex(-1);
       setPlayed(false);
     };
 
-    const handleUpdatePoints = data => {
-      setPoints(data);
-    };
-
-    socket.on('dealHand', handleDealHand);
-    socket.on('updatePoints', handleUpdatePoints);
+    socket.on('sendTurnData', handleDealHand);
 
     return () => {
-      socket.off('dealHand', handleDealHand);
-      socket.off('updatePoints', handleUpdatePoints);
+      socket.off('sendTurnData', handleDealHand);
     };
   }, [params.roomCode, socket]);
 
@@ -34,10 +29,44 @@ const Board = ({ socket }) => {
     setSelectedCardIndex(index);
   };
 
+  const displayCardData = card => (
+    <div style={{ padding: '0 4px' }}>
+      {/* will be the actual image later */}
+      {card.name}
+      {card.data && `Card data: ${card.data}`}
+    </div>
+  );
+
+  const currPlayer = playersData[0];
+  const otherPlayerData = playersData.slice(1);
+
   return (
     <div className="Board" style={{ display: 'block' }}>
       <h1>Board</h1>
-      <p>Display cards somehow</p>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+        }}
+      >
+        {otherPlayerData.map(player => (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              margin: '0 6px',
+              maxHeight: '250px',
+              overflowY: 'auto',
+            }}
+          >
+            <span>{`${player.name}'s played cards:`}</span>
+            {player.playedCards.map(card => displayCardData(card))}
+          </div>
+        ))}
+      </div>
       <div>
         {hand.map((card, index) => (
           <button
@@ -48,11 +77,7 @@ const Board = ({ socket }) => {
             disabled={played}
             onClick={() => handleSelectCard(index)}
           >
-            <div>
-              {/* will be the actual image later */}
-              {card.name}
-              {card.data && `Card data: ${card.data}`}
-            </div>
+            {displayCardData(card)}
           </button>
         ))}
       </div>
@@ -65,7 +90,14 @@ const Board = ({ socket }) => {
       >
         Play card (you cannot undo this action)
       </button>
-      <div>Your points: {points}</div>
+      <div>
+        <span>{'Your played cards:'}</span>
+        <div style={{ display: 'flex', justifyContent: 'center' }}>
+          {currPlayer &&
+            currPlayer.playedCards.map(card => displayCardData(card))}
+        </div>
+      </div>
+      <div>Your points: {playersData[0] && playersData[0].points}</div>
     </div>
   );
 };

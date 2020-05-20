@@ -102,7 +102,17 @@ io.on('connection', socket => {
   socket.on('boardLoaded', roomCode => {
     const game = rooms[roomCode];
     const player = game.players.find(val => val.socketId === socket.id);
-    socket.emit('dealHand', player ? player.hand : []);
+
+    const playersData = game.getPlayersData();
+    while (
+      playersData &&
+      playersData[0] &&
+      playersData[0].socketId !== socket.id
+    ) {
+      playersData.push(playersData.shift());
+    }
+
+    socket.emit('sendTurnData', player ? player.hand : [], playersData);
   });
 
   socket.on('cardSelected', (roomCode, card) => {
@@ -110,11 +120,11 @@ io.on('connection', socket => {
     const player = game.players.find(val => val.socketId === socket.id);
     player.playCard(card);
 
-    const dealHandToPlayer = p => io.to(p.socketId).emit('dealHand', p.hand);
-    const updatePoints = p => io.to(p.socketId).emit('updatePoints', p.points);
+    const sendTurnData = (socketId, hand, otherPlayerData) =>
+      io.to(socketId).emit('sendTurnData', hand, otherPlayerData);
     // keeping those seperate for now
     // might change to everyone can see everyones points rather than only seeing your own
-    game.finishedTurn(dealHandToPlayer, updatePoints);
+    game.finishedTurn(sendTurnData);
   });
 
   socket.on('disconnect', () => {

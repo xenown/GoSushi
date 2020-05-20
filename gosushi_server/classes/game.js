@@ -26,7 +26,7 @@ class Game {
     this.players.push(new Player(name, socketId));
   }
 
-  finishedTurn(sendHands, sendPoints) {
+  finishedTurn(sendPlayerData) {
     this.playedTurn++;
     if (this.playedTurn === this.numPlayers) {
       this.playedTurn = 0;
@@ -34,8 +34,9 @@ class Game {
         this.players,
         this.deck.menu,
         this.uramakiCountMap,
-        this.uramakiStanding,
+        this.uramakiStanding
       );
+      const tempPlayers = this.getPlayersData();
       this.rotateHands(this.players.map(p => p.hand));
       if (this.players[0].hand.length === 0) {
         // no more cards in the hand
@@ -46,17 +47,30 @@ class Game {
           // remove and add desserts
           console.log('End of round');
           this.startRound();
-          this.players.forEach(sendHands);
-          this.players.forEach(sendPoints); // may be changed later! Don't mere with above forEach just yet
+          this.players.forEach(p => {
+            sendPlayerData(p.hand, tempPlayers);
+            tempPlayers.push(tempPlayers.shift());
+          });
         } else {
           // end game + display results
           console.log('End of game');
         }
       } else {
-        this.players.forEach(sendHands);
-        // for each player, emit the 'dealHand' event -> will send each player their hand
+        this.players.forEach(p => {
+          sendPlayerData(p.socketId, p.hand, tempPlayers);
+          tempPlayers.push(tempPlayers.shift());
+        });
       }
     }
+  }
+
+  getPlayersData() {
+    let tempPlayers = [];
+    const notCloned = ['hand', 'turnCards', 'makiCount', 'uramakiCount'];
+    this.players.forEach(p =>
+      tempPlayers.push(_.cloneDeepWith(_.omit(p, notCloned)))
+    );
+    return tempPlayers;
   }
 
   startRound() {

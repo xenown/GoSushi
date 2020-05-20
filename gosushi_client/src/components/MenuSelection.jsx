@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import _ from 'lodash';
 import './menuSelection.css';
 import {
@@ -13,7 +13,14 @@ import { suggestedMenus } from '../utils/suggestedMenus';
 const SideList = ({ menuList, handleSuggestedMenu }) => (
   <div className="btn-group-vertical">
     {menuList.map((value, index) => (
-      <button className={"btn btn-primary default-menu-btn " + (index%2==0? "odd" : 'even')} onClick={handleSuggestedMenu[index]} key={index}>
+      <button
+        className={
+          'btn btn-primary default-menu-btn ' +
+          (index % 2 === 0 ? 'odd' : 'even')
+        }
+        onClick={handleSuggestedMenu[index]}
+        key={index}
+      >
         {suggestedMenus[value].name}
       </button>
     ))}
@@ -21,7 +28,11 @@ const SideList = ({ menuList, handleSuggestedMenu }) => (
 );
 
 const MenuSelection = ({ handleMenu, menu }) => {
-  const selectRoll = item => { let menucopy = _.clone(menu); menucopy.roll = item; handleMenu(menucopy); }
+  const selectRoll = item => {
+    let menucopy = _.clone(menu);
+    menucopy.roll = item;
+    handleMenu(menucopy);
+  };
 
   const selectAppetizer = item => {
     let menucopy = _.clone(menu);
@@ -49,7 +60,11 @@ const MenuSelection = ({ handleMenu, menu }) => {
     handleMenu(menucopy);
   };
 
-  const selectDessert = item => { let menucopy = _.clone(menu); menucopy.dessert = item; handleMenu(menucopy); }
+  const selectDessert = item => {
+    let menucopy = _.clone(menu);
+    menucopy.dessert = item;
+    handleMenu(menucopy);
+  };
 
   const suggestedMenuOnClicks = Object.keys(suggestedMenus).map(name => {
     return () => {
@@ -65,9 +80,9 @@ const MenuSelection = ({ handleMenu, menu }) => {
   return (
     <div className="menu-wrapper mt-3 mb-3">
       <div className="pt-1 pb-1 menu-header">Menu</div>
-      <div className="row ml-3 mr-3" style={{paddingBottom: '1rem'}}>
+      <div className="row ml-3 mr-3" style={{ paddingBottom: '1rem' }}>
         <div className="col-3 menu-left-pane">
-          <div className='menu-subheader'>Courses</div>
+          <div className="menu-subheader">Courses</div>
           <div
             className="nav flex-column nav-pills"
             id="v-pills-tab"
@@ -210,14 +225,15 @@ const MenuSelection = ({ handleMenu, menu }) => {
           </div>
         </div>
         <div className="col-3 menu-right-pane">
-          <div className='menu-subheader'>Default Menus</div>
+          <div className="menu-subheader">Default Menus</div>
           <SideList
             menuList={Object.keys(suggestedMenus)}
             handleSuggestedMenu={suggestedMenuOnClicks}
           />
         </div>
-      </div> 
-    </div>)
+      </div>
+    </div>
+  );
 };
 
 export default MenuSelection;
