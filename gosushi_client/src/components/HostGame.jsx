@@ -12,7 +12,7 @@ const HostGame = ({ socket }) => {
   const history = useHistory();
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
-  const [numPlayers, setNumPlayers] = useState('');
+  const [numPlayers, setNumPlayers] = useState(2);
   const [isCreating, setIsCreating] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState('');
@@ -92,11 +92,17 @@ const HostGame = ({ socket }) => {
         <input type="text" class="form-control" aria-label="Name" aria-describedby="inputGroup-sizing-default" onChange={e => setName(e.target.value)}/>
       </div>
 
-      <div class="mb-3">
+
+      <div class="player-count btn-group btn-group-toggle mb-3" data-toggle="buttons">
+          <label class="btn btn-primary active" onClick={() => setNumPlayers(2)}>
+            <input type="radio" name="options" id="option0" autocomplete="off" checked/>2-player
+          </label>
           {
-            [2,3,4,5,6,7,8].map((players, index) => 
-            <button type="button" class="btn btn-primary ml-2 mr-2" onClick={() => setNumPlayers(players)}>{players}-player</button>
-            )
+            [3,4,5,6,7,8].map((players, index) =>
+                <label class="btn btn-primary" onClick={() => setNumPlayers(players)}>
+                  <input type="radio" name="options" id={"option" + index + 1} autocomplete="off"/>{players}-player
+                </label>
+              )
           }        
       </div>
 
