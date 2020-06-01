@@ -30,14 +30,13 @@ const Board = ({ socket }) => {
     setSelectedCardIndex(index);
   };
 
-  const displayCardData = (card, isHand = true) => (
+  const displayPlayedCard = (card, index) => (
     <img
-      style={{ height: isHand ? '200px' : '125px', padding: '0 4px' }}
+      style={{ height: '125px', padding: '0 4px' }}
       src={getCardImage(card)}
-      alt={card.name + card.data}
-      key={card.name + card.data}
+      alt={card.name}
+      key={`played_${card.name}_${index}`}
     />
-    // need a unique key for each, will probably need to pass in index or something?
   );
 
   const currPlayer = playersData[0];
@@ -56,7 +55,12 @@ const Board = ({ socket }) => {
             disabled={played}
             onClick={() => handleSelectCard(index)}
           >
-            {displayCardData(card)}
+            <img
+              style={{ height: '200px', padding: '0 4px' }}
+              src={getCardImage(card)}
+              alt={card.name}
+              key={`hand_${card.name}_${index}`}
+            />
           </div>
         ))}
       </div>
@@ -72,8 +76,7 @@ const Board = ({ socket }) => {
       <div>
         <span>{'Your played cards:'}</span>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
-          {currPlayer &&
-            currPlayer.playedCards.map(card => displayCardData(card, false))}
+          {currPlayer && currPlayer.playedCards.map(displayPlayedCard)}
         </div>
       </div>
       <div>Your points: {playersData[0] && playersData[0].points}</div>
@@ -91,9 +94,10 @@ const Board = ({ socket }) => {
               flexDirection: 'row',
               margin: '6px',
             }}
+            key={player.name}
           >
             <span>{`${player.name}'s played cards:`}</span>
-            {player.playedCards.map(card => displayCardData(card, false))}
+            {player.playedCards.map(displayPlayedCard)}
           </div>
         ))}
       </div>

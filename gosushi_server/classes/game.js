@@ -36,7 +36,7 @@ class Game {
         this.uramakiCountMap,
         this.uramakiStanding
       );
-      const tempPlayers = this.getPlayersData();
+      let tempPlayers = this.getPlayersData();
       this.rotateHands(this.players.map(p => p.hand));
       if (this.players[0].hand.length === 0) {
         // no more cards in the hand
@@ -46,9 +46,11 @@ class Game {
           // this.calculateRoundPoints()
           // remove and add desserts
           console.log('End of round');
+
           this.startRound();
+          tempPlayers = this.getPlayersData();
           this.players.forEach(p => {
-            sendPlayerData(p.hand, tempPlayers);
+            sendPlayerData(p.socketId, p.hand, tempPlayers);
             tempPlayers.push(tempPlayers.shift());
           });
         } else {
