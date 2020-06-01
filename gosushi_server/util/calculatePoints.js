@@ -3,7 +3,7 @@ const cardNameEnum = require('./cardNameEnum');
 const onigiriNameEnum = require('./onigiriNameEnum');
 const { makiPoints, uramakiPoints, dumplingPoints } = require('../util/pointRules');
 
-const addPoints = (playerName, players, points) => {
+const addPlayerPoints = (playerName, players, points) => {
   _.find(players, p => p.name === playerName).points += points;
 }
 
@@ -14,9 +14,35 @@ calculateTurnPoints = (
   uramakiStanding,
 ) => {
   players.forEach(currPlyr => {
+    let wasabi = currPlyr.playedCards.filter(card => card.name === cardNameEnum.WASABI && !card.data);
+    let tripleNigiri = false;
+    if(menu.specials.includes(cardNameEnum.WASABI) && wasabi.length > 0) {
+      tripleNigiri = true;
+    }
     while (currPlyr.turnCards.length !== 0) {
       const card = currPlyr.turnCards.pop();
       switch (card.name) {
+        case cardNameEnum.EGG:
+          if (tripleNigiri) {
+            wasabi[0].data = 2;
+            wasabi = currPlyr.playedCards.filter(card => card.name === cardNameEnum.WASABI && !card.data);
+            tripleNigiri = wasabi.length > 0;
+          }
+          break;
+        case cardNameEnum.SALMON:
+          if (tripleNigiri) {
+            wasabi[0].data = 4;
+            wasabi = currPlyr.playedCards.filter(card => card.name === cardNameEnum.WASABI && !card.data);
+            tripleNigiri = wasabi.length > 0;
+          }
+          break;
+        case cardNameEnum.SQUID:
+          if (tripleNigiri) {
+            wasabi[0].data = 6;
+            wasabi = currPlyr.playedCards.filter(card => card.name === cardNameEnum.WASABI && !card.data);
+            tripleNigiri = wasabi.length > 0;
+          }
+          break;
         case cardNameEnum.MISO_SOUP:
           const repeats = players.filter(
             otherPlyr =>
@@ -76,7 +102,7 @@ calculateUramakiPoints = (players, uramakiCountMap, uramakiStanding) => {
       equivStanding = uramakiStanding.value;
     }
     if (equivStanding <= 3) {
-      addPoints(el[0], players, uramakiPoints[equivStanding]);
+      addPlayerPoints(el[0], players, uramakiPoints[equivStanding]);
       uramakiCountMap[el[0]] = 0;
       uramakiStanding.value++;
     }
@@ -150,7 +176,7 @@ calculateMakiPoints = players => {
   players.forEach(player => {
     let makiPoints = 0;
     player.playedCards.forEach(card => {
-      if (card.name == cardNameEnum.MAKI) {
+      if (card.name === cardNameEnum.MAKI) {
         makiPoints += card.data;
       }
     });
@@ -344,9 +370,41 @@ calculateTofuPoints = players => {
 
 //Special Functions
 calculateSoySaucePoints = players => { };
-calculateWasabiPoints = players => { };
+
+calculateWasabiPoints = players => {
+  players.forEach(player => {
+    const wasabi = player.playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    wasabi.forEach(c => {
+      player.points += c.data ? c.data : 0;
+    });
+  });
+};
+
 calculateTeaPoints = players => { };
 calculateTakeoutBoxPoints = players => { };
+
+calculateGamePoints = (players, menu) => {
+  calculateDessertPoints(players, menu.dessert);
+}
+
+calculateDessertPoints = (players, dessertName) => {
+  switch (dessertName) {
+    case cardNameEnum.PUDDING:
+      calculatePuddingPoints(players);
+      break;
+    case cardNameEnum.GREEN_TEA_ICE_CREAM:
+      calculateIceCreamPoints(players);
+      break;
+    case cardNameEnum.FRUIT:
+      calculateFruitPoints(players);
+      break;
+  }
+}
+
+// TODO: finish implementing these once we've decided where desserts will be stored
+calculatePuddingPoints = (players) => {}
+calculateIceCreamPoints = (players) => {}
+calculateFruitPoints = (players) => {}
 
 module.exports = {
   calculateTurnPoints,

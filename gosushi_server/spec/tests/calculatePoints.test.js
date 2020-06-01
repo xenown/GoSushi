@@ -23,6 +23,10 @@ describe('calculateTurnPoints', function () {
       new Card(cardNameEnum.URAMAKI, 3),
       new Card(cardNameEnum.URAMAKI, 10),
       new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.WASABI),
+      new Card(cardNameEnum.WASABI),
+      [new Card(cardNameEnum.EGG), new Card(cardNameEnum.SALMON)],
+      new Card(cardNameEnum.TOFU),
     ],
     [
       new Card(cardNameEnum.MISO_SOUP),
@@ -31,6 +35,10 @@ describe('calculateTurnPoints', function () {
       new Card(cardNameEnum.URAMAKI, 3),
       new Card(cardNameEnum.URAMAKI, 10),
       new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.WASABI),
+      new Card(cardNameEnum.WASABI),
+      new Card(cardNameEnum.SALMON),
+      new Card(cardNameEnum.SQUID)
     ],
     [
       new Card(cardNameEnum.TOFU),
@@ -39,11 +47,15 @@ describe('calculateTurnPoints', function () {
       new Card(cardNameEnum.URAMAKI, 3),
       new Card(cardNameEnum.URAMAKI, 3),
       new Card(cardNameEnum.URAMAKI, 10),
+      new Card(cardNameEnum.WASABI),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.SALMON),
     ],
   ];
 
   const game = new Game(
-    menus.dinnerForTwo,
+    _.clone(menus.dinnerForTwo),
     players.length,
     roomCode,
     players[0],
@@ -88,6 +100,43 @@ describe('calculateTurnPoints', function () {
 
   it('should give no points when all prizes are taken', () => {
     expect(game.players.map(p => p.points)).toEqual([10, 10, 2]);
+  });
+
+  it('should assign two Wasabi\'s in one turn and assign another', () => {
+    game.deck.menu.specials = "Wasabi";
+    game.players.forEach(p => p.turnCards.push(p.hand.pop()));
+    calculateTurnPoints(game.players,
+      game.deck.menu,
+      game.uramakiCountMap,
+      game.uramakiStanding);
+
+    game.players.forEach(p => {
+      let card = p.hand.pop();
+      if (_.isArray(card)){
+        p.turnCards = p.turnCards.concat(card);
+      } else {
+        p.turnCards.push(card);
+      }
+    });
+
+    calculateTurnPoints(game.players,
+      game.deck.menu,
+      game.uramakiCountMap,
+      game.uramakiStanding);
+
+    const wasabi1 = game.players[0].playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    expect(wasabi1.map(el => el.data)).toEqual([4, 2]);
+
+    const wasabi2 = game.players[1].playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    expect(wasabi2.map(el => el.data)).toEqual([4, null]);
+  });
+
+  it('should assign two Wasabi\'s in one turn and assign another', () => {
+    const wasabi2 = game.players[1].playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    expect(wasabi2.map(el => el.data)).toEqual([4, 6]);
+
+    const wasabi3 = game.players[2].playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    expect(wasabi3.map(el => el.data)).toEqual([4]);
   });
 });
 
@@ -445,5 +494,45 @@ describe('calculateAppetizerPoints', function () {
     });
     calculateRoundPoints(game.players, game.deck.menu);
     expect(game.players.map(p => p.points)).toEqual([3, 9, 3, 3, 0, 0]);
+  });
+});
+
+describe('calculateSpecialPoints', function () {
+  const roomCode = "code";
+  const players = ["P1", "P2", "P3"];
+
+  const hands = [
+    [
+    ],
+    [
+      new Card(cardNameEnum.WASABI, 4),
+    ],
+    [
+      new Card(cardNameEnum.WASABI),
+    ],
+  ];
+
+  const game = new Game(
+    _.clone(menus.firstMeal),
+    players.length,
+    roomCode,
+    players[0],
+    players[0]
+  );
+
+  addPlayers(game, players);
+
+  game.players.forEach((p, index) => {
+    p.playedCards = hands[index];
+  });
+
+  beforeEach(() => {
+    game.players.forEach(p => p.points = 0);
+  })
+
+  it('should give Wasabi points correctly', () => {
+    game.deck.menu.specials = ["Wasabi"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    expect(game.players.map(p => p.points)).toEqual([0, 4, 0]);
   });
 });
