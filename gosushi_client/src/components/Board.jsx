@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { getCardImage } from '../utils/getCardImage';
 
 const Board = ({ socket }) => {
   const params = useParams();
@@ -29,12 +30,14 @@ const Board = ({ socket }) => {
     setSelectedCardIndex(index);
   };
 
-  const displayCardData = card => (
-    <div style={{ padding: '0 4px' }}>
-      {/* will be the actual image later */}
-      {card.name}
-      {card.data && `Card data: ${card.data}`}
-    </div>
+  const displayCardData = (card, isHand = true) => (
+    <img
+      style={{ height: isHand ? '200px' : '125px', padding: '0 4px' }}
+      src={getCardImage(card)}
+      alt={card.name + card.data}
+      key={card.name + card.data}
+    />
+    // need a unique key for each, will probably need to pass in index or something?
   );
 
   const currPlayer = playersData[0];
@@ -43,33 +46,9 @@ const Board = ({ socket }) => {
   return (
     <div className="Board" style={{ display: 'block' }}>
       <h1>Board</h1>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-        }}
-      >
-        {otherPlayerData.map(player => (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              margin: '0 6px',
-              maxHeight: '250px',
-              overflowY: 'auto',
-            }}
-          >
-            <span>{`${player.name}'s played cards:`}</span>
-            {player.playedCards.map(card => displayCardData(card))}
-          </div>
-        ))}
-      </div>
-      <div>
+      <div style={{ display: 'flex' }}>
         {hand.map((card, index) => (
-          <button
+          <div
             key={index}
             style={
               selectedCardIndex === index ? { backgroundColor: 'yellow' } : null
@@ -78,7 +57,7 @@ const Board = ({ socket }) => {
             onClick={() => handleSelectCard(index)}
           >
             {displayCardData(card)}
-          </button>
+          </div>
         ))}
       </div>
       <button
@@ -94,10 +73,30 @@ const Board = ({ socket }) => {
         <span>{'Your played cards:'}</span>
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           {currPlayer &&
-            currPlayer.playedCards.map(card => displayCardData(card))}
+            currPlayer.playedCards.map(card => displayCardData(card, false))}
         </div>
       </div>
       <div>Your points: {playersData[0] && playersData[0].points}</div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          marginTop: '20px',
+        }}
+      >
+        {otherPlayerData.map(player => (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              margin: '6px',
+            }}
+          >
+            <span>{`${player.name}'s played cards:`}</span>
+            {player.playedCards.map(card => displayCardData(card, false))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

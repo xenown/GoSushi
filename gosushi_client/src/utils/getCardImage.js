@@ -51,7 +51,10 @@ export const getCardImage = card => {
     case 'Green Tea Ice Cream':
       return cardImages.greenteaicecream;
     case 'Fruit':
-      const value = Object.values(card.data).join();
+      const value = Object.values(card.data).join('');
       return cardImages[`fruit${value}`];
+    default:
+      console.log(`Error: invalid card value ${card.name}, ${card.data}.`);
+      return cardImages.salmonNigiri;
   }
 };

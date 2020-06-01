@@ -122,9 +122,9 @@ class Deck {
       for (let i = 0; i < 15; i++) {
         let fruit = {};
         if (i / 3 < 3) {
-          fruit = fruitCombos[i / 3];
+          fruit = fruitCombos[Math.floor(i / 3)];
         } else {
-          fruit = fruitCombos[(i - 9) / 2 + 3];
+          fruit = fruitCombos[Math.floor((i - 9) / 2) + 3];
         }
         arr[i] = new Card(cardNameEnum.FRUIT, fruit);
       }
