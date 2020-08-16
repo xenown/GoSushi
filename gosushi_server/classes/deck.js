@@ -161,6 +161,19 @@ class Deck {
     this.activeDeck = _.drop(this.activeDeck, num);
     return hand;
   }
+
+  removeOneAndShuffle(card) {
+    let chosenCard = new Card(card);
+    let index = _.findIndex(this.activeDeck, c => _.isEqual(c, chosenCard));
+    if (index > 4) {
+      console.log(
+        `Chose item at index ${index}, should not have been able to choose from beyond the first 4 cards!`
+      );
+    }
+    let removed = this.activeDeck.splice(index, 1)[0];
+    this.shuffle();
+    return removed;
+  }
 }
 
 module.exports = Deck;

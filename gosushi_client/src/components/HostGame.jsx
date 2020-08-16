@@ -8,6 +8,8 @@ import {
   MENU_SPECIAL_COUNT,
 } from '../utils/menuSelectionUtils';
 
+const dev = process.env.NODE_ENV === 'development';
+
 const HostGame = ({ socket }) => {
   const history = useHistory();
   const [name, setName] = useState('');
@@ -16,7 +18,12 @@ const HostGame = ({ socket }) => {
   const [isCreating, setIsCreating] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState('');
-  const [menu, setMenu] = useState({roll: '', appetizers: [], specials: [], dessert: ""});
+  const [menu, setMenu] = useState({
+    roll: '',
+    appetizers: [],
+    specials: [],
+    dessert: '',
+  });
 
   useEffect(() => {
     const handleNewPlayer = data => {
@@ -31,7 +38,7 @@ const HostGame = ({ socket }) => {
     const handleRoomFilled = () => {
       setIsReady(true);
     };
-    socket.on('getRoomCode', (data) => setRoomCode(data));
+    socket.on('getRoomCode', data => setRoomCode(data));
     socket.on('playerJoined', handleNewPlayer);
     socket.on('roomFilled', handleRoomFilled);
 
@@ -41,7 +48,7 @@ const HostGame = ({ socket }) => {
     };
   }, [socket]);
 
-  const handleSubmit = () => {
+  const checkValidMenu = () => {
     let msg = '';
     if (menu.roll === '') {
       msg += 'Missing a roll.\n';
@@ -57,12 +64,16 @@ const HostGame = ({ socket }) => {
     if (menu.dessert === '') {
       msg += 'Missing a dessert.\n';
     }
-  
+    return msg;
+  };
+
+  const handleSubmit = () => {
+    let msg = checkValidMenu();
     if (msg !== '') {
       setMessage(msg);
       return;
     }
-  
+
     socket.emit('hostGame', menu, numPlayers, name);
     setMessage('Loading...');
   };
@@ -70,7 +81,7 @@ const HostGame = ({ socket }) => {
   const handleBack = () => history.push('/');
 
   const handleMenu = menu => {
-    console.log("HOSTGAME MENU:");
+    console.log('HOSTGAME MENU:');
     console.log(menu);
     setMenu(menu);
   };
@@ -79,40 +90,90 @@ const HostGame = ({ socket }) => {
     socket.emit('gameInitiated', roomCode);
   };
 
+  const handleAutoPlayers = () => {
+    let msg = checkValidMenu();
+    if (msg !== '') {
+      setMessage(msg);
+      return;
+    }
+
+    socket.emit('autoPlayers', menu, numPlayers, name);
+    setMessage('Loading...');
+  };
+
   const createForm = (
     <div>
       <MenuSelection handleMenu={handleMenu} menu={menu} />
       <DisplayMenu menu={menu} />
-      <br/>
-      
-      <div class="input-group mb-3">
-        <div class="input-group-prepend">
-          <span class="input-group-text" id="inputGroup-sizing-default">Name</span>
+      <br />
+
+      <div className="input-group mb-3">
+        <div className="input-group-prepend">
+          <span className="input-group-text" id="inputGroup-sizing-default">
+            Name
+          </span>
         </div>
-        <input type="text" class="form-control" aria-label="Name" aria-describedby="inputGroup-sizing-default" onChange={e => setName(e.target.value)}/>
+        <input
+          type="text"
+          className="form-control"
+          aria-label="Name"
+          aria-describedby="inputGroup-sizing-default"
+          onChange={e => setName(e.target.value)}
+        />
       </div>
 
-
-      <div class="player-count btn-group btn-group-toggle mb-3" data-toggle="buttons">
-          <label class="btn btn-primary active" onClick={() => setNumPlayers(2)}>
-            <input type="radio" name="options" id="option0" autocomplete="off" checked/>2-player
+      <div
+        className="player-count btn-group btn-group-toggle mb-3"
+        data-toggle="buttons"
+      >
+        <label
+          className="btn btn-primary active"
+          key={`2-player`}
+          onClick={() => setNumPlayers(2)}
+        >
+          <input
+            type="radio"
+            name="options"
+            id="option0"
+            autoComplete="off"
+            defaultChecked
+          />
+          2-player
+        </label>
+        {[3, 4, 5, 6, 7, 8].map((players, index) => (
+          <label
+            className="btn btn-primary"
+            key={`${players}-player`}
+            onClick={() => setNumPlayers(players)}
+          >
+            <input
+              type="radio"
+              name="options"
+              id={'option' + index + 1}
+              autoComplete="off"
+            />
+            {players}-player
           </label>
-          {
-            [3,4,5,6,7,8].map((players, index) =>
-                <label class="btn btn-primary" onClick={() => setNumPlayers(players)}>
-                  <input type="radio" name="options" id={"option" + index + 1} autocomplete="off"/>{players}-player
-                </label>
-              )
-          }        
+        ))}
       </div>
 
-      <button className="btn btn-danger ml-2 mr-2" onClick={handleBack}>Back</button>
-      <button className="btn btn-success ml-2 mr-2" onClick={handleSubmit}>Submit</button>
+      <button className="btn btn-danger ml-2 mr-2" onClick={handleBack}>
+        Back
+      </button>
+      <button className="btn btn-success ml-2 mr-2" onClick={handleSubmit}>
+        Submit
+      </button>
+      {dev && (
+        <button
+          className="btn btn-success ml-2 mr-2"
+          onClick={handleAutoPlayers}
+        >
+          Auto other players
+        </button>
+      )}
       <p>{message}</p>
     </div>
   );
-
-  console.log('state of: ', menu);
 
   return (
     <div className="HostGame" style={{ display: 'block' }}>

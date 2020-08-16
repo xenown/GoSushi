@@ -2,12 +2,14 @@ import React from 'react';
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import socketIOClient from 'socket.io-client';
 
+// import 'bootstrap/dist/css/bootstrap.css';
+// import 'bootstrap/dist/css/bootstrap-theme.css';
+
 import './App.css';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
 import Board from './components/Board';
 const logo = require('./assets/sushigologo.jpg');
-
 
 const serverport = process.env.SERVERPORT || 4001;
 const ENDPOINT = 'http://127.0.0.1:' + serverport;
@@ -31,7 +33,7 @@ const App = () => {
             </Route>
             <Route exact path="/">
               <div className="App-logo">
-                <img src={logo} style={{height: "40vh"}}/>
+                <img src={logo} style={{ height: '40vh' }} alt="logo" />
               </div>
               <div className="transition"></div>
               <div className="App-route-container">

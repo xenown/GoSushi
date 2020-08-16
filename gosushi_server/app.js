@@ -18,7 +18,7 @@ const socketToRoom = {};
 io.on('connection', socket => {
   console.log('New client connected');
 
-  socket.on('hostGame', (menu, numPlayers, username) => {
+  const handleHostGame = async (menu, numPlayers, username) => {
     //Assuming menu contains roll, appetizers, specials, dessert
     roomCode = generateRoomCode(new Set(Object.keys(rooms)));
     if (roomCode === false) {
@@ -28,7 +28,7 @@ io.on('connection', socket => {
       );
       return;
     }
-    socket.join([roomCode], e => {
+    return socket.join([roomCode], e => {
       if (e) {
         socket.emit(
           'playerJoined',
@@ -50,7 +50,9 @@ io.on('connection', socket => {
       io.to(roomCode).emit('playerJoined', [username], menu);
       socket.emit('getNumPlayers', numPlayers);
     });
-  });
+  };
+
+  socket.on('hostGame', handleHostGame);
 
   socket.on('joinGame', (username, roomCode) => {
     socket.join([roomCode], e => {
@@ -95,36 +97,98 @@ io.on('connection', socket => {
     });
   });
 
+  socket.on('autoPlayers', (menu, numPlayers, username) => {
+    handleHostGame(menu, numPlayers, username).then(() => {
+      let game = rooms[socketToRoom[socket.id]];
+
+      for (let i = 2; i <= numPlayers; i++) {
+        game.addPlayer(`Player${i}`, i);
+      }
+      game.isAutoPlayers = true;
+      socket.emit('getNumPlayers', game.numPlayers);
+      io.to(roomCode).emit(
+        'playerJoined',
+        game.players.map(p => p.name),
+        game.deck.menu
+      );
+      game.startRound();
+      io.to(roomCode).emit('roomFilled', roomCode);
+    });
+  });
+
   socket.on('gameInitiated', roomCode => {
     io.to(roomCode).emit('startGame', roomCode);
   });
 
   socket.on('boardLoaded', roomCode => {
     const game = rooms[roomCode];
-    const player = game.players.find(val => val.socketId === socket.id);
-
-    const playersData = game.getPlayersData();
-    while (
-      playersData &&
-      playersData[0] &&
-      playersData[0].socketId !== socket.id
+    if (
+      game &&
+      game.players &&
+      game.players.find(val => val.socketId === socket.id)
     ) {
-      playersData.push(playersData.shift());
-    }
+      const player = game.players.find(val => val.socketId === socket.id);
 
-    socket.emit('sendTurnData', player ? player.hand : [], playersData);
+      const playersData = game.getPlayersData();
+      while (
+        playersData &&
+        playersData[0] &&
+        playersData[0].socketId !== socket.id
+      ) {
+        playersData.push(playersData.shift());
+      }
+
+      socket.emit('sendTurnData', player ? player.hand : [], playersData);
+    }
   });
+
+  const sendTurnData = (socketId, hand, otherPlayerData) =>
+    io.to(socketId).emit('sendTurnData', hand, otherPlayerData);
+
+  // specialCards: [Card]
+  const doSpecialAction = (socketId, specialCard, data) =>
+    io.to(socketId).emit('doSpecialAction', specialCard, data);
+
+  const sendGameResults = playerData =>
+    io.to(roomCode).emit('gameResults', playerData);
 
   socket.on('cardSelected', (roomCode, card) => {
     const game = rooms[roomCode];
-    const player = game.players.find(val => val.socketId === socket.id);
-    player.playCard(card);
+    if (
+      game &&
+      game.players &&
+      game.players.find(val => val.socketId === socket.id)
+    ) {
+      const player = game.players.find(val => val.socketId === socket.id);
+      player.playCardFromHand(card);
 
-    const sendTurnData = (socketId, hand, otherPlayerData) =>
-      io.to(socketId).emit('sendTurnData', hand, otherPlayerData);
-    // keeping those seperate for now
-    // might change to everyone can see everyones points rather than only seeing your own
-    game.finishedTurn(sendTurnData);
+      // keeping those seperate for now
+      // might change to everyone can see everyones points rather than only seeing your own
+      game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
+    }
+  });
+
+  socket.on('usePlayedCard', (roomCode, card) => {
+    const game = rooms[roomCode];
+    if (
+      game &&
+      game.players &&
+      game.players.find(val => val.socketId === socket.id)
+    ) {
+      const player = game.players.find(val => val.socketId === socket.id);
+      player.playUsedCard(card);
+    }
+  });
+
+  socket.on('handleSpecialAction', (roomCode, speCard, chosenCard) => {
+    const game = rooms[roomCode];
+    if (game && game.players) {
+      let player = game.players.find(val => val.socketId === socket.id);
+      if (player) {
+        game.handleSpecialAction(player, speCard, chosenCard);
+        game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
+      }
+    }
   });
 
   socket.on('disconnect', () => {
