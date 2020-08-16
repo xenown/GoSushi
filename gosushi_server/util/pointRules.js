@@ -24,8 +24,18 @@ const dumplingPoints = {
   5: 15,
 };
 
+const fruitPoints = {
+  0: -2,
+  1: 0,
+  2: 1,
+  3: 3,
+  4: 6,
+  5: 10,
+};
+
 module.exports = {
-  makiPoints: makiPoints,
-  uramakiPoints: uramakiPoints,
-  dumplingPoints: dumplingPoints,
+  makiPoints,
+  uramakiPoints,
+  dumplingPoints,
+  fruitPoints,
 };

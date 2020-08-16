@@ -1,22 +1,24 @@
 const _ = require('lodash');
 const cardNameEnum = require('./cardNameEnum');
 const onigiriNameEnum = require('./onigiriNameEnum');
-const { makiPoints, uramakiPoints, dumplingPoints } = require('../util/pointRules');
+const {
+  makiPoints,
+  uramakiPoints,
+  dumplingPoints,
+  fruitPoints,
+} = require('../util/pointRules');
 
 const addPlayerPoints = (playerName, players, points) => {
   _.find(players, p => p.name === playerName).points += points;
-}
+};
 
-calculateTurnPoints = (
-  players,
-  menu,
-  uramakiCountMap,
-  uramakiStanding,
-) => {
+calculateTurnPoints = (players, menu, uramakiCountMap, uramakiStanding) => {
   players.forEach(currPlyr => {
-    let wasabi = currPlyr.playedCards.filter(card => card.name === cardNameEnum.WASABI && !card.data);
+    let wasabi = currPlyr.playedCards.filter(
+      card => card.name === cardNameEnum.WASABI && !card.data
+    );
     let tripleNigiri = false;
-    if(menu.specials.includes(cardNameEnum.WASABI) && wasabi.length > 0) {
+    if (menu.specials.includes(cardNameEnum.WASABI) && wasabi.length > 0) {
       tripleNigiri = true;
     }
     while (currPlyr.turnCards.length !== 0) {
@@ -25,21 +27,27 @@ calculateTurnPoints = (
         case cardNameEnum.EGG:
           if (tripleNigiri) {
             wasabi[0].data = 2;
-            wasabi = currPlyr.playedCards.filter(card => card.name === cardNameEnum.WASABI && !card.data);
+            wasabi = currPlyr.playedCards.filter(
+              card => card.name === cardNameEnum.WASABI && !card.data
+            );
             tripleNigiri = wasabi.length > 0;
           }
           break;
         case cardNameEnum.SALMON:
           if (tripleNigiri) {
             wasabi[0].data = 4;
-            wasabi = currPlyr.playedCards.filter(card => card.name === cardNameEnum.WASABI && !card.data);
+            wasabi = currPlyr.playedCards.filter(
+              card => card.name === cardNameEnum.WASABI && !card.data
+            );
             tripleNigiri = wasabi.length > 0;
           }
           break;
         case cardNameEnum.SQUID:
           if (tripleNigiri) {
             wasabi[0].data = 6;
-            wasabi = currPlyr.playedCards.filter(card => card.name === cardNameEnum.WASABI && !card.data);
+            wasabi = currPlyr.playedCards.filter(
+              card => card.name === cardNameEnum.WASABI && !card.data
+            );
             tripleNigiri = wasabi.length > 0;
           }
           break;
@@ -47,9 +55,7 @@ calculateTurnPoints = (
           const repeats = players.filter(
             otherPlyr =>
               otherPlyr.name !== currPlyr.name &&
-              otherPlyr.turnCards.find(
-                c => c.name === cardNameEnum.MISO_SOUP
-              )
+              otherPlyr.turnCards.find(c => c.name === cardNameEnum.MISO_SOUP)
           );
           const value = repeats.length !== 0 ? 0 : 3;
           repeats.forEach(repeat => {
@@ -80,7 +86,7 @@ calculateTurnPoints = (
 calculateUramakiPoints = (players, uramakiCountMap, uramakiStanding) => {
   const isLastTurnInRound = players[0].hand.length === 0; // no cards left
   const potentialWinners = Object.entries(uramakiCountMap)
-    .filter(el => isLastTurnInRound ? true : el[1] >= 10)
+    .filter(el => (isLastTurnInRound ? true : el[1] >= 10))
     // don't need to limit to only above 10 uramaki's if the round is over
     .sort((el1, el2) => el2[1] - el1[1]);
 
@@ -109,7 +115,7 @@ calculateUramakiPoints = (players, uramakiCountMap, uramakiStanding) => {
     prevValue = el[1];
     equivStanding++;
   });
-}
+};
 
 // Base Function
 calculateRoundPoints = (players, menu) => {
@@ -124,8 +130,12 @@ calculateNigiriPoints = players => {
   players.forEach(player => {
     player.points +=
       player.playedCards.filter(card => card.name == cardNameEnum.EGG).length +
-      player.playedCards.filter(card => card.name == cardNameEnum.SALMON).length * 2 +
-      player.playedCards.filter(card => card.name == cardNameEnum.SQUID).length * 3;
+      player.playedCards.filter(card => card.name == cardNameEnum.SALMON)
+        .length *
+        2 +
+      player.playedCards.filter(card => card.name == cardNameEnum.SQUID)
+        .length *
+        3;
   });
 };
 
@@ -170,8 +180,7 @@ calculateMakiPoints = players => {
   let mostMaki = 0;
   let secondMostMaki = 0;
   const makiCountMap = {};
-  const makiPointMap =
-    players.length > 5 ? makiPoints.more : makiPoints.less;
+  const makiPointMap = players.length > 5 ? makiPoints.more : makiPoints.less;
 
   players.forEach(player => {
     let makiPoints = 0;
@@ -194,7 +203,7 @@ calculateMakiPoints = players => {
     if (makiPoints === mostMaki && mostMaki !== 0) {
       player.points += makiPointMap[1];
     } else if (makiPoints === secondMostMaki && secondMostMaki !== 0) {
-      player.points += makiPointMap[2]
+      player.points += makiPointMap[2];
     }
   });
 };
@@ -272,8 +281,9 @@ calculateEdamamePoints = players => {
 
 calculateEelPoints = players => {
   players.forEach(player => {
-    const eels = player.playedCards.filter(card => card.name == cardNameEnum.EEL)
-      .length;
+    const eels = player.playedCards.filter(
+      card => card.name == cardNameEnum.EEL
+    ).length;
     if (eels === 1) {
       player.points -= 3;
     } else if (eels > 1) {
@@ -287,14 +297,16 @@ calculateOnigiriPoints = players => {
     const onigiri = player.playedCards.filter(
       card => card.name == cardNameEnum.ONIGIRI
     );
-    let square = onigiri.filter(card => card.data === onigiriNameEnum.SQUARE).length;
+    let square = onigiri.filter(card => card.data === onigiriNameEnum.SQUARE)
+      .length;
     let triangle = onigiri.filter(
       card => card.data === onigiriNameEnum.TRIANGLE
     ).length;
     let rectangle = onigiri.filter(
       card => card.data === onigiriNameEnum.RECTANGLE
     ).length;
-    let circle = onigiri.filter(card => card.data === onigiriNameEnum.CIRCLE).length;
+    let circle = onigiri.filter(card => card.data === onigiriNameEnum.CIRCLE)
+      .length;
     let set = 0;
     do {
       set = (square > 0) + (triangle > 0) + (rectangle > 0) + (circle > 0);
@@ -358,8 +370,9 @@ calculateTempuraPoints = players => {
 
 calculateTofuPoints = players => {
   players.forEach(player => {
-    const tofu = player.playedCards.filter(card => card.name == cardNameEnum.TOFU)
-      .length;
+    const tofu = player.playedCards.filter(
+      card => card.name == cardNameEnum.TOFU
+    ).length;
     if (tofu === 1) {
       player.points += 2;
     } else if (tofu === 2) {
@@ -369,23 +382,61 @@ calculateTofuPoints = players => {
 };
 
 //Special Functions
-calculateSoySaucePoints = players => { };
+calculateSoySaucePoints = players => {
+  let colourCount = players.map(p => {
+    let map = {};
+    p.playedCards.forEach(c => (map[c.name] = 1));
+    return Object.keys(map).length;
+  });
+
+  let max = _.max(colourCount);
+  players.forEach((p, idx) => {
+    if (colourCount[idx] === max) {
+      p.points += 4;
+    }
+  });
+};
 
 calculateWasabiPoints = players => {
   players.forEach(player => {
-    const wasabi = player.playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    const wasabi = player.playedCards.filter(
+      c => c.name === cardNameEnum.WASABI
+    );
     wasabi.forEach(c => {
       player.points += c.data ? c.data : 0;
     });
   });
 };
 
-calculateTeaPoints = players => { };
-calculateTakeoutBoxPoints = players => { };
+calculateTeaPoints = players => {
+  let typeCount = players.map(p => {
+    let map = {};
+    p.playedCards.forEach(c => {
+      map[c.name] = map[c.name] ? 1 : map[c.name] + 1;
+    });
+    return _.max(Object.values(map));
+  });
+
+  let max = _.max(typeCount);
+  players.forEach((p, idx) => {
+    if (typeCount[idx] === max) {
+      p.points += 4;
+    }
+  });
+};
+
+calculateTakeoutBoxPoints = players => {
+  players.forEach(p => {
+    const takeoutbox = p.playedCards.filter(
+      card => card.name == cardNameEnum.TAKEOUT_BOX
+    ).length;
+    p.points += 2 * takeoutbox;
+  });
+};
 
 calculateGamePoints = (players, menu) => {
   calculateDessertPoints(players, menu.dessert);
-}
+};
 
 calculateDessertPoints = (players, dessertName) => {
   switch (dessertName) {
@@ -399,14 +450,63 @@ calculateDessertPoints = (players, dessertName) => {
       calculateFruitPoints(players);
       break;
   }
-}
+};
 
 // TODO: finish implementing these once we've decided where desserts will be stored
-calculatePuddingPoints = (players) => {}
-calculateIceCreamPoints = (players) => {}
-calculateFruitPoints = (players) => {}
+calculatePuddingPoints = players => {
+  let puddingCount = players.map(
+    p => p.playedCards.filter(c => c.name === cardNameEnum.PUDDING).length
+  );
+
+  const max = _.max(puddingCount);
+  const min = _.min(puddingCount);
+
+  players.forEach((p, idx) => {
+    if (puddingCount[idx] === max) {
+      p.points += 6;
+    }
+
+    // 2 player games don't get penalties
+    if (puddingCount[idx] === min && players.length > 2) {
+      p.points -= 6;
+    }
+  });
+};
+
+calculateIceCreamPoints = players => {
+  players.forEach(p => {
+    let icecream = p.playedCards.filter(
+      c => c.name === cardNameEnum.GREEN_TEA_ICE_CREAM
+    ).length;
+
+    p.points += Math.floor(icecream / 4);
+  });
+};
+
+calculateFruitPoints = players => {
+  players.forEach(p => {
+    let fruitCards = p.playedCards.filter(c => c.name === cardNameEnum.FRUIT);
+
+    let fruitCounts = {
+      watermelon: 0,
+      pineapple: 0,
+      orange: 0,
+    };
+
+    fruitCards.forEach(c => {
+      Object.entries(c.data).forEach(
+        ([key, value]) => (fruitCounts[key] += value)
+      );
+    });
+
+    Object.values(fruitCounts).forEach(count => {
+      p.points += fruitPoints[count] ? fruitPoints[count] : fruitPoints[5];
+    });
+  });
+};
 
 module.exports = {
   calculateTurnPoints,
   calculateRoundPoints,
+  calculateGamePoints,
 };
