@@ -1,6 +1,6 @@
-export const eggNigiri = require('../assets/images/CardImages/SalmonNigiri.png');
+export const eggNigiri = require('../assets/images/CardImages/EggNigiri.png');
 export const salmonNigiri = require('../assets/images/CardImages/SalmonNigiri.png');
-export const squidNigiri = require('../assets/images/CardImages/SalmonNigiri.png');
+export const squidNigiri = require('../assets/images/CardImages/SquidNigiri.png');
 export const maki1 = require('../assets/images/CardImages/Maki1.png');
 export const maki2 = require('../assets/images/CardImages/Maki2.png');
 export const maki3 = require('../assets/images/CardImages/Maki3.png');
