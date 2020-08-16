@@ -80,9 +80,6 @@ class Game {
         let data = this.getSpecialData(playerId, card);
 
         if (this.isAutoPlayers && index !== 0) {
-          if (data.length === 0) {
-            _.remove(this.players[index].turnCards, c => _.isEqual(c, card));
-          }
           this.handleSpecialAction(this.players[index], card, data[0]);
           this.finishedTurn(
             sendPlayerData,
@@ -191,13 +188,19 @@ class Game {
   }
 
   handleSpecialAction(player, specialCard, chosenCard) {
-    let indexOfSpe = _.findIndex(player.turnCards, c =>
-      _.isEqual(c, specialCard)
+    let specialCardCasted = new Card(specialCard);
+    if (!chosenCard) {
+      _.remove(player.turnCards, c => _.isEqual(c, specialCardCasted));
+      return;
+    }
+
+    let indexOfSpe = _.findIndex(player.turnCardsReuse, c =>
+      _.isEqual(c, specialCardCasted)
     );
 
     if (indexOfSpe === -1) {
-      indexOfSpe = _.findIndex(player.turnCardsReuse, c =>
-        _.isEqual(c, specialCard)
+      indexOfSpe = _.findIndex(player.turnCards, c =>
+        _.isEqual(c, specialCardCasted)
       );
     }
 
@@ -240,9 +243,9 @@ class Game {
 
           //note for the spoon case, chosenCard is a string containing the name, not a Card object
           let cardInHand = p.hand.findIndex(c => c.name === chosenCard);
-          if (cardInHand) {
+          if (cardInHand !== -1) {
             player.playedCards.push(p.hand[cardInHand]);
-            p.hand[cardInHand] = specialCard;
+            p.hand[cardInHand] = specialCardCasted;
             break;
           }
         }
@@ -275,7 +278,6 @@ class Game {
     this.setupDeck();
 
     const hands = [];
-    console.log(this.numPlayers);
     for (let i = 0; i < this.numPlayers; i++) {
       const temp = this.deck.dealHand(handSize[this.numPlayers]);
       hands.push(temp);

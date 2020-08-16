@@ -68,7 +68,7 @@ const Board = ({ socket }) => {
   return (
     <div className="Board" style={{ display: 'block' }}>
       <SpecialModal
-        show={specialData.length > 0 && !!specialAction}
+        show={!!specialAction}
         data={specialData}
         specialCard={specialAction}
         handleFinishedAction={card => {

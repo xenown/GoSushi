@@ -5,9 +5,18 @@ import { getCardImage } from '../utils/getCardImage';
 
 const Board = ({ show, data, specialCard, handleFinishedAction }) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [alertText, setAlertText] = useState('');
 
   const bodyContent = () => {
-    return data.map(displayCard);
+    if (data.length > 0) {
+      return data.map(displayCard);
+    } else if (specialCard && data.length === 0) {
+      return (
+        <div class="alert alert-info" role="alert">
+          {'No cards available to choose from'}
+        </div>
+      );
+    }
   };
 
   const displayCard = (card, index) => {
@@ -15,26 +24,25 @@ const Board = ({ show, data, specialCard, handleFinishedAction }) => {
     return (
       <div
         key={`cards-for-special-action-${index}`}
-        style={selectedIndex === index ? { backgroundColor: 'yellow' } : null}
+        style={{
+          margin: '12px',
+          backgroundColor: selectedIndex === index ? 'yellow' : 'unset',
+        }}
         onClick={() => {
-          setSelectedIndex(index);
+          if (specialCard.name === 'Menu' && card.name === 'Menu') {
+            setAlertText('You cannot choose a menu card');
+          } else {
+            setSelectedIndex(index);
+            setAlertText('');
+          }
         }}
       >
-        {isCard ? (
-          <img
-            style={{ height: '125px', padding: '0 4px' }}
-            src={getCardImage(card)}
-            alt={card.name}
-            key={`card-image-${card.name}-${index}`}
-          />
-        ) : (
-          <img
-            style={{ height: '125px', padding: '0 4px' }}
-            src={menuCardImageMap[card]}
-            alt={card}
-            key={`card-image-${card}-${index}`}
-          />
-        )}
+        <img
+          style={{ height: '125px', padding: '0 4px' }}
+          src={isCard ? getCardImage(card) : menuCardImageMap[card]}
+          alt={isCard ? card.name : card}
+          key={`card-image-${card}-${index}`}
+        />
       </div>
     );
   };
@@ -54,9 +62,20 @@ const Board = ({ show, data, specialCard, handleFinishedAction }) => {
         } Actions`}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div className="col-6" style={{ display: 'flex' }}>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+          }}
+        >
           {bodyContent()}
         </div>
+        {alertText !== '' && (
+          <div class="alert alert-info" role="alert">
+            {alertText}
+          </div>
+        )}
       </Modal.Body>
       <Modal.Footer>
         {/* <Button variant="secondary" onClick={handleClose}>
@@ -64,6 +83,7 @@ const Board = ({ show, data, specialCard, handleFinishedAction }) => {
         </Button> */}
         <Button
           variant="primary"
+          disabled={data.length > 0 && selectedIndex === -1}
           onClick={() => handleFinishedAction(data[selectedIndex])}
         >
           Finish
