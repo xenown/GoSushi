@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import './menuSelection.css';
+import './menuSelection.scss';
 import {
   rollsEnum,
   appetizersEnum,
