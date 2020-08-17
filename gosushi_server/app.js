@@ -149,8 +149,8 @@ io.on('connection', socket => {
   const doSpecialAction = (socketId, specialCard, data) =>
     io.to(socketId).emit('doSpecialAction', specialCard, data);
 
-  const sendGameResults = playerData =>
-    io.to(roomCode).emit('gameResults', playerData);
+  const sendGameResults = (socketId, playerData, isHost) =>
+    io.to(socketId).emit('gameResults', playerData, isHost);
 
   socket.on('cardSelected', (roomCode, card) => {
     const game = rooms[roomCode];

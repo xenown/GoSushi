@@ -3,7 +3,7 @@ import { Button, Modal } from 'react-bootstrap';
 import { menuCardImageMap } from '../utils/menuSelectionUtils';
 import { getCardImage } from '../utils/getCardImage';
 
-const Board = ({ show, data, specialCard, handleFinishedAction }) => {
+const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [alertText, setAlertText] = useState('');
 
@@ -96,4 +96,4 @@ const Board = ({ show, data, specialCard, handleFinishedAction }) => {
   );
 };
 
-export default Board;
+export default SpecialModal;
