@@ -124,11 +124,11 @@ class Game {
     let tempPlayers = [];
     this.rotateHands(this.players.map(p => p.hand));
     if (this.players[0].hand.length === 0) {
+      calculateRoundPoints(this.players, this.deck.menu);
       // no more cards in the hand
       if (this.round < 3) {
         // go to next round
         this.round++;
-        calculateRoundPoints(this.players, this.deck.menu);
         // remove and add desserts
         console.log('End of round');
 
@@ -139,11 +139,7 @@ class Game {
           tempPlayers.push(tempPlayers.shift());
         });
       } else {
-        calculateGamePoints(this.players, this.deck.menu);
-        tempPlayers = this.getPlayersData();
-        // end game + display results
-        sendGameResults(tempPlayers);
-        console.log('End of game');
+        this.handleEndGame(sendPlayerData, sendGameResults);
       }
     } else {
       tempPlayers = this.getPlayersData();
@@ -295,6 +291,28 @@ class Game {
       );
     }
     this.rotateHands(hands);
+  }
+
+  handleEndGame(sendPlayerData, sendGameResults) {
+    calculateGamePoints(this.players, this.deck.menu);
+    let tempPlayers = this.getPlayersData();
+    this.players.forEach(p => {
+      sendPlayerData(p.socketId, p.hand, tempPlayers);
+      tempPlayers.push(tempPlayers.shift());
+    });
+
+    // sort from highest to lowest
+    tempPlayers.sort((p1, p2) => p2.points - p1.points);
+
+    // end game + display results
+    this.players.forEach(p => {
+      sendGameResults(
+        p.socketId,
+        tempPlayers,
+        p.socketId === this.hostPlayer.socketId
+      );
+    });
+    console.log('End of game');
   }
 
   setupDeck() {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getCardImage } from '../utils/getCardImage';
 import SpecialModal from './SpecialModal';
+import ResultsModal from './ResultsModal';
 
 const Board = ({ socket }) => {
   const params = useParams();
@@ -37,9 +38,7 @@ const Board = ({ socket }) => {
     };
 
     socket.on('sendTurnData', handleDealHand);
-
     socket.on('doSpecialAction', handleSpecialAction);
-
     socket.on('completedSpecialAction', handleCompleteAction);
 
     return () => {
@@ -82,6 +81,7 @@ const Board = ({ socket }) => {
           setSpecialData([]);
         }}
       />
+      <ResultsModal socket={socket} />
       <h1>Board</h1>
       <div style={{ display: 'flex' }}>
         {hand.map((card, index) => (
@@ -167,6 +167,7 @@ const Board = ({ socket }) => {
           >
             <span>{`${player.name}'s played cards:`}</span>
             {player.playedCards.map(displayPlayedCard)}
+            <span>{`${player.name}'s points: ${player.points}`}</span>
           </div>
         ))}
       </div>
