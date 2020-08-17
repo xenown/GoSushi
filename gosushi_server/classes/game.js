@@ -36,17 +36,28 @@ class Game {
   }
 
   checkForSpecialActions() {
+    const isInSpecialActions = (newCard, newPlayerId) =>
+      this.specialActions.findIndex(
+        obj => _.isEqual(obj.card, newCard) && obj.playerId === newPlayerId
+      ) !== -1;
+
     this.players.forEach(p => {
       p.turnCards.forEach(card => {
         // checks for special cards that activate when played
-        if (specialActionsHand.includes(card.name)) {
+        if (
+          specialActionsHand.includes(card.name) &&
+          !isInSpecialActions(card, p.socketId)
+        ) {
           this.specialActions.push({ card: card, playerId: p.socketId });
         }
       });
 
       p.turnCardsReuse.forEach(card => {
         // check for special cards that are used on a turn after they were initialy played/flipped
-        if (specialActionsPlayed.includes(card.name)) {
+        if (
+          specialActionsPlayed.includes(card.name) &&
+          !isInSpecialActions(card, p.socketId)
+        ) {
           this.specialActions.push({ card: card, playerId: p.socketId });
         }
       });
@@ -250,10 +261,6 @@ class Game {
           }
         }
 
-        // if (i === indexCurrPlayer) {
-        //   // case where the card type doesn't exist in other people's hands, spoon is discarded for the round
-        //   player.turnCardsReuse.splice(indexOfSpe, 1);
-        // }
         player.turnCardsReuse.splice(indexOfSpe, 1);
         break;
       case 'Takeout Box':

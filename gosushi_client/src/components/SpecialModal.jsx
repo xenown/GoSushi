@@ -52,6 +52,8 @@ const Board = ({ show, data, specialCard, handleFinishedAction }) => {
       show={show}
       onHide={() => {
         handleFinishedAction(data[selectedIndex]);
+        setSelectedIndex(-1);
+        setAlertText('');
       }}
       backdrop="static"
       keyboard={false}
@@ -78,13 +80,14 @@ const Board = ({ show, data, specialCard, handleFinishedAction }) => {
         )}
       </Modal.Body>
       <Modal.Footer>
-        {/* <Button variant="secondary" onClick={handleClose}>
-          Close
-        </Button> */}
         <Button
           variant="primary"
           disabled={data.length > 0 && selectedIndex === -1}
-          onClick={() => handleFinishedAction(data[selectedIndex])}
+          onClick={() => {
+            handleFinishedAction(data[selectedIndex]);
+            setSelectedIndex(-1);
+            setAlertText('');
+          }}
         >
           Finish
         </Button>
