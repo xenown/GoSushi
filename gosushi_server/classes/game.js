@@ -124,14 +124,14 @@ class Game {
     let tempPlayers = [];
     this.rotateHands(this.players.map(p => p.hand));
     if (this.players[0].hand.length === 0) {
-      calculateRoundPoints(this.players, this.deck.menu);
       // no more cards in the hand
+      calculateRoundPoints(this.players, this.deck.menu);
       if (this.round < 3) {
         // go to next round
         this.round++;
-        // remove and add desserts
         console.log('End of round');
 
+        // remove and add desserts
         this.startRound();
         tempPlayers = this.getPlayersData();
         this.players.forEach(p => {

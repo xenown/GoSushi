@@ -25,7 +25,6 @@ const ResultsModal = ({ socket }) => {
     let placement = 0;
     let score = 0;
     let duplicates = 1;
-    console.log(playersData);
     return (
       <ListGroup>
         {playersData.map(player => {
