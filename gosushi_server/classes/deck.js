@@ -1,6 +1,7 @@
 const _ = require('lodash');
 const Card = require('./card');
 const cardNameEnum = require('../util/cardNameEnum');
+const fruitCombos = require('../util/fruitCombos');
 const onigiriNameEnum = require('../util/onigiriNameEnum');
 
 class Deck {
@@ -178,35 +179,3 @@ class Deck {
 
 module.exports = Deck;
 
-const fruitCombos = [
-  {
-    watermelon: 1,
-    pineapple: 1,
-    orange: 0,
-  },
-  {
-    watermelon: 1,
-    pineapple: 0,
-    orange: 1,
-  },
-  {
-    watermelon: 0,
-    pineapple: 1,
-    orange: 1,
-  },
-  {
-    watermelon: 2,
-    pineapple: 0,
-    orange: 0,
-  },
-  {
-    watermelon: 0,
-    pineapple: 2,
-    orange: 0,
-  },
-  {
-    watermelon: 0,
-    pineapple: 0,
-    orange: 2,
-  },
-];

@@ -14,51 +14,44 @@ const addPlayerPoints = (playerName, players, points) => {
 
 calculateTurnPoints = (players, menu, uramakiCountMap, uramakiStanding) => {
   players.forEach(currPlyr => {
+    // Get list of unused wasabi cards
     let wasabi = currPlyr.playedCards.filter(
       card => card.name === cardNameEnum.WASABI && !card.data
     );
-    let tripleNigiri = false;
-    if (menu.specials.includes(cardNameEnum.WASABI) && wasabi.length > 0) {
-      tripleNigiri = true;
-    }
     while (currPlyr.turnCards.length !== 0) {
       const card = currPlyr.turnCards.pop();
       switch (card.name) {
         case cardNameEnum.EGG:
-          if (tripleNigiri) {
+          // Update wasabi with score to triple the nigiri's value
+          if (wasabi.length > 0) {
             wasabi[0].data = 2;
-            wasabi = currPlyr.playedCards.filter(
-              card => card.name === cardNameEnum.WASABI && !card.data
-            );
-            tripleNigiri = wasabi.length > 0;
+            // Shift the used wasabi out of the list of unused wasabis
+            wasabi.shift();
           }
           break;
         case cardNameEnum.SALMON:
-          if (tripleNigiri) {
+          if (wasabi.length > 0) {
             wasabi[0].data = 4;
-            wasabi = currPlyr.playedCards.filter(
-              card => card.name === cardNameEnum.WASABI && !card.data
-            );
-            tripleNigiri = wasabi.length > 0;
+            wasabi.shift();
           }
           break;
         case cardNameEnum.SQUID:
-          if (tripleNigiri) {
+          if (wasabi.length > 0) {
             wasabi[0].data = 6;
-            wasabi = currPlyr.playedCards.filter(
-              card => card.name === cardNameEnum.WASABI && !card.data
-            );
-            tripleNigiri = wasabi.length > 0;
+            wasabi.shift();
           }
           break;
         case cardNameEnum.MISO_SOUP:
+          // Find all other players that played a miso
           const repeats = players.filter(
             otherPlyr =>
               otherPlyr.name !== currPlyr.name &&
               otherPlyr.turnCards.find(c => c.name === cardNameEnum.MISO_SOUP)
           );
+
           const value = repeats.length !== 0 ? 0 : 3;
           repeats.forEach(repeat => {
+            // Update all other player's miso cards accordingly and put them into playedCards
             const miso = _.remove(
               repeat.turnCards,
               el => el.name === cardNameEnum.MISO_SOUP
@@ -66,9 +59,11 @@ calculateTurnPoints = (players, menu, uramakiCountMap, uramakiStanding) => {
             miso.data = value;
             repeat.playedCards.push(miso);
           });
+          // Update current player's card
           card.data = value;
           break;
         case cardNameEnum.URAMAKI:
+          // Count the current player's uramaki points
           uramakiCountMap[currPlyr.name] += card.data;
           break;
         default:
@@ -175,7 +170,7 @@ calculateSpecialPoints = (players, menu) => {
     calculateTakeoutBoxPoints(players);
 };
 
-//Roll Functions
+// Roll Functions
 calculateMakiPoints = players => {
   let mostMaki = 0;
   let secondMostMaki = 0;
@@ -184,11 +179,14 @@ calculateMakiPoints = players => {
 
   players.forEach(player => {
     let makiPoints = 0;
+    // Count up the number of maki for the current player
     player.playedCards.forEach(card => {
       if (card.name === cardNameEnum.MAKI) {
         makiPoints += card.data;
       }
     });
+
+    // Update current best and second best accordingly
     if (makiPoints > mostMaki) {
       secondMostMaki = mostMaki;
       mostMaki = makiPoints;
@@ -200,6 +198,7 @@ calculateMakiPoints = players => {
 
   players.forEach(player => {
     const makiPoints = makiCountMap[player.name];
+    // Assign points for meeting the best or second best maki count
     if (makiPoints === mostMaki && mostMaki !== 0) {
       player.points += makiPointMap[1];
     } else if (makiPoints === secondMostMaki && secondMostMaki !== 0) {
@@ -215,11 +214,14 @@ calculateTemakiPoints = players => {
 
   players.forEach(player => {
     let temakiPoints = 0;
+    // Count number of temaki for a player
     player.playedCards.forEach(card => {
       if (card.name == cardNameEnum.TEMAKI) {
         temakiPoints++;
       }
     });
+
+    // Update least and most counters accordingly
     if (temakiPoints > mostTemaki) {
       mostTemaki = temakiPoints;
     }
@@ -230,6 +232,7 @@ calculateTemakiPoints = players => {
   });
 
   if (mostTemaki != leastTemaki) {
+    // Assign points as long as most and least don't cancel each other out
     players.forEach(player => {
       const temakiPoints = temakiCountMap[player.name];
       if (temakiPoints === mostTemaki) {
@@ -241,7 +244,7 @@ calculateTemakiPoints = players => {
   }
 };
 
-//Appetizer Functions
+// Appetizer Functions
 calculateDumplingPoints = players => {
   players.forEach(player => {
     const dumplings = player.playedCards.filter(
@@ -381,18 +384,28 @@ calculateTofuPoints = players => {
   });
 };
 
-//Special Functions
+// Special Functions
 calculateSoySaucePoints = players => {
   let colourCount = players.map(p => {
     let map = {};
-    p.playedCards.forEach(c => (map[c.name] = 1));
+    p.playedCards.forEach(c => {
+      if (c.name.includes("Nigiri") || c.name.includes("Wasabi")){
+        // Count Nigiris and Wasabi as the same colour
+        map["Nigiri"] = 1;
+      } else {
+        map[c.name] = 1;
+      }
+    });
     return Object.keys(map).length;
   });
 
   let max = _.max(colourCount);
   players.forEach((p, idx) => {
     if (colourCount[idx] === max) {
-      p.points += 4;
+      let soysauce =  p.playedCards.filter(
+        card => card.name == cardNameEnum.SOY_SAUCE
+      ).length;
+      p.points += 4 * soysauce;
     }
   });
 };
@@ -412,15 +425,24 @@ calculateTeaPoints = players => {
   let typeCount = players.map(p => {
     let map = {};
     p.playedCards.forEach(c => {
-      map[c.name] = map[c.name] ? 1 : map[c.name] + 1;
+      if (c.name.includes("Nigiri") || c.name.includes("Wasabi")){
+        // Count Nigiris and Wasabi as the same colour
+        map["Nigiri"] = map["Nigiri"] ? map["Nigiri"] + 1 : 1;
+      } else {
+        map[c.name] = map[c.name] ? map[c.name] + 1 : 1;
+      }
     });
-    return _.max(Object.values(map));
+    return _.max(Object.values(map)) || 0;
+    
   });
 
   let max = _.max(typeCount);
   players.forEach((p, idx) => {
     if (typeCount[idx] === max) {
-      p.points += 4;
+      let tea =  p.playedCards.filter(
+        card => card.name == cardNameEnum.TEA
+      ).length;
+      p.points += max * tea;
     }
   });
 };
@@ -452,7 +474,6 @@ calculateDessertPoints = (players, dessertName) => {
   }
 };
 
-// TODO: finish implementing these once we've decided where desserts will be stored
 calculatePuddingPoints = players => {
   let puddingCount = players.map(
     p => p.playedCards.filter(c => c.name === cardNameEnum.PUDDING).length
@@ -479,7 +500,7 @@ calculateIceCreamPoints = players => {
       c => c.name === cardNameEnum.GREEN_TEA_ICE_CREAM
     ).length;
 
-    p.points += Math.floor(icecream / 4);
+    p.points += Math.floor(icecream / 4) * 12;
   });
 };
 
@@ -500,7 +521,7 @@ calculateFruitPoints = players => {
     });
 
     Object.values(fruitCounts).forEach(count => {
-      p.points += fruitPoints[count] ? fruitPoints[count] : fruitPoints[5];
+      p.points += fruitPoints[count] !== undefined? fruitPoints[count] : fruitPoints[5];
     });
   });
 };
