@@ -1,11 +1,12 @@
 const _ = require('lodash');
 const Card = require('../../classes/card');
 const Game = require('../../classes/game');
-const { calculateRoundPoints, calculateTurnPoints } = require('../../util/calculatePoints');
+const { calculateGamePoints, calculateRoundPoints, calculateTurnPoints } = require('../../util/calculatePoints');
 const cardNameEnum = require('../../util/cardNameEnum');
 const onigiriEnum = require('../../util/onigiriNameEnum');
 const menus = require('../../util/suggestedMenus');
 
+// Add an array of players to a game
 const addPlayers = (game, players) => {
   for (let i = 1; i < players.length; i++) {
     game.addPlayer(players[i], players[i]);
@@ -64,11 +65,14 @@ describe('calculateTurnPoints', function () {
 
   addPlayers(game, players);
   game.setupDeck();
+  // Assign hands to each player
   game.players.forEach((p, index) => {
+    // Each hand is in reverse order so we can pop off the last one when playing a card
     p.hand = hands[index].reverse();
   });
 
   beforeEach(() => {
+    // Pop last card and add it to turnCards to "play" it
     game.players.forEach(p => p.turnCards.push(p.hand.pop()));
     calculateTurnPoints(game.players,
       game.deck.menu,
@@ -102,7 +106,7 @@ describe('calculateTurnPoints', function () {
     expect(game.players.map(p => p.points)).toEqual([10, 10, 2]);
   });
 
-  it('should assign two Wasabi\'s in one turn and assign another', () => {
+  it('should assign two Wasabi\'s in a turn to one player (P1) and assign one Wasabi to another (P2)', () => {
     game.deck.menu.specials = "Wasabi";
     game.players.forEach(p => p.turnCards.push(p.hand.pop()));
     calculateTurnPoints(game.players,
@@ -131,7 +135,7 @@ describe('calculateTurnPoints', function () {
     expect(wasabi2.map(el => el.data)).toEqual([4, null]);
   });
 
-  it('should assign two Wasabi\'s in one turn and assign another', () => {
+  it('should assign two Wasabi\'s in one turn to different players (P2 and P3)', () => {
     const wasabi2 = game.players[1].playedCards.filter(c => c.name === cardNameEnum.WASABI);
     expect(wasabi2.map(el => el.data)).toEqual([4, 6]);
 
@@ -211,6 +215,7 @@ describe('calculateRollPoints', function () {
     new Card(cardNameEnum.URAMAKI, 1),
   ]
 
+  // Set up game with different roll depending on test case number (num)
   const setupGame = num => {
     const game = new Game(
       _.clone(menus.firstMeal),
@@ -432,6 +437,7 @@ describe('calculateAppetizerPoints', function () {
   });
 
   beforeEach(() => {
+    // Reset points before each test
     game.players.forEach(p => p.points = 0);
   })
 
@@ -499,16 +505,70 @@ describe('calculateAppetizerPoints', function () {
 
 describe('calculateSpecialPoints', function () {
   const roomCode = "code";
-  const players = ["P1", "P2", "P3"];
+  const players = ["P1", "P2", "P3", "P4"];
 
   const hands = [
     [
+      // Other colour cards
+      new Card(cardNameEnum.PUDDING),
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.TOFU),
+      new Card(cardNameEnum.SASHIMI),
+      new Card(cardNameEnum.TEMAKI),
+
+      // Repeat colour cards
+      new Card(cardNameEnum.CHOPSTICKS),
+      new Card(cardNameEnum.CHOPSTICKS),
+      new Card(cardNameEnum.CHOPSTICKS),
+      new Card(cardNameEnum.CHOPSTICKS),
     ],
     [
       new Card(cardNameEnum.WASABI, 4),
+      new Card(cardNameEnum.SOY_SAUCE),
+      new Card(cardNameEnum.TEA),
+      new Card(cardNameEnum.TAKEOUT_BOX),
+
+      // Other colour cards
+      new Card(cardNameEnum.EEL),
+
+      // Repeat colour cards
+      new Card(cardNameEnum.EGG),
+      new Card(cardNameEnum.EGG),
     ],
     [
       new Card(cardNameEnum.WASABI),
+      new Card(cardNameEnum.SOY_SAUCE),
+      new Card(cardNameEnum.TEA),
+      new Card(cardNameEnum.TAKEOUT_BOX),
+      new Card(cardNameEnum.TAKEOUT_BOX),
+
+      // Other colour cards
+      new Card(cardNameEnum.EEL),
+      new Card(cardNameEnum.TOFU),
+
+      // Repeat colour cards
+      new Card(cardNameEnum.EGG),
+      new Card(cardNameEnum.EGG),
+      new Card(cardNameEnum.EGG),
+    ],
+    [
+      new Card(cardNameEnum.WASABI, 2),
+      new Card(cardNameEnum.SOY_SAUCE),
+      new Card(cardNameEnum.SOY_SAUCE),
+      new Card(cardNameEnum.TEA),
+      new Card(cardNameEnum.TEA),
+      new Card(cardNameEnum.TAKEOUT_BOX),
+      new Card(cardNameEnum.TAKEOUT_BOX),
+      new Card(cardNameEnum.TAKEOUT_BOX),
+
+      // Other colour cards
+      new Card(cardNameEnum.PUDDING),
+      new Card(cardNameEnum.TOFU),
+
+      // Repeat colour cards
+      new Card(cardNameEnum.EGG),
+      new Card(cardNameEnum.EGG),
+      new Card(cardNameEnum.EGG),
     ],
   ];
 
@@ -530,9 +590,187 @@ describe('calculateSpecialPoints', function () {
     game.players.forEach(p => p.points = 0);
   })
 
+  const removeNigiriPoints = () => {
+    game.players[1].points -= 2;
+    game.players[2].points -= 3;
+    game.players[3].points -= 3;
+  }
+
   it('should give Wasabi points correctly', () => {
     game.deck.menu.specials = ["Wasabi"];
     calculateRoundPoints(game.players, game.deck.menu);
-    expect(game.players.map(p => p.points)).toEqual([0, 4, 0]);
+    removeNigiriPoints();
+    expect(game.players.map(p => p.points)).toEqual([0, 4, 0, 2]);
+  });
+
+  it('should give Soy Sauce points correctly', () => {
+    game.deck.menu.specials = ["Soy Sauce"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    removeNigiriPoints();
+    expect(game.players.map(p => p.points)).toEqual([0, 0, 4, 8]);
+  });
+
+  it('should give Tea points correctly', () => {
+    game.deck.menu.specials = ["Tea"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    removeNigiriPoints();
+    expect(game.players.map(p => p.points)).toEqual([0, 0, 4, 8]);
+  });
+
+  it('should give Takeout Box points correctly', () => {
+    game.deck.menu.specials = ["Takeout Box"];
+    calculateRoundPoints(game.players, game.deck.menu);
+    removeNigiriPoints();
+    expect(game.players.map(p => p.points)).toEqual([0, 2, 4, 6]);
+  });
+});
+
+describe('calculateDessertPoints', function () {
+  const roomCode = "code";
+  const players = ["P1", "P2", "P3"];
+
+  const hands = [
+    [
+      [],
+      [
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.FRUIT, {
+          watermelon: 1,
+          pineapple: 1,
+          orange: 1,
+        }),
+      ],
+      [
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.FRUIT, {
+          watermelon: 3,
+          pineapple: 3,
+          orange: 3,
+        }),
+      ],
+    ],[
+      [
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.FRUIT, {
+          watermelon: 5,
+          pineapple: 5,
+          orange: 10,
+        }),
+      ],
+      [
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.FRUIT, {
+          watermelon: 4,
+          pineapple: 2,
+          orange: 0,
+        }),
+      ],
+      [
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.PUDDING),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.GREEN_TEA_ICE_CREAM),
+        new Card(cardNameEnum.FRUIT, {
+          watermelon: 0,
+          pineapple: 2,
+          orange: 2,
+        }),
+      ],
+    ]
+  ];
+
+  const game = new Game(
+    _.clone(menus.firstMeal),
+    players.length,
+    roomCode,
+    players[0],
+    players[0]
+  );
+
+  addPlayers(game, players);
+
+  game.players.forEach((p, index) => {
+    p.playedCards = hands[index];
+  });
+
+  // Set up game with different roll depending on test case number (num)
+  const setupGame = num => {
+    const game = new Game(
+      _.clone(menus.firstMeal),
+      players.length,
+      roomCode,
+      players[0],
+      players[0]
+    );
+
+    addPlayers(game, players);
+
+    game.setupDeck();
+    game.players.forEach((p, index) => {
+      p.playedCards = hands[num][index];
+    });
+
+    return game;
+  }
+
+  const games = [setupGame(0), setupGame(1)];
+
+  beforeEach(() => {
+    games.forEach(g => g.players.forEach(p => p.points = 0));
+  })
+
+  it('should give Pudding points correctly with different counts', () => {
+    games[0].deck.menu.dessert = "Pudding";
+    calculateGamePoints(games[0].players, games[0].deck.menu);
+    expect(games[0].players.map(p => p.points)).toEqual([-6, 0, 6]);
+  });
+
+  it('should give Pudding points correctly with same counts', () => {
+    games[1].deck.menu.dessert = "Pudding";
+    calculateGamePoints(games[1].players, games[1].deck.menu);
+    expect(games[1].players.map(p => p.points)).toEqual([0, 0, 0]);
+  });
+
+  it('should give Ice Cream points correctly when count is divisible by 4', () => {
+    games[0].deck.menu.dessert = "Green Tea Ice Cream";
+    calculateGamePoints(games[0].players, games[0].deck.menu);
+    expect(games[0].players.map(p => p.points)).toEqual([0, 12, 24]);
+  });
+
+  it('should give Ice Cream points correctly when count is not divisible by 4', () => {
+    games[1].deck.menu.dessert = "Green Tea Ice Cream";
+    calculateGamePoints(games[1].players, games[1].deck.menu);
+    expect(games[1].players.map(p => p.points)).toEqual([0, 0, 12]);
+  });
+
+  it('should give Fruit points correctly for all same counts', () => {
+    games[0].deck.menu.dessert = "Fruit";
+    calculateGamePoints(games[0].players, games[0].deck.menu);
+    expect(games[0].players.map(p => p.points)).toEqual([-6, 0, 9]);
+  });
+
+  it('should give Fruit points correctly for different counts', () => {
+    games[1].deck.menu.dessert = "Fruit";
+    calculateGamePoints(games[1].players, games[1].deck.menu);
+    expect(games[1].players.map(p => p.points)).toEqual([30, 5, 0]);
   });
 });
