@@ -12,7 +12,7 @@ const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
       return data.map(displayCard);
     } else if (specialCard && data.length === 0) {
       return (
-        <div class="alert alert-info" role="alert">
+        <div className="alert alert-info" role="alert">
           {'No cards available to choose from'}
         </div>
       );
@@ -74,7 +74,7 @@ const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
           {bodyContent()}
         </div>
         {alertText !== '' && (
-          <div class="alert alert-info" role="alert">
+          <div className="alert alert-info" role="alert">
             {alertText}
           </div>
         )}

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import DisplayMenu from './DisplayMenu';
+import './common.scss';
+import './menuSelection.scss';
+import './waitingRoom.scss';
 
 const WaitingRoom = ({ name, roomCode, socket }) => {
   const history = useHistory();
@@ -34,17 +37,19 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
   }, [history, socket]);
 
   return (
-    <div>
+    <div className="mb-3">
       {players.length > 0 && roomCode !== "" ? (
-        <div>
+        <div className="center vertical menu-wrapper mb-3">
           <p>Room code: {roomCode}</p>
-          <p>Player name: {name}</p>
-          {players.map(player => (
-            <div key={player}>{`${player} has joined the game`}</div>
-          ))}
-          <p>
-            {players.length}/{numPlayers} players joined
-          </p>
+          <p>Your name: {name}</p>
+          <div className="list-wrapper">
+            {players.map(player => (
+              <div key={player}>{`${player} has joined the game`}</div>
+            ))}
+            <div>
+              {players.length}/{numPlayers} players joined
+            </div>
+          </div>
         </div>
       ) : null}
       <DisplayMenu menu={menu} />

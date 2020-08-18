@@ -7,6 +7,7 @@ import {
   MENU_APPETIZER_COUNT,
   MENU_SPECIAL_COUNT,
 } from '../utils/menuSelectionUtils';
+import './common.scss';
 
 const dev = process.env.NODE_ENV === 'development';
 
@@ -102,24 +103,26 @@ const HostGame = ({ socket }) => {
   };
 
   const createForm = (
-    <div>
+    <div className="center vertical">
       <MenuSelection handleMenu={handleMenu} menu={menu} />
       <DisplayMenu menu={menu} />
       <br />
 
-      <div className="input-group mb-3">
-        <div className="input-group-prepend">
-          <span className="input-group-text" id="inputGroup-sizing-default">
-            Name
-          </span>
+      <div className="col-auto">
+        <div className="input-group mb-3 col-auto">
+          <div className="input-group-prepend">
+            <span className="input-group-text" id="inputGroup-sizing-default">
+              Name
+            </span>
+          </div>
+          <input
+            type="text"
+            className="form-control"
+            aria-label="Name"
+            aria-describedby="inputGroup-sizing-default"
+            onChange={e => setName(e.target.value)}
+          />
         </div>
-        <input
-          type="text"
-          className="form-control"
-          aria-label="Name"
-          aria-describedby="inputGroup-sizing-default"
-          onChange={e => setName(e.target.value)}
-        />
       </div>
 
       <div
@@ -157,30 +160,34 @@ const HostGame = ({ socket }) => {
         ))}
       </div>
 
-      <button className="btn btn-danger ml-2 mr-2" onClick={handleBack}>
-        Back
-      </button>
-      <button className="btn btn-success ml-2 mr-2" onClick={handleSubmit}>
-        Submit
-      </button>
-      {dev && (
-        <button
-          className="btn btn-success ml-2 mr-2"
-          onClick={handleAutoPlayers}
-        >
-          Auto other players
+      <div>
+        <button className="btn btn-danger ml-2 mr-2" onClick={handleBack}>
+          Back
         </button>
-      )}
-      <p>{message}</p>
+        <button className="btn btn-success ml-2 mr-2" onClick={handleSubmit}>
+          Submit
+        </button>
+        {dev && (
+          <button
+            className="btn btn-success ml-2 mr-2"
+            onClick={handleAutoPlayers}
+          >
+            Auto other players
+          </button>
+        )}
+        <p>{message}</p>
+      </div>
     </div>
   );
 
   return (
-    <div className="HostGame" style={{ display: 'block' }}>
-      <h1>Host Game</h1>
-      {isCreating && createForm}
-      <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
-      {isReady && <button onClick={handleStartGame}>Start Game</button>}
+    <div className="full row center">
+      <div className="col">
+        <h1>Host Game</h1>
+        {isCreating && createForm}
+        <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
+        {isReady && <button className="btn btn-success ml-2 mr-2" onClick={handleStartGame}>Start Game</button>}
+      </div>
     </div>
   );
 };

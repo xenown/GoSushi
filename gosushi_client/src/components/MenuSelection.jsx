@@ -142,7 +142,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                     key={item}
                     onClick={() => selectRoll(item)}
                     style={
-                      menu.roll === menu.item
+                      menu.roll === item
                         ? {
                             border: '4px solid #741b47',
                             borderRadius: '18px',

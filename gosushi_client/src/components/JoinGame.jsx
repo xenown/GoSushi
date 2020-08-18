@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
+import './common.scss';
 
 const JoinGame = ({ socket }) => {
   const [name, setName] = useState('');
@@ -35,26 +36,40 @@ const JoinGame = ({ socket }) => {
   };
 
   const joinForm = (
-    <div>
-      <div>
-        Enter your name
-        <input type="text" onChange={e => setName(e.target.value)} />
+    <div className="center vertical">
+      <div className="form-group">
+        <label>Enter your name</label>
+        <input 
+          type="text" 
+          className="form-control"
+          aria-label="Name"
+          aria-describedby="inputGroup-sizing-default"
+          onChange={e => setName(e.target.value)} />
+      </div>
+      <div className="form-group">
+        <label>Enter the room code</label>
+          <input 
+            type="text"
+            className="form-control"
+            aria-label="Code"
+            aria-describedby="inputGroup-sizing-default"
+            onChange={e => setRoomCode(e.target.value)} />
       </div>
       <div>
-        Enter the room code
-        <input type="text" onChange={e => setRoomCode(e.target.value)} />
+        <button className="btn btn-danger ml-2 mr-2" onClick={handleBack}>Back</button>
+        <button className="btn btn-success ml-2 mr-2" onClick={handleSubmit}>Submit</button>
+        <p>{message}</p>
       </div>
-      <button onClick={handleBack}>Back</button>
-      <button onClick={handleSubmit}>Submit</button>
-      <p>{message}</p>
     </div>
   );
 
   return (
-    <div className="JoinGame" style={{ display: 'block' }}>
-      <h1>Join Game</h1>
-      {isJoining && joinForm}
-      <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
+    <div className="full row center">
+      <div className="col">
+        <h1>Join Game</h1>
+        {isJoining && joinForm}
+        <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
+      </div>
     </div>
   );
 };
