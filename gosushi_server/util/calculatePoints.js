@@ -56,8 +56,8 @@ calculateTurnPoints = (players, menu, uramakiCountMap, uramakiStanding) => {
               repeat.turnCards,
               el => el.name === cardNameEnum.MISO_SOUP
             );
-            miso.data = value;
-            repeat.playedCards.push(miso);
+            miso.forEach(c => (c.data = value));
+            repeat.playedCards = repeat.playedCards.concat(miso);
           });
           // Update current player's card
           card.data = value;
