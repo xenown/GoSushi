@@ -34,6 +34,13 @@ export const dessertsEnum = Object.freeze({
   FRUIT: 'Fruit',
 });
 
+export const invalidMenuOptions = Object.freeze({
+  Edamame: [2],
+  Menu: [7, 8],
+  Spoon: [2],
+  'Special Order': [7, 8],
+});
+
 export const menuCardImageMap = {
   Nigiri: menuImages.nigiri,
   Maki: menuImages.maki,

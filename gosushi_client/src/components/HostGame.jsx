@@ -4,6 +4,7 @@ import WaitingRoom from './WaitingRoom';
 import MenuSelection from './MenuSelection';
 import DisplayMenu from './DisplayMenu';
 import {
+  invalidMenuOptions,
   MENU_APPETIZER_COUNT,
   MENU_SPECIAL_COUNT,
 } from '../utils/menuSelectionUtils';
@@ -87,6 +88,11 @@ const HostGame = ({ socket }) => {
   const handleMenu = menu => {
     console.log('HOSTGAME MENU:');
     console.log(menu);
+
+    // Remove menu items that are not allowed with the current number of players
+    menu.appetizers = menu.appetizers.filter(a => validMenuOption(a, numPlayers));
+    menu.specials = menu.specials.filter(s => validMenuOption(s, numPlayers));
+
     setMenu(menu);
   };
 
@@ -105,9 +111,20 @@ const HostGame = ({ socket }) => {
     setMessage('Loading...');
   };
 
+  const validMenuOption = (item, num) => invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(num) : true;
+
+  const handleNumPlayers = num => {
+    // Remove menu items that are not allowed with the new number of players
+    menu.appetizers = menu.appetizers.filter(a => validMenuOption(a, num));
+    menu.specials = menu.specials.filter(s => validMenuOption(s, num));
+
+    setNumPlayers(num);
+    setMenu(menu);
+  };
+
   const createForm = (
     <div className="center vertical">
-      <MenuSelection handleMenu={handleMenu} menu={menu} />
+      <MenuSelection handleMenu={handleMenu} menu={menu} numPlayers={numPlayers}/>
       <DisplayMenu menu={menu} />
       <br />
 
@@ -150,7 +167,7 @@ const HostGame = ({ socket }) => {
           <label
             className="btn btn-primary"
             key={`${players}-player`}
-            onClick={() => setNumPlayers(players)}
+            onClick={() => handleNumPlayers(players)}
           >
             <input
               type="radio"

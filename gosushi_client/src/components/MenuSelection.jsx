@@ -6,6 +6,7 @@ import {
   appetizersEnum,
   specialsEnum,
   dessertsEnum,
+  invalidMenuOptions,
   menuCardImageMap,
 } from '../utils/menuSelectionUtils';
 import { suggestedMenus } from '../utils/suggestedMenus';
@@ -27,7 +28,10 @@ const SideList = ({ menuList, handleSuggestedMenu }) => (
   </div>
 );
 
-const MenuSelection = ({ handleMenu, menu }) => {
+const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
+  const validMenuOption = item => invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(numPlayers) : true;
+  const getCardStyle = item => "menu-item game-card" + (validMenuOption(item) ? "": " disable-card");
+
   const selectRoll = item => {
     let menucopy = _.clone(menu);
     menucopy.roll = item;
@@ -35,6 +39,10 @@ const MenuSelection = ({ handleMenu, menu }) => {
   };
 
   const selectAppetizer = item => {
+    if (!validMenuOption(item)){
+      return;
+    }
+
     let menucopy = _.clone(menu);
     let newAppetizer = menu.appetizers.slice();
     if (menu.appetizers.includes(item)) {
@@ -48,6 +56,10 @@ const MenuSelection = ({ handleMenu, menu }) => {
   };
 
   const selectSpecial = item => {
+    if (!validMenuOption(item)){
+      return;
+    }
+
     let menucopy = _.clone(menu);
     let newSpecial = menu.specials.slice();
     if (menu.specials.includes(item)) {
@@ -138,7 +150,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className="menu-item game-card"
+                    className={getCardStyle(item)}
                     key={item}
                     onClick={() => selectRoll(item)}
                     style={
@@ -161,7 +173,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className="menu-item game-card"
+                    className={getCardStyle(item)}
                     key={item}
                     onClick={() => selectAppetizer(item)}
                     style={
@@ -184,7 +196,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className="menu-item game-card"
+                    className={getCardStyle(item)}
                     key={item}
                     onClick={() => selectSpecial(item)}
                     style={
@@ -207,7 +219,7 @@ const MenuSelection = ({ handleMenu, menu }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className="menu-item game-card"
+                    className={getCardStyle(item)}
                     key={item}
                     onClick={() => selectDessert(item)}
                     style={
