@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import { Button, Modal, ListGroup, ListGroupItem } from 'react-bootstrap';
+import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
+
+import './resultsModal.scss';
 
 const ResultsModal = ({ socket }) => {
   const history = useHistory();
@@ -26,7 +28,12 @@ const ResultsModal = ({ socket }) => {
     let score = 0;
     let duplicates = 1;
     return (
-      <ListGroup>
+      <Container fluid>
+        <Row>
+          <Col sm={2}>Rank</Col>
+          <Col sm={8}>Player Name</Col>
+          <Col sm={2}>Points</Col>
+        </Row>
         {playersData.map(player => {
           if (player.points !== score) {
             score = player.points;
@@ -36,11 +43,24 @@ const ResultsModal = ({ socket }) => {
             duplicates++;
           }
 
+          let className = '';
+          if (placement === 1) {
+            className = 'first';
+          } else if (placement === 2) {
+            className = 'second';
+          } else if (placement === 3) {
+            className = 'third';
+          }
+
           return (
-            <ListGroupItem>{`${placement}. ${player.name}, points: ${player.points}`}</ListGroupItem>
+            <Row className={className}>
+              <Col sm={2}>{placement}</Col>
+              <Col sm={8}>{player.name}</Col>
+              <Col sm={2}>{player.points}</Col>
+            </Row>
           );
         })}
-      </ListGroup>
+      </Container>
     );
   };
 
@@ -56,17 +76,7 @@ const ResultsModal = ({ socket }) => {
       <Modal.Header>
         <Modal.Title>{`Game Results`}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-          }}
-        >
-          {bodyContent()}
-        </div>
-      </Modal.Body>
+      <Modal.Body>{bodyContent()}</Modal.Body>
       <Modal.Footer>
         <Button
           variant="primary"
