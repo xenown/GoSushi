@@ -23,7 +23,7 @@ io.on('connection', socket => {
     roomCode = generateRoomCode(new Set(Object.keys(rooms)));
     if (roomCode === false) {
       socket.emit(
-        'playerJoined',
+        'getActivePlayers',
         `Connection failed: Could not generate unique room code.`
       );
       return;
@@ -31,7 +31,7 @@ io.on('connection', socket => {
     return socket.join([roomCode], e => {
       if (e) {
         socket.emit(
-          'playerJoined',
+          'getActivePlayers',
           `Connection failed: Error joining room: ${e}`
         );
         return;
@@ -45,9 +45,9 @@ io.on('connection', socket => {
       );
 
       socketToRoom[socket.id] = roomCode;
-      console.log(`joined ${socket.id}`);
+      console.log(`${username} joined ${socket.id}`);
       io.to(roomCode).emit('getRoomCode', roomCode);
-      io.to(roomCode).emit('playerJoined', [username], menu);
+      io.to(roomCode).emit('getActivePlayers', [username], menu);
       socket.emit('getNumPlayers', numPlayers);
     });
   };
@@ -59,19 +59,19 @@ io.on('connection', socket => {
       const game = rooms[roomCode];
       if (!game) {
         socket.emit(
-          'playerJoined',
+          'getActivePlayers',
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
       } else if (game.players.length === game.numPlayers) {
         socket.emit(
-          'playerJoined',
+          'getActivePlayers',
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
         return;
       } else if (e) {
         socket.emit(
-          'playerJoined',
+          'getActivePlayers',
           `Connection failed: Error joining room: ${e}`
         );
         return;
@@ -84,7 +84,7 @@ io.on('connection', socket => {
       console.log(`joined ${socket.id}`);
 
       io.to(roomCode).emit(
-        'playerJoined',
+        'getActivePlayers',
         players.map(p => p.name),
         game.deck.menu
       );
@@ -92,7 +92,6 @@ io.on('connection', socket => {
 
       if (players.length === game.numPlayers) {
         game.startRound();
-        io.to(roomCode).emit('roomFilled', roomCode);
       }
     });
   });
@@ -107,12 +106,11 @@ io.on('connection', socket => {
       game.isAutoPlayers = true;
       socket.emit('getNumPlayers', game.numPlayers);
       io.to(roomCode).emit(
-        'playerJoined',
+        'getActivePlayers',
         game.players.map(p => p.name),
         game.deck.menu
       );
       game.startRound();
-      io.to(roomCode).emit('roomFilled', roomCode);
     });
   });
 
@@ -139,6 +137,8 @@ io.on('connection', socket => {
       }
 
       socket.emit('sendTurnData', player ? player.hand : [], playersData);
+    } else {
+      socket.emit("unknownGame");
     }
   });
 
@@ -199,8 +199,9 @@ io.on('connection', socket => {
     if (game) {
       game.players = game.players.filter(p => p.socketId !== socket.id);
       socket.to(roomCode).emit(
-        'playerJoined',
-        game.players.map(p => p.name)
+        'getActivePlayers',
+        game.players.map(p => p.name),
+        game.deck.menu
       );
     }
     // TODO: If the host leaves, end game

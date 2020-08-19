@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 
 import { getCardImage } from '../utils/getCardImage';
@@ -10,6 +10,7 @@ import './board.scss';
 
 const Board = ({ socket }) => {
   const params = useParams();
+  const history = useHistory();
   const [hand, setHand] = useState([]);
   const [playersData, setPlayersData] = useState([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
@@ -41,17 +42,23 @@ const Board = ({ socket }) => {
       setSpecialData([]);
     };
 
+    const handleUnknownGame = () => {
+      history.push('/');
+    }
+
     socket.on('sendTurnData', handleDealHand);
     socket.on('doSpecialAction', handleSpecialAction);
     socket.on('completedSpecialAction', handleCompleteAction);
+    socket.on('unknownGame', handleUnknownGame);
 
     return () => {
       socket.off('sendTurnData', handleDealHand);
       socket.off('doSpecialAction', handleSpecialAction);
       socket.off('completedSpecialAction', handleCompleteAction);
+      socket.off('unknownGame', handleUnknownGame);
     };
-  }, [params.roomCode, socket]);
-
+  }, [params.roomCode, socket, history]);
+  
   const handleSelectCard = index => {
     setSelectedCardIndex(index);
   };
