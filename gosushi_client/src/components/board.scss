@@ -1,0 +1,52 @@
+.board {
+  display: block;
+  width: 100%;
+  margin: 8px;
+  box-sizing: border-box;
+}
+
+.action-bar {
+  display: flex;
+}
+
+.container-hand {
+  display: flex;
+  width: 90%;
+  justify-content: center;
+}
+
+.container-played-cards {
+  display: flex;
+  justify-content: center;
+}
+
+.card-playable {
+  cursor: pointer;
+}
+
+.card-selected {
+  background-color: yellow;
+}
+
+.card-image-hand {
+  height: 200px;
+  padding: 0 4px;
+}
+
+.card-image-played {
+  height: 125px;
+  padding: 0 4px;
+}
+
+.container-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 8px;
+
+  .button {
+    display: block;
+    margin: 8px 0;
+  }
+}
