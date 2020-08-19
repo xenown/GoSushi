@@ -69,6 +69,12 @@ io.on('connection', socket => {
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
         return;
+      } else if (game.players.reduce((acc, p) => { return acc || p.name === username }, false)) {
+        socket.emit(
+          'playerJoined',
+          `Connection failed: Player name ${username} is already in use, please use a different name.`
+        );
+        return;
       } else if (e) {
         socket.emit(
           'playerJoined',
@@ -202,6 +208,7 @@ io.on('connection', socket => {
         'playerJoined',
         game.players.map(p => p.name)
       );
+      io.to(roomCode).emit('roomFilled', roomCode, false);
     }
     // TODO: If the host leaves, end game
   });

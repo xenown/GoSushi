@@ -27,6 +27,10 @@ const JoinGame = ({ socket }) => {
   }, [socket]);
 
   const handleSubmit = () => {
+    if (name === '') {
+      setMessage("Missing player name.");
+      return;
+    }
     socket.emit('joinGame', name, roomCode);
     setMessage('Loading...');
   };
