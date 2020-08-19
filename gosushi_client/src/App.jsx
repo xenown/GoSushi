@@ -26,7 +26,7 @@ const App = () => {
   return (
     <Router>
       <div className="App">
-        <header className="App-header">
+        <div className="App-content">
           <Switch>
             <Route path="/host">
               <HostGame socket={socket} />
@@ -53,8 +53,8 @@ const App = () => {
             </Route>
             <Redirect from="/*" to="/" />
           </Switch>
-        </header>
-      </div>
+        </div>
+        </div>
     </Router>
   );
 };
