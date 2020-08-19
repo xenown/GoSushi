@@ -54,6 +54,48 @@ const HandCard = ({ card, index, isSelected, played, handleSelectCard }) => {
   );
 };
 
+const HandCard = ({ card, index, isSelected, played, handleSelectCard }) => {
+  const [props, set] = useSpring(() => ({ zIndex: 0, xys: [0, 0, 1], config: config.default }));
+  // const [props, set] = useSpring(() => ({ xys: [0, 0, 1], width: 136, height: 208, config: config.default }));
+
+  let className = 'card-playable';
+
+  if (isSelected) {
+    className += ' card-selected';
+  }
+  // selectedCardIndex === index
+  const calc = (x, y) => [-(y - window.innerHeight / 2) / 20, (x - window.innerWidth / 2) / 20, 2];
+  const trans = (x, y, s) => `scale(${s})`;
+  // const trans = (x, y, s) => `perspective(600px) rotateX(${x}deg) rotateY(${y}deg) scale(${s})`;
+
+  return (
+    <div
+      className={className}
+      key={index}
+      disabled={played}
+      onClick={() => handleSelectCard(index)}
+    >
+      <animated.div
+        class="card"
+        onMouseMove={({ clientX: x, clientY: y }) => set({ xys: calc(x, y), zIndex: 1})}
+        // onMouseMove={({ clientX: x, clientY: y }) => set({ width : 2 * 136, height: 2 * 208 })}
+        onMouseLeave={() => set({ xys: [0, 0, 1], zIndex: 0 })}
+        // onMouseLeave={() => set({ xys: [0, 0, 1], width: 136, height: 208 })}
+        style={{ zIndex: props.zIndex, transform: props.xys.interpolate(trans)}}
+      >
+        <img
+          className="card-image-hand"
+          src={getCardImage(card)}
+          alt={card.name}
+          key={`hand_${card.name}_${index}`}
+          height="100%"
+          width="100%"
+        />
+      </animated.div>
+    </div>
+  );
+};
+
 const Board = ({ socket }) => {
   const params = useParams();
   const history = useHistory();
