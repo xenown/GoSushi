@@ -1,5 +1,11 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Link,
+  Redirect,
+  Route,
+  Switch,
+} from 'react-router-dom';
 import socketIOClient from 'socket.io-client';
 
 // import 'bootstrap/dist/css/bootstrap.css';
@@ -45,6 +51,7 @@ const App = () => {
                 </Link>
               </div>
             </Route>
+            <Redirect from="/*" to="/" />
           </Switch>
         </header>
       </div>
