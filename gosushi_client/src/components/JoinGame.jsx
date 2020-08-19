@@ -60,9 +60,9 @@ const JoinGame = ({ socket }) => {
             onChange={e => setRoomCode(e.target.value)} />
       </div>
       <div>
+        <p>{message}</p>
         <button className="btn btn-danger ml-2 mr-2" onClick={handleBack}>Back</button>
         <button className="btn btn-success ml-2 mr-2" onClick={handleSubmit}>Submit</button>
-        <p>{message}</p>
       </div>
     </div>
   );
