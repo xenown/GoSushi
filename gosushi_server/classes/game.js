@@ -176,11 +176,7 @@ class Game {
       case 'Spoon':
         // display the menu
         let valArray = Object.values(this.deck.menu);
-        let menuItems = [
-          CardNameEnum.EGG,
-          CardNameEnum.SALMON,
-          CardNameEnum.SQUID,
-        ];
+        let menuItems = ["Nigiri"];
         menuItems.push(valArray[0]);
         menuItems = menuItems.concat(valArray[1]);
         menuItems = menuItems.concat(valArray[2]);

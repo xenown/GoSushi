@@ -105,6 +105,9 @@ const HostGame = ({ socket }) => {
     if (msg !== '') {
       setMessage(msg);
       return;
+    } else if (name === ''){
+      setMessage("Missing player name.");
+      return;
     }
 
     socket.emit('autoPlayers', menu, numPlayers, name);
