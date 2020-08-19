@@ -181,6 +181,7 @@ const HostGame = ({ socket }) => {
       </div>
 
       <div>
+        <p>{message}</p>
         <button className="btn btn-danger ml-2 mr-2" onClick={handleBack}>
           Back
         </button>
@@ -195,7 +196,6 @@ const HostGame = ({ socket }) => {
             Auto other players
           </button>
         )}
-        <p>{message}</p>
       </div>
     </div>
   );
