@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Modal } from 'react-bootstrap';
+import { Alert, Button, Modal } from 'react-bootstrap';
 import { menuCardImageMap } from '../utils/menuSelectionUtils';
 import { getCardImage } from '../utils/getCardImage';
+import './specialModal.scss';
 
 const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -12,22 +13,23 @@ const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
       return data.map(displayCard);
     } else if (specialCard && data.length === 0) {
       return (
-        <div className="alert alert-info" role="alert">
-          {'No cards available to choose from'}
-        </div>
+        <Alert variant="info">{'No cards available to choose from'}</Alert>
       );
     }
   };
 
   const displayCard = (card, index) => {
     let isCard = card.name !== undefined;
+    let className = 'card-playable-special';
+
+    if (selectedIndex === index) {
+      className += ' card-selected';
+    }
+
     return (
       <div
+        className={className}
         key={`cards-for-special-action-${index}`}
-        style={{
-          margin: '12px',
-          backgroundColor: selectedIndex === index ? 'yellow' : 'unset',
-        }}
         onClick={() => {
           if (specialCard.name === 'Menu' && card.name === 'Menu') {
             setAlertText('You cannot choose a menu card');
@@ -38,7 +40,7 @@ const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
         }}
       >
         <img
-          style={{ height: '125px', padding: '0 4px' }}
+          className="card-special"
           src={isCard ? getCardImage(card) : menuCardImageMap[card]}
           alt={isCard ? card.name : card}
           key={`card-image-${card}-${index}`}
@@ -64,20 +66,8 @@ const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
         } Actions`}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-          }}
-        >
-          {bodyContent()}
-        </div>
-        {alertText !== '' && (
-          <div className="alert alert-info" role="alert">
-            {alertText}
-          </div>
-        )}
+        <div className="body-special-modal">{bodyContent()}</div>
+        {alertText !== '' && <Alert variant="info">{alertText}</Alert>}
       </Modal.Body>
       <Modal.Footer>
         <Button

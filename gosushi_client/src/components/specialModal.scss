@@ -1,0 +1,19 @@
+.body-special-modal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card-special {
+  height: 125px;
+  padding: 0 4px;
+}
+
+.card-playable-special {
+  cursor: pointer;
+  margin: 12px;
+}
+
+.card-selected {
+  background-color: yellow;
+}
