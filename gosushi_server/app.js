@@ -75,7 +75,7 @@ io.on('connection', socket => {
         }, false)
       ) {
         socket.emit(
-          'playerJoined',
+          'getActivePlayers',
           `Connection failed: Player name ${username} is already in use, please use a different name.`
         );
         return;
