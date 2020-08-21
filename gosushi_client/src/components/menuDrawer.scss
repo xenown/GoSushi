@@ -1,0 +1,23 @@
+.modal-dialog {
+  position: absolute;
+  left: 0;
+  width: 20vh;
+  height: 90%;
+}
+
+.modal-content {
+  height: 100%;
+  width: 100%;
+}
+
+.menu-drawer-body {
+  margin-top: 15%;
+}
+
+.menu-card {
+  height: auto;
+  width: 70%;
+  margin: -15%;
+  box-shadow: grey 0px 0px 6px 4px;
+  background-color: gray;
+}
