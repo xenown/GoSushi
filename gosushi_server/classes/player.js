@@ -10,6 +10,7 @@ class Player {
     this.playedCards = [];
     this.turnCards = [];
     this.turnCardsReuse = [];
+    this.dessertCards = [];
     this.makiCount = 0;
     this.uramakiCount = 0;
   }

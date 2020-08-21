@@ -473,7 +473,7 @@ calculateDessertPoints = (players, dessertName) => {
 
 calculatePuddingPoints = players => {
   let puddingCount = players.map(
-    p => p.playedCards.filter(c => c.name === cardNameEnum.PUDDING).length
+    p => p.dessertCards.filter(c => c.name === cardNameEnum.PUDDING).length
   );
 
   const max = _.max(puddingCount);
@@ -493,7 +493,7 @@ calculatePuddingPoints = players => {
 
 calculateIceCreamPoints = players => {
   players.forEach(p => {
-    let icecream = p.playedCards.filter(
+    let icecream = p.dessertCards.filter(
       c => c.name === cardNameEnum.GREEN_TEA_ICE_CREAM
     ).length;
 
@@ -503,7 +503,7 @@ calculateIceCreamPoints = players => {
 
 calculateFruitPoints = players => {
   players.forEach(p => {
-    let fruitCards = p.playedCards.filter(c => c.name === cardNameEnum.FRUIT);
+    let fruitCards = p.dessertCards.filter(c => c.name === cardNameEnum.FRUIT);
 
     let fruitCounts = {
       watermelon: 0,
