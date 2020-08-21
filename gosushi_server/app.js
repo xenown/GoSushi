@@ -69,7 +69,11 @@ io.on('connection', socket => {
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
         return;
-      } else if (game.players.reduce((acc, p) => { return acc || p.name === username }, false)) {
+      } else if (
+        game.players.reduce((acc, p) => {
+          return acc || p.name === username;
+        }, false)
+      ) {
         socket.emit(
           'playerJoined',
           `Connection failed: Player name ${username} is already in use, please use a different name.`
@@ -152,8 +156,14 @@ io.on('connection', socket => {
     io.to(socketId).emit('sendTurnData', hand, otherPlayerData);
 
   // specialCards: [Card]
-  const doSpecialAction = (socketId, specialCard, data) =>
-    io.to(socketId).emit('doSpecialAction', specialCard, data);
+  const doSpecialAction = (playerName, players, specialCard, data) =>
+    players.forEach(p => {
+      if (p.name === playerName) {
+        io.to(p.socketId).emit('doSpecialAction', specialCard, data);
+      } else {
+        io.to(p.socketId).emit('waitForAction', playerName, specialCard.name);
+      }
+    });
 
   const sendGameResults = (socketId, playerData, isHost) =>
     io.to(socketId).emit('gameResults', playerData, isHost);
@@ -192,6 +202,7 @@ io.on('connection', socket => {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
         game.handleSpecialAction(player, speCard, chosenCard);
+        socket.broadcast.emit('completedSpecialAction');
         game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
       }
     }

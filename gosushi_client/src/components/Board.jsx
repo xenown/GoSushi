@@ -14,8 +14,6 @@ const Board = ({ socket }) => {
   const [playersData, setPlayersData] = useState([]);
   const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
   const [played, setPlayed] = useState(false);
-  const [specialAction, setSpecialAction] = useState(null);
-  const [specialData, setSpecialData] = useState([]);
   const [selectedPlayedCard, setSelectedPlayedCard] = useState(-1);
   const [usePlayedCard, setUsePlayedCard] = useState(false);
 
@@ -31,24 +29,10 @@ const Board = ({ socket }) => {
       setUsePlayedCard(false);
     };
 
-    const handleSpecialAction = (specialCard, data) => {
-      setSpecialAction(specialCard);
-      setSpecialData(data);
-    };
-
-    const handleCompleteAction = () => {
-      setSpecialAction({});
-      setSpecialData([]);
-    };
-
     socket.on('sendTurnData', handleDealHand);
-    socket.on('doSpecialAction', handleSpecialAction);
-    socket.on('completedSpecialAction', handleCompleteAction);
 
     return () => {
       socket.off('sendTurnData', handleDealHand);
-      socket.off('doSpecialAction', handleSpecialAction);
-      socket.off('completedSpecialAction', handleCompleteAction);
     };
   }, [params.roomCode, socket]);
 
@@ -111,23 +95,12 @@ const Board = ({ socket }) => {
     );
   };
 
-  const handleFinishedSpeAction = card => {
-    socket.emit('handleSpecialAction', params.roomCode, specialAction, card);
-    setSpecialAction(null);
-    setSpecialData([]);
-  };
-
   const currPlayer = playersData[0];
   const otherPlayerData = playersData.slice(1);
 
   return (
     <div className="board">
-      <SpecialModal
-        show={!!specialAction}
-        data={specialData}
-        specialCard={specialAction}
-        handleFinishedAction={handleFinishedSpeAction}
-      />
+      <SpecialModal socket={socket} />
       <ResultsModal socket={socket} />
       <div className="action-bar">
         <div className="container-hand">{hand.map(displayHandCard)}</div>
