@@ -3,19 +3,18 @@
 }
 
 .App-logo {
-  background-color: black;
+  background-color: #8d5820;
   width: 100%;
   padding: 10vh 0 10vh 0;
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #f6edce;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   font-size: calc(10px + 2vmin);
-  color: white;
 }
 
 .player-count {
@@ -23,9 +22,9 @@
 }
 
 .transition {
-  width:100%;
+  width: 100%;
   height: 10vh;
-  background: linear-gradient(black, #282c34);
+  background: linear-gradient(#8d5820, #f6edce); // #282c34);
 }
 
 .App-route-container {
