@@ -1,12 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Alert, Button, Modal } from 'react-bootstrap';
+
 import { menuCardImageMap } from '../utils/menuSelectionUtils';
 import { getCardImage } from '../utils/getCardImage';
 import './specialModal.scss';
 
-const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
+const SpecialModal = ({ socket }) => {
+  const params = useParams();
+  const [specialCard, setSpecialCard] = useState(null);
+  const [data, setSpecialData] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [alertText, setAlertText] = useState('');
+
+  useEffect(() => {
+    const handleSpecialAction = (specialCard, data) => {
+      setSpecialCard(specialCard);
+      setSpecialData(data);
+    };
+
+    const handleWaitingForAction = (playerName, cardName) => {
+      setAlertText(`Waiting for ${playerName} to finish ${cardName} actions.`);
+    };
+
+    const handleCompleteAction = () => {
+      setSpecialCard(null);
+      setSpecialData([]);
+      setAlertText('');
+    };
+
+    socket.on('doSpecialAction', handleSpecialAction);
+    socket.on('waitForAction', handleWaitingForAction);
+    socket.on('completedSpecialAction', handleCompleteAction);
+
+    return () => {
+      socket.off('doSpecialAction', handleSpecialAction);
+      socket.off('waitForAction', handleWaitingForAction);
+      socket.off('completedSpecialAction', handleCompleteAction);
+    };
+  }, [params.roomCode, socket]);
+
+  const handleFinish = card => {
+    socket.emit('handleSpecialAction', params.roomCode, specialCard, card);
+    setSpecialCard(null);
+    setSpecialData([]);
+    setSelectedIndex(-1);
+    setAlertText('');
+  };
 
   const bodyContent = () => {
     if (data.length > 0) {
@@ -49,11 +89,14 @@ const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
     );
   };
 
+  const modalTitle = !!specialCard
+    ? `${specialCard.name} Actions`
+    : 'Waiting for others';
+
   return (
     <Modal
-      show={show}
+      show={!!specialCard || !!alertText}
       onHide={() => {
-        handleFinishedAction(data[selectedIndex]);
         setSelectedIndex(-1);
         setAlertText('');
       }}
@@ -61,26 +104,24 @@ const SpecialModal = ({ show, data, specialCard, handleFinishedAction }) => {
       keyboard={false}
     >
       <Modal.Header>
-        <Modal.Title>{`${
-          specialCard && specialCard.name
-        } Actions`}</Modal.Title>
+        <Modal.Title>{modalTitle}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div className="body-special-modal">{bodyContent()}</div>
         {alertText !== '' && <Alert variant="info">{alertText}</Alert>}
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="primary"
-          disabled={data.length > 0 && selectedIndex === -1}
-          onClick={() => {
-            handleFinishedAction(data[selectedIndex]);
-            setSelectedIndex(-1);
-            setAlertText('');
-          }}
-        >
-          Finish
-        </Button>
+        {!!specialCard && (
+          <Button
+            variant="primary"
+            disabled={data.length > 0 && selectedIndex === -1}
+            onClick={() => {
+              handleFinish(data[selectedIndex]);
+            }}
+          >
+            Finish
+          </Button>
+        )}
       </Modal.Footer>
     </Modal>
   );

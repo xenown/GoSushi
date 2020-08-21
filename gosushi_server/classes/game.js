@@ -36,9 +36,9 @@ class Game {
   }
 
   checkForSpecialActions() {
-    const isInSpecialActions = (newCard, newPlayerId) =>
+    const isInSpecialActions = (newCard, newPlayerName) =>
       this.specialActions.findIndex(
-        obj => _.isEqual(obj.card, newCard) && obj.playerId === newPlayerId
+        obj => _.isEqual(obj.card, newCard) && obj.name === newPlayerName
       ) !== -1;
 
     this.players.forEach(p => {
@@ -46,9 +46,9 @@ class Game {
         // checks for special cards that activate when played
         if (
           specialActionsHand.includes(card.name) &&
-          !isInSpecialActions(card, p.socketId)
+          !isInSpecialActions(card, p.name)
         ) {
-          this.specialActions.push({ card: card, playerId: p.socketId });
+          this.specialActions.push({ card: card, playerName: p.name });
         }
       });
 
@@ -56,9 +56,9 @@ class Game {
         // check for special cards that are used on a turn after they were initialy played/flipped
         if (
           specialActionsPlayed.includes(card.name) &&
-          !isInSpecialActions(card, p.socketId)
+          !isInSpecialActions(card, p.name)
         ) {
-          this.specialActions.push({ card: card, playerId: p.socketId });
+          this.specialActions.push({ card: card, playerName: p.name });
         }
       });
     });
@@ -83,12 +83,12 @@ class Game {
       if (this.specialActions.length > 0) {
         this.playedTurn -= 1;
 
-        let { card, playerId } = this.specialActions.shift();
+        let { card, playerName } = this.specialActions.shift();
 
-        // console.log(`player ${playerId} plays special card: ${card.name}`);
+        // console.log(`player ${playerName} plays special card: ${card.name}`);
 
-        let index = this.players.findIndex(p => p.socketId === playerId);
-        let data = this.getSpecialData(playerId, card);
+        let index = this.players.findIndex(p => p.name === playerName);
+        let data = this.getSpecialData(playerName, card);
 
         if (this.isAutoPlayers && index !== 0) {
           this.handleSpecialAction(this.players[index], card, data[0]);
@@ -99,13 +99,14 @@ class Game {
           );
         } else {
           notifySpecialAction(
-            playerId,
+            playerName,
+            this.players,
             card,
-            this.getSpecialData(playerId, card)
+            this.getSpecialData(playerName, card)
           );
         }
 
-        // TODO: notify others to wait for 'playerId' player to finish 'card.name' action
+        // TODO: notify others to wait for 'playerName' player to finish 'card.name' action
       } else {
         this.playedTurn = 0;
         this.hasAutoPlayedTurn = false;
@@ -160,8 +161,8 @@ class Game {
     return tempPlayers;
   }
 
-  getSpecialData(socketId, card) {
-    let currPlayer = this.players.find(p => p.socketId === socketId);
+  getSpecialData(playerName, card) {
+    let currPlayer = this.players.find(p => p.name === playerName);
 
     switch (card.name) {
       case 'Chopsticks':
