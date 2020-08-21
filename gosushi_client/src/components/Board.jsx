@@ -6,12 +6,16 @@ import { getCardImage } from '../utils/getCardImage';
 import SpecialModal from './SpecialModal';
 import ResultsModal from './ResultsModal';
 import OtherPlayerGrid from './OtherPlayerGrid';
+import CardToggle from './CardToggle';
 import './board.scss';
 
 const Board = ({ socket }) => {
   const params = useParams();
   const [hand, setHand] = useState([]);
   const [playersData, setPlayersData] = useState([]);
+
+  const [showPlayedCards, toggleShowPlayedCards] = useState(true);
+
   const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
   const [played, setPlayed] = useState(false);
   const [selectedPlayedCard, setSelectedPlayedCard] = useState(-1);
@@ -95,52 +99,67 @@ const Board = ({ socket }) => {
     );
   };
 
+  const renderActions = () => {
+    return (
+      <div className="container-buttons">
+        <Button
+          className="button"
+          disabled={selectedCardIndex === -1 || played}
+          onClick={() => {
+            setPlayed(true);
+            socket.emit(
+              'cardSelected',
+              params.roomCode,
+              hand[selectedCardIndex]
+            );
+          }}
+        >
+          {'Play card (you cannot undo this action)'}
+        </Button>
+        <Button
+          className="button"
+          disabled={selectedPlayedCard === -1 || usePlayedCard}
+          onClick={() => {
+            setUsePlayedCard(true);
+            socket.emit(
+              'usePlayedCard',
+              params.roomCode,
+              currPlayer.playedCards[selectedPlayedCard]
+            );
+          }}
+        >
+          Use special card
+        </Button>
+        <CardToggle
+          checked={showPlayedCards}
+          onClick={() => toggleShowPlayedCards(!showPlayedCards)}
+        />
+      </div>
+    );
+  };
+
   const currPlayer = playersData[0];
   const otherPlayerData = playersData.slice(1);
 
+  let cardsToShow = [];
+
+  if (currPlayer) {
+    cardsToShow = showPlayedCards
+      ? currPlayer.playedCards
+      : currPlayer.dessertCards;
+  }
   return (
     <div className="board">
       <SpecialModal socket={socket} />
       <ResultsModal socket={socket} />
       <div className="action-bar">
         <div className="container-hand">{hand.map(displayHandCard)}</div>
-        <div className="container-buttons">
-          <h4>Actions</h4>
-          <Button
-            className="button"
-            disabled={selectedCardIndex === -1 || played}
-            onClick={() => {
-              setPlayed(true);
-              socket.emit(
-                'cardSelected',
-                params.roomCode,
-                hand[selectedCardIndex]
-              );
-            }}
-          >
-            {'Play card (you cannot undo this action)'}
-          </Button>
-          <Button
-            className="button"
-            disabled={selectedPlayedCard === -1 || usePlayedCard}
-            onClick={() => {
-              setUsePlayedCard(true);
-              socket.emit(
-                'usePlayedCard',
-                params.roomCode,
-                currPlayer.playedCards[selectedPlayedCard]
-              );
-            }}
-          >
-            Use special card
-          </Button>
-        </div>
+        {renderActions()}
       </div>
-
       <div>
         <span>{'Your played cards:'}</span>
         <div className="container-played-cards">
-          {currPlayer && currPlayer.playedCards.map(displayPlayedCard)}
+          {cardsToShow.map(displayPlayedCard)}
         </div>
       </div>
       <div>Your points: {playersData[0] && playersData[0].points}</div>
