@@ -15,6 +15,10 @@
   color: white;
 }
 
+.points-text {
+  font-size: 18px;
+}
+
 .container-cards {
   display: flex;
   flex-wrap: wrap;
@@ -28,7 +32,11 @@
 }
 
 .toggle-row {
-  margin: 8px;
+  margin: 4px;
   display: flex;
   justify-content: flex-end;
+}
+
+.player-name {
+  font-size: 18px;
 }

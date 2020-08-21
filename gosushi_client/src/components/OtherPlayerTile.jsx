@@ -24,7 +24,7 @@ const OtherPlayerTile = ({ player }) => {
   return (
     <div className="container-player-data">
       <div className="points-circle">
-        <span>{player.points}</span>
+        <span className="points-text">{player.points}</span>
       </div>
       <div className="toggle-row">
         <CardToggle
@@ -35,7 +35,7 @@ const OtherPlayerTile = ({ player }) => {
       <div className="container-cards">
         {cardsToShow.map(displayPlayedCard)}
       </div>
-      <span>{player.name}</span>
+      <div className="player-name">{player.name}</div>
     </div>
   );
 };
