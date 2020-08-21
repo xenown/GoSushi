@@ -1,13 +1,13 @@
-import React from 'react';
-import { Modal } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Button, Modal } from 'react-bootstrap';
 
-import {
-  menuCardImageMap,
-} from '../utils/menuSelectionUtils';
+import { menuCardImageMap } from '../utils/menuSelectionUtils';
 import './common.scss';
 import './menuDrawer.scss';
 
 const MenuDrawer = ({ menu }) => {
+  const [show, setShow] = useState(false);
+  const handleHide = () => setShow(false);
 
   const bodyContent = () => {
     return (
@@ -36,10 +36,18 @@ const MenuDrawer = ({ menu }) => {
   }
 
   return (
+    <div>
+    <Button 
+      className={"menu-drawer-button" + (show ? " show": "")}
+      onClick={() => {setShow(!show)}}>
+        {show ? "Close Menu": "Open Menu"}
+      </Button>
     <Modal
-      show={true}
-      backdrop="static"
+      show={show}
+      onHide={handleHide}
+      animation={true}
       keyboard={false}
+      className="menu-drawer-modal"
     >
       <Modal.Header>
         <Modal.Title>Current Menu</Modal.Title>
@@ -48,6 +56,7 @@ const MenuDrawer = ({ menu }) => {
         {bodyContent()}
       </Modal.Body>
     </Modal>
+    </div>
   );
 };
 

@@ -10,6 +10,40 @@
   width: 100%;
 }
 
+.modal {
+  &.fade {
+    left:-20vh;
+  }
+
+  &.show {
+    left:0;
+  }
+}
+
+.modal.fade .modal-dialog {
+  -webkit-transform: translate(0);
+  -moz-transform: translate(0);
+  transform: translate(0);
+}
+
+.menu-drawer-modal {
+  transition: left 0.15s linear;
+}
+
+.menu-drawer-button {
+  transition: left 0s linear;
+  position: absolute;
+  transform: rotate(-90deg);
+  left: -40px;
+  bottom: 50%;
+
+  &.show {
+    transition: left 0.15s linear;
+    left: calc(20vh - 40px);
+    z-index: 1041;
+  }
+}
+
 .menu-drawer-body {
   margin-top: 15%;
 }
@@ -18,6 +52,5 @@
   height: auto;
   width: 70%;
   margin: -15%;
-  box-shadow: grey 0px 0px 6px 4px;
-  background-color: gray;
+  filter: drop-shadow(0 0 5px #333);
 }
