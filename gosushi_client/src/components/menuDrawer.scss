@@ -8,6 +8,12 @@
 .modal-content {
   height: 100%;
   width: 100%;
+  background-color: #D1AB83;
+  border-color: white;
+  color: white;
+  border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+  border-left-width: 0px;
 }
 
 .modal {
@@ -20,6 +26,7 @@
   }
 }
 
+// Remove default modal animation
 .modal.fade .modal-dialog {
   -webkit-transform: translate(0);
   -moz-transform: translate(0);
@@ -36,6 +43,9 @@
   transform: rotate(-90deg);
   left: -40px;
   bottom: 50%;
+  background-color: #D1AB83;
+  border-color: #D1AB83;
+  box-shadow: none;
 
   &.show {
     transition: left 0.15s linear;
