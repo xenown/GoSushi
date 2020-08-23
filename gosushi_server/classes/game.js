@@ -129,10 +129,9 @@ class Game {
       calculateRoundPoints(this.players, this.deck.menu);
 
       // empty the playedCards and moved the dessert cards
-
       this.players.forEach(p => {
-        p.dessertCards = p.playedCards.filter(
-          c => c.name === this.deck.menu.dessert
+        p.dessertCards = p.dessertCards.concat(
+          p.playedCards.filter(c => c.name === this.deck.menu.dessert)
         );
         p.playedCards = [];
       });
@@ -281,7 +280,10 @@ class Game {
   }
 
   resetGame() {
-    this.players.forEach(p => (p.playedCards = []));
+    this.players.forEach(p => {
+      p.playedCards = [];
+      p.dessertCards = [];
+    });
   }
 
   startRound() {

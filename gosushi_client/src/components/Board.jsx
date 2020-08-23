@@ -157,6 +157,7 @@ const Board = ({ socket }) => {
       ? currPlayer.playedCards
       : currPlayer.dessertCards;
   }
+
   return (
     <div className="board">
       {!_.isEmpty(menu) && <Drawer menu={menu} />}
