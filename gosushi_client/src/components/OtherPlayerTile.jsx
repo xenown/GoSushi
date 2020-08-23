@@ -1,18 +1,25 @@
 import React, { useState } from 'react';
 
 import CardToggle from './CardToggle';
-import { getCardImage } from '../utils/getCardImage';
+import Card from './Card';
 import './otherPlayerTile.scss';
 
 const OtherPlayerTile = ({ player }) => {
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
+  const transform = {
+    start: "translateY(0%)",
+    hover: "translateY(25%)",
+    noHover: "translateY(0%)"
+  };
+  
   const displayPlayedCard = (card, index) => (
     <div key={`played_${card.name}_${index}`}>
-      <img
-        className="card-image-other-players"
-        src={getCardImage(card)}
-        alt={card.name}
+      <Card 
+        card={card}
+        imageClass="card-image-other-players"
+        scaleUpFactor={6}
+        transform={transform}
       />
     </div>
   );

@@ -54,18 +54,17 @@ const Board = ({ socket }) => {
       socket.off('sendMenuData', handleMenuData);
       socket.off('unknownGame', handleUnknownGame);
     };
-  }, [params.roomCode, socket, history]);
+  }, [params.roomCode, socket, menu, history]);
   
   const handleSelectCard = index => {
-    setSelectedCardIndex(index);
+    setSelectedCardIndex(index === selectedCardIndex ? -1 : index);
   };
 
   const displayPlayedCard = (card, index) => {
     let canUse =
       (card.name === 'Chopsticks' || card.name === 'Spoon') && hand.length > 1;
 
-    let className = canUse ? 'card-playable' : '';
-
+    let className = canUse ? 'card-played-playable' : 'card-played';
     if (selectedPlayedCard === index) {
       className += ' card-selected';
     }
@@ -76,13 +75,13 @@ const Board = ({ socket }) => {
         index={index}
         className={className} 
         isSelected={false}
-        played={played}
+        played={true}
         handleSelectCard={() => {
           if (canUse) {
             setSelectedPlayedCard(index);
           }
         }}
-        scaleUpFactor={4}
+        scaleUpFactor={2}
         imageClass="card-image-played"
         key={`my-played-cards-${index}`}
       />
@@ -131,41 +130,31 @@ const Board = ({ socket }) => {
   const currPlayer = playersData[0];
   const otherPlayerData = playersData.slice(1);
 
-  let cardsToShow = [];
-
-  if (currPlayer) {
-    cardsToShow = showPlayedCards
-      ? currPlayer.playedCards
-      : currPlayer.dessertCards;
-  }
-
   return (
     <div className="board">
       {!_.isEmpty(menu) && <Drawer menu={menu} />}
       <SpecialModal socket={socket} />
       <ResultsModal socket={socket} />
+      <OtherPlayerGrid data={otherPlayerData} />
+      <div className="played-cards">
+        <div className="container-played-cards">
+          {currPlayer && currPlayer.playedCards.map(displayPlayedCard)}
+        </div>
+      </div>
       <div className="action-bar">
+        {renderActions()}
         <div className="container-hand">{hand.map((card, index) => 
             <Card card={card} 
               index={index}
               isSelected={selectedCardIndex === index}
-              played={played}
+              played={false}
               handleSelectCard={handleSelectCard}
               scaleUpFactor={2}
               imageClass="card-image-hand"
               key={`hand_${card.name}_${index}`}
             /> )}
         </div>
-        {renderActions()}
       </div>
-      <div>
-        <span>{'Your played cards:'}</span>
-        <div className="container-played-cards">
-          {cardsToShow.map(displayPlayedCard)}
-        </div>
-      </div>
-      <div>Your points: {playersData[0] && playersData[0].points}</div>
-      <OtherPlayerGrid data={otherPlayerData} />
     </div>
   );
 };

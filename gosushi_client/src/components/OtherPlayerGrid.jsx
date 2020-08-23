@@ -1,20 +1,10 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 
-import Card from './Card';
 import OtherPlayerTile from './OtherPlayerTile';
 import './otherPlayerGrid.scss';
 
 const OtherPlayerGrid = ({ data }) => {
-  const displayPlayedCard = (card, index) => (
-    <Col key={`played_${card.name}_${index}`}>
-      <Card 
-        card={card}
-        imageClass="card-image-other-players"
-        scaleUpFactor={6}
-      />
-    </Col>
-  );
 
   const displayPlayerData = player => (
     <Col>
@@ -36,7 +26,7 @@ const OtherPlayerGrid = ({ data }) => {
 
   return (
     <Container>
-      <Row xs={1} sm={2} md={numPerRow} noGutters>
+      <Row className="other-player-cards" xs={1} sm={2} md={numPerRow} noGutters>
         {data.map(displayPlayerData)}
       </Row>
     </Container>

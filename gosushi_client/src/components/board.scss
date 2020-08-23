@@ -1,41 +1,66 @@
 .board {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   width: 100%;
-  margin: 8px;
+  padding: 8px;
   box-sizing: border-box;
+  background-color: #F6EDCE;
+  color: black;
 }
 
 .action-bar {
   display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: 2%;
+  align-items: center;
+}
+
+.played-cards {
+  margin: auto 10% 0 10%;
+  min-height: 20%;
+  background-color: #D1AB83;
+  border-radius: 1rem;
 }
 
 .container-hand {
   display: flex;
-  width: 90%;
   justify-content: center;
 }
 
 .container-played-cards {
   display: flex;
   justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.card {
+  // override some aspects from bootstrap
+  border-radius : 0.5rem
 }
 
 .card-playable {
   cursor: pointer;
+  margin: 0 4px; 
 }
 
-.card-selected {
-  background-color: yellow;
+.card-played {
+  margin: 1%;
+}
+
+.card-played-playable {
+  cursor: pointer;
+  margin: 1%;
 }
 
 .card-image-hand {
-  height: 200px;
-  width: 136px;
-  padding: 0 4px;
+  width: 7vw;
 }
 
 .card-image-played {
-  height: 125px;
+  max-height: 15vh;
   padding: 0 4px;
 }
 
