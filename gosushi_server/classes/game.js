@@ -268,12 +268,13 @@ class Game {
       case 'Takeout Box':
         // replace chosen card with takeout box
         let chosenCardCast = new Card(chosenCard);
-        let card = _.find(player.playedCards, c =>
-          _.isEqual(c, chosenCardCast)
-        );
-        card.name = CardNameEnum.TAKEOUT_BOX;
-
-        player.playedCards.push(player.turnCards.splice(indexOfSpe, 1)[0]);
+        for (let c in player.playedCards) {
+          if (_.isEqual(player.playedCards[c], chosenCardCast)) {
+            player.playedCards[c] = specialCardCasted;
+            player.turnCards.pop();
+            return;
+          }
+        }
         break;
       default:
     }
