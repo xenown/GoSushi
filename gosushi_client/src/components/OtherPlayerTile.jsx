@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { Badge } from 'react-bootstrap';
 import CardToggle from './CardToggle';
 import Card from './Card';
 import './otherPlayerTile.scss';
@@ -30,9 +30,7 @@ const OtherPlayerTile = ({ player }) => {
 
   return (
     <div className="container-player-data">
-      <div className="points-circle">
-        <span className="points-text">{player.points}</span>
-      </div>
+      <Badge className="points-circle" variant="light">{player.points}</Badge>
       <div className="toggle-row">
         <CardToggle
           checked={showPlayedCards}
