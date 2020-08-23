@@ -1,0 +1,42 @@
+.container-player-data {
+  display: block;
+  border: double;
+  margin: 12px;
+}
+
+.points-circle {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  background-color: #d1ab83;
+  color: white;
+}
+
+.points-text {
+  font-size: 18px;
+}
+
+.container-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  min-height: 75px;
+}
+
+.card-image-other-players {
+  height: 75px;
+  padding: 4px;
+}
+
+.toggle-row {
+  margin: 4px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.player-name {
+  font-size: 18px;
+}

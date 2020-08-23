@@ -1,37 +1,31 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 
-import { getCardImage } from '../utils/getCardImage';
+import OtherPlayerTile from './OtherPlayerTile';
 import './otherPlayerGrid.scss';
 
 const OtherPlayerGrid = ({ data }) => {
-  const displayPlayedCard = (card, index) => (
-    <Col key={`played_${card.name}_${index}`}>
-      <img
-        className="card-image-other-players"
-        src={getCardImage(card)}
-        alt={card.name}
-      />
+  const displayPlayerData = player => (
+    <Col>
+      <OtherPlayerTile key={player.name} player={player} />
     </Col>
   );
 
-  const displayPlayerData = player => (
-    <Col key={player.name}>
-      <div className="container-player-data">
-        <span>{player.name}</span>
-        <Container>
-          <Row md={4} noGutters>
-            {player.playedCards.map(displayPlayedCard)}
-          </Row>
-        </Container>
-        <span>{`Points: ${player.points}`}</span>
-      </div>
-    </Col>
-  );
+  let numPerRow = 0;
+
+  if (data.length > 0 && data.length <= 3) {
+    numPerRow = data.length;
+  } else if (data.length === 4 || data.length === 6) {
+    numPerRow = data.length / 2;
+  } else if (data.length === 5) {
+    numPerRow = 3;
+  } else {
+    numPerRow = 4;
+  }
 
   return (
     <Container>
-      <Row xs={1} sm={2} md={4} noGutters>
+      <Row xs={1} sm={2} md={numPerRow} noGutters>
         {data.map(displayPlayerData)}
       </Row>
     </Container>

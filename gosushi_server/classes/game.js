@@ -127,6 +127,16 @@ class Game {
     if (this.players[0].hand.length === 0) {
       // no more cards in the hand
       calculateRoundPoints(this.players, this.deck.menu);
+
+      // empty the playedCards and moved the dessert cards
+
+      this.players.forEach(p => {
+        p.dessertCards = p.playedCards.filter(
+          c => c.name === this.deck.menu.dessert
+        );
+        p.playedCards = [];
+      });
+
       if (this.round < 3) {
         // go to next round
         this.round++;
@@ -177,7 +187,7 @@ class Game {
       case 'Spoon':
         // display the menu
         let valArray = Object.values(this.deck.menu);
-        let menuItems = ["Nigiri"];
+        let menuItems = ['Nigiri'];
         menuItems.push(valArray[0]);
         menuItems = menuItems.concat(valArray[1]);
         menuItems = menuItems.concat(valArray[2]);
@@ -281,11 +291,6 @@ class Game {
     for (let i = 0; i < this.numPlayers; i++) {
       const temp = this.deck.dealHand(handSize[this.numPlayers]);
       hands.push(temp);
-
-      // empty the hand except for the dessert cards
-      this.players[i].playedCards = this.players[i].playedCards.filter(
-        c => c.name === this.deck.menu.dessert
-      );
     }
     this.rotateHands(hands);
   }
