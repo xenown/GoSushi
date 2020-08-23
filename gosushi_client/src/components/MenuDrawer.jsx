@@ -48,6 +48,7 @@ const MenuDrawer = ({ menu }) => {
       animation={true}
       keyboard={false}
       className="menu-drawer-modal"
+      dialogClassName="menu-drawer-dialog"
     >
       <Modal.Header>
         <Modal.Title>Current Menu</Modal.Title>

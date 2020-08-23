@@ -1,4 +1,4 @@
-.modal-dialog {
+.menu-drawer-dialog {
   position: absolute;
   left: 0;
   width: 20vh;
@@ -11,12 +11,11 @@
   background-color: #D1AB83;
   border-color: white;
   color: white;
-  border-bottom-left-radius: 0px;
-  border-top-left-radius: 0px;
-  border-left-width: 0px;
 }
 
-.modal {
+.menu-drawer-modal {
+  transition: left 0.15s linear;
+
   &.fade {
     left:-20vh;
   }
@@ -27,14 +26,10 @@
 }
 
 // Remove default modal animation
-.modal.fade .modal-dialog {
+.menu-drawer-modal.fade .menu-drawer-dialog {
   -webkit-transform: translate(0);
   -moz-transform: translate(0);
   transform: translate(0);
-}
-
-.menu-drawer-modal {
-  transition: left 0.15s linear;
 }
 
 .menu-drawer-button {
@@ -45,12 +40,18 @@
   bottom: 50%;
   background-color: #D1AB83;
   border-color: #D1AB83;
-  box-shadow: none;
 
   &.show {
     transition: left 0.15s linear;
     left: calc(20vh - 40px);
     z-index: 1041;
+  }
+
+  // All the selectors needed to change the button to a brown palette
+  &:hover, &:focus, &:active, &:not(:disabled):not(.disabled):active, &:not(:disabled):not(.disabled):active:focus {
+    background-color: #c3925e;
+    border-color: #c3925e;
+    box-shadow: 0 0 0 0.2rem rgba(216,184,150,.5);
   }
 }
 
