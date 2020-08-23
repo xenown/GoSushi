@@ -91,7 +91,7 @@ class Game {
         let data = this.getSpecialData(playerName, card);
 
         if (this.isAutoPlayers && index !== 0) {
-          this.handleSpecialAction(this.players[index], card, data[0]);
+          this.handleSpecialAction(this.players[index], card, data.slice(0, 1));
           this.finishedTurn(
             sendPlayerData,
             notifySpecialAction,
@@ -200,9 +200,9 @@ class Game {
     }
   }
 
-  handleSpecialAction(player, specialCard, chosenCard) {
+  handleSpecialAction(player, specialCard, chosenCards) {
     let specialCardCasted = new Card(specialCard);
-    if (!chosenCard) {
+    if (chosenCards.length === 0) {
       _.remove(player.turnCards, c => _.isEqual(c, specialCardCasted));
       return;
     }
@@ -220,20 +220,20 @@ class Game {
     switch (specialCard.name) {
       case 'Chopsticks':
         // add card to player's turn cards from their hand
-        player.playCardFromHand(chosenCard);
+        player.playCardFromHand(chosenCards[0]);
 
         player.hand.push(player.turnCardsReuse.splice(indexOfSpe, 1)[0]);
         break;
       case 'Menu':
         // choose a card from the top 4 in the unused deck, shuffle the rest
-        let cardFromDeck = this.deck.removeOneAndShuffle(chosenCard);
+        let cardFromDeck = this.deck.removeOneAndShuffle(chosenCards[0]);
 
         //remove special card from turn cards and add the one from the deck
         player.turnCards.splice(indexOfSpe, 1, cardFromDeck);
         break;
       case 'Special Order':
         // add the card to the player's turn cards
-        let duplicate = new Card(chosenCard);
+        let duplicate = new Card(chosenCards[0]);
 
         //remove special card from turn cards (the chosen card is duplicated and replaces it)
         player.turnCards.splice(indexOfSpe, 1, duplicate);
@@ -255,7 +255,7 @@ class Game {
           let p = this.players[i];
 
           //note for the spoon case, chosenCard is a string containing the name, not a Card object
-          let cardInHand = p.hand.findIndex(c => c.name === chosenCard);
+          let cardInHand = p.hand.findIndex(c => c.name === chosenCards[0]);
           if (cardInHand !== -1) {
             player.playedCards.push(p.hand[cardInHand]);
             p.hand[cardInHand] = specialCardCasted;
@@ -267,14 +267,16 @@ class Game {
         break;
       case 'Takeout Box':
         // replace chosen card with takeout box
-        let chosenCardCast = new Card(chosenCard);
+        let indexChosen = 0;
         for (let c in player.playedCards) {
-          if (_.isEqual(player.playedCards[c], chosenCardCast)) {
+          if (
+            _.isEqual(player.playedCards[c], new Card(chosenCards[indexChosen]))
+          ) {
             player.playedCards[c] = specialCardCasted;
-            player.turnCards.pop();
-            return;
+            indexChosen++;
           }
         }
+        player.turnCards.splice(indexOfSpe, 1);
         break;
       default:
     }
