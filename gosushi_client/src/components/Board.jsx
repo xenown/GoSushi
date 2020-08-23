@@ -11,6 +11,7 @@ import Card from './Card';
 import './board.scss';
 import Drawer from './MenuDrawer';
 
+
 const Board = ({ socket }) => {
   const params = useParams();
   const history = useHistory();
