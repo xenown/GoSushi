@@ -1,77 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
-import { useSpring, animated, config } from 'react-spring';
 
-import { getCardImage } from '../utils/getCardImage';
 import SpecialModal from './SpecialModal';
 import ResultsModal from './ResultsModal';
 import OtherPlayerGrid from './OtherPlayerGrid';
+import Card from './Card';
 import './board.scss';
 
-const HandCard = ({ card, index, isSelected, played, handleSelectCard }) => {
-  const [isHovering, setHover] = useState(false);
-
-  const calc = (x, y) => [-(y - window.innerHeight / 2) / 20, (x - window.innerWidth / 2) / 20, 2];
-  const trans = (x, y, s) => `scale(${s}) translate3d(0,${(s-1) * 200},0)`;
-  // const trans = (x, y, s) => `perspective(600px) rotateX(${x}deg) rotateY(${y}deg) scale(${s})`;
-
-  // const posRef = useRef();
-  // const [props, set] = useSpring(() => ({ zIndex: 0, xys: [0, 0, 1], config: config.default }));
-  const props = useSpring({
-    // to: !isHover ? [{ zIndex: 1, transform: "" }, { zIndex: 1, transform: "scale(2) translate3d(0, 100, 0)" }] : { zIndex: 0, transform: "scale(1) translate3d(0, 0, 0)" },
-    from: { zIndex: 0, transform: "scale(1)" },
-    to: isHovering ? [{ zIndex: 1, transform: "scale(1)" }, { zIndex: 1, transform: "scale(2)" }] : { zIndex: 0, transform: "scale(1)" },
-    config: config.default
-  });
-
-  // const sizeRef = useRef();
-  // const [props, set] = useSpring(() => ({ zIndex: 0, xys: [0, 0, 1], config: config.default }));
-  // // const [props, set] = useSpring(() => ({ xys: [0, 0, 1], width: 136, height: 208, config: config.default }));
-
-  // useChain([posRef, sizeRef]);
-
-  let className = 'card-playable';
-
-  if (isSelected) {
-    className += ' card-selected';
-  }
-
-  return (
-    <div
-      className={className}
-      key={index}
-      disabled={played}
-      onClick={() => handleSelectCard(index)}
-    >
-      <animated.div
-        className="card"
-        // onMouseEnter={({ clientX: x, clientY: y }) => set({ xys: calc(x, y), zIndex: 1})}
-        // onMouseEnter={({ clientX: x, clientY: y }) => {
-        //   // set({ xys: props.xys, zIndex: 1 });
-        //   set({ xys: calc(x, y), zIndex: 1 });
-        // }}
-        onMouseEnter={() => setHover(true)}
-        // onMouseEnter={() => set({ zIndex: 1})}
-        // onMouseMove={({ clientX: x, clientY: y }) => set({ width : 2 * 136, height: 2 * 208 })}
-        // onMouseLeave={() => set({ xys: [0, 0, 1], zIndex: 0 })}
-        onMouseLeave={() => setHover(false)}
-        // onMouseLeave={() => set({ zIndex: 0 })}
-        // onMouseLeave={() => set({ xys: [0, 0, 1], width: 136, height: 208 })}
-        // style={{ zIndex: props.zIndex, transform: props.xys.interpolate(trans)} }
-        style={props}
-      >
-        <img
-          className="card-image-hand"
-          src={getCardImage(card)}
-          alt={card.name}
-          height="208"
-          width="136"
-        />
-      </animated.div>
-    </div>
-  );
-};
 
 const Board = ({ socket }) => {
   const params = useParams();
@@ -123,23 +59,21 @@ const Board = ({ socket }) => {
     }
 
     return (
-      <div
-        className={className}
-        key={`my-played-cards-${index}`}
-        disabled={played}
-        onClick={() => {
+      <Card 
+        card={card}
+        index={index}
+        className={className} 
+        isSelected={false}
+        played={played}
+        handleSelectCard={() => {
           if (canUse) {
             setSelectedPlayedCard(index);
           }
         }}
-      >
-        <img
-          className="card-image-played"
-          src={getCardImage(card)}
-          alt={card.name}
-          key={`played_${card.name}_${index}`}
-        />
-      </div>
+        scaleUpFactor={4}
+        imageClass="card-image-played"
+        key={`my-played-cards-${index}`}
+      />
     );
   };
 
@@ -152,11 +86,13 @@ const Board = ({ socket }) => {
       <ResultsModal socket={socket} />
       <div className="action-bar">
         <div className="container-hand">{hand.map((card, index) => 
-            <HandCard card={card} 
+            <Card card={card} 
               index={index}
               isSelected={selectedCardIndex === index}
               played={played}
               handleSelectCard={handleSelectCard}
+              scaleUpFactor={2}
+              imageClass="card-image-hand"
               key={`hand_${card.name}_${index}`}
             /> )}
         </div>

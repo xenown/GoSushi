@@ -1,16 +1,16 @@
 import React from 'react';
 import { Container, Row, Col } from 'react-bootstrap';
 
-import { getCardImage } from '../utils/getCardImage';
+import Card from './Card';
 import './otherPlayerGrid.scss';
 
 const OtherPlayerGrid = ({ data }) => {
   const displayPlayedCard = (card, index) => (
     <Col key={`played_${card.name}_${index}`}>
-      <img
-        className="card-image-other-players"
-        src={getCardImage(card)}
-        alt={card.name}
+      <Card 
+        card={card}
+        imageClass="card-image-other-players"
+        scaleUpFactor={6}
       />
     </Col>
   );
