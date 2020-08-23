@@ -77,6 +77,10 @@ const Board = ({ socket }) => {
       history.push('/');
     }
 
+    const handleUnknownGame = () => {
+      history.push('/');
+    }
+
     socket.on('sendTurnData', handleDealHand);
     socket.on('unknownGame', handleUnknownGame);
 
