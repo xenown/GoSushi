@@ -8,7 +8,7 @@
 .modal-content {
   height: 100%;
   width: 100%;
-  background-color: #D1AB83;
+  background-color: var(--tan);
   border-color: white;
   color: white;
 }
@@ -38,8 +38,8 @@
   transform: rotate(-90deg);
   left: -40px;
   bottom: 50%;
-  background-color: #D1AB83;
-  border-color: #D1AB83;
+  background-color: var(--tan);
+  border-color: var(--tan);
 
   &.show {
     transition: left 0.15s linear;
@@ -49,9 +49,11 @@
 
   // All the selectors needed to change the button to a brown palette
   &:hover, &:focus, &:active, &:not(:disabled):not(.disabled):active, &:not(:disabled):not(.disabled):active:focus {
-    background-color: #c3925e;
-    border-color: #c3925e;
-    box-shadow: 0 0 0 0.2rem rgba(216,184,150,.5);
+    // background-color: $camel;
+    // border-color: $camel;
+    background-color: var(--camel);
+    border-color: var(--camel);
+    box-shadow: 0 0 0 0.2rem rgba(var(--light-tan-rgb),.5);
   }
 }
 
@@ -63,5 +65,5 @@
   height: auto;
   width: 70%;
   margin: -15%;
-  filter: drop-shadow(0 0 5px #333);
+  filter: drop-shadow(0 0 5px var(--jet));
 }
