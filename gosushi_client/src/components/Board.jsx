@@ -36,8 +36,8 @@ const Board = ({ socket }) => {
       setUsePlayedCard(false);
     };
 
-    const handleMenuData = (menuData) => {
-      setMenu(menuData)
+    const handleMenuData = menuData => {
+      setMenu(menuData);
     };
 
     socket.on('sendTurnData', handleDealHand);
@@ -47,7 +47,7 @@ const Board = ({ socket }) => {
       socket.off('sendTurnData', handleDealHand);
       socket.off('sendMenuData', handleMenuData);
     };
-  }, [params.roomCode, socket]);
+  }, [params.roomCode, socket, menu]);
 
   const handleSelectCard = index => {
     setSelectedCardIndex(index);
