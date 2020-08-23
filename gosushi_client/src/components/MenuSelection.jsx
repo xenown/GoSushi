@@ -85,9 +85,6 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
       menu.appetizers = suggestedMenus[name]['appetizers'];
       menu.specials = suggestedMenus[name]['specials'];
       menu.dessert = suggestedMenus[name]['dessert'];
-      console.log("TEST");
-      console.log(suggestedMenus[name]['specials']);
-      console.log(menu);
       handleMenu(menu);
     };
   });
