@@ -1,7 +1,11 @@
 const _ = require('lodash');
 const Card = require('../../classes/card');
 const Game = require('../../classes/game');
-const { calculateGamePoints, calculateRoundPoints, calculateTurnPoints } = require('../../util/calculatePoints');
+const {
+  calculateGamePoints,
+  calculateRoundPoints,
+  calculateTurnPoints,
+} = require('../../util/calculatePoints');
 const cardNameEnum = require('../../util/cardNameEnum');
 const onigiriEnum = require('../../util/onigiriNameEnum');
 const menus = require('../../util/suggestedMenus');
@@ -11,11 +15,11 @@ const addPlayers = (game, players) => {
   for (let i = 1; i < players.length; i++) {
     game.addPlayer(players[i], players[i]);
   }
-}
+};
 
 describe('calculateTurnPoints', function () {
-  const roomCode = "code";
-  const players = ["P1", "P2", "P3"];
+  const roomCode = 'code';
+  const players = ['P1', 'P2', 'P3'];
   const hands = [
     [
       new Card(cardNameEnum.MISO_SOUP),
@@ -39,7 +43,7 @@ describe('calculateTurnPoints', function () {
       new Card(cardNameEnum.WASABI),
       new Card(cardNameEnum.WASABI),
       new Card(cardNameEnum.SALMON),
-      new Card(cardNameEnum.SQUID)
+      new Card(cardNameEnum.SQUID),
     ],
     [
       new Card(cardNameEnum.TOFU),
@@ -74,10 +78,12 @@ describe('calculateTurnPoints', function () {
   beforeEach(() => {
     // Pop last card and add it to turnCards to "play" it
     game.players.forEach(p => p.turnCards.push(p.hand.pop()));
-    calculateTurnPoints(game.players,
+    calculateTurnPoints(
+      game.players,
       game.deck.menu,
       game.uramakiCountMap,
-      game.uramakiStanding);
+      game.uramakiStanding
+    );
   });
 
   it('should not give Miso points when 2 are played', () => {
@@ -106,104 +112,104 @@ describe('calculateTurnPoints', function () {
     expect(game.players.map(p => p.points)).toEqual([10, 10, 2]);
   });
 
-  it('should assign two Wasabi\'s in a turn to one player (P1) and assign one Wasabi to another (P2)', () => {
-    game.deck.menu.specials = "Wasabi";
+  it("should assign two Wasabi's in a turn to one player (P1) and assign one Wasabi to another (P2)", () => {
+    game.deck.menu.specials = 'Wasabi';
     game.players.forEach(p => p.turnCards.push(p.hand.pop()));
-    calculateTurnPoints(game.players,
+    calculateTurnPoints(
+      game.players,
       game.deck.menu,
       game.uramakiCountMap,
-      game.uramakiStanding);
+      game.uramakiStanding
+    );
 
     game.players.forEach(p => {
       let card = p.hand.pop();
-      if (_.isArray(card)){
+      if (_.isArray(card)) {
         p.turnCards = p.turnCards.concat(card);
       } else {
         p.turnCards.push(card);
       }
     });
 
-    calculateTurnPoints(game.players,
+    calculateTurnPoints(
+      game.players,
       game.deck.menu,
       game.uramakiCountMap,
-      game.uramakiStanding);
+      game.uramakiStanding
+    );
 
-    const wasabi1 = game.players[0].playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    const wasabi1 = game.players[0].playedCards.filter(
+      c => c.name === cardNameEnum.WASABI
+    );
     expect(wasabi1.map(el => el.data)).toEqual([4, 2]);
 
-    const wasabi2 = game.players[1].playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    const wasabi2 = game.players[1].playedCards.filter(
+      c => c.name === cardNameEnum.WASABI
+    );
     expect(wasabi2.map(el => el.data)).toEqual([4, null]);
   });
 
-  it('should assign two Wasabi\'s in one turn to different players (P2 and P3)', () => {
-    const wasabi2 = game.players[1].playedCards.filter(c => c.name === cardNameEnum.WASABI);
+  it("should assign two Wasabi's in one turn to different players (P2 and P3)", () => {
+    const wasabi2 = game.players[1].playedCards.filter(
+      c => c.name === cardNameEnum.WASABI
+    );
     expect(wasabi2.map(el => el.data)).toEqual([4, 6]);
 
-    const wasabi3 = game.players[2].playedCards.filter(c => c.name === cardNameEnum.WASABI);
+    const wasabi3 = game.players[2].playedCards.filter(
+      c => c.name === cardNameEnum.WASABI
+    );
     expect(wasabi3.map(el => el.data)).toEqual([4]);
   });
 });
 
 describe('calculateRollPoints', function () {
-  const roomCode = "code";
+  const roomCode = 'code';
   const players = [
-    ["P1", "P2", "P3", "P4", "P5", "P6"],
-    ["P1", "P2"],
-    ["P1", "P2", "P3"],
+    ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'],
+    ['P1', 'P2'],
+    ['P1', 'P2', 'P3'],
   ];
 
-  const hands = [[
+  const hands = [
     [
-      new Card(cardNameEnum.MAKI, 10),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
+      [
+        new Card(cardNameEnum.MAKI, 10),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+      ],
+      [
+        new Card(cardNameEnum.MAKI, 10),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+      ],
+      [
+        new Card(cardNameEnum.MAKI, 6),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+      ],
+      [
+        new Card(cardNameEnum.MAKI, 3),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+      ],
+      [new Card(cardNameEnum.TEMAKI), new Card(cardNameEnum.TEMAKI)],
+      [new Card(cardNameEnum.TEMAKI), new Card(cardNameEnum.TEMAKI)],
     ],
     [
-      new Card(cardNameEnum.MAKI, 10),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
+      [new Card(cardNameEnum.MAKI, 10), new Card(cardNameEnum.TEMAKI)],
+      [
+        new Card(cardNameEnum.MAKI, 5),
+        new Card(cardNameEnum.MAKI, 3),
+        new Card(cardNameEnum.TEMAKI),
+        new Card(cardNameEnum.TEMAKI),
+      ],
     ],
-    [
-      new Card(cardNameEnum.MAKI, 6),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-    ],
-    [
-      new Card(cardNameEnum.MAKI, 3),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-    ],
-    [
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-    ],
-    [
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-    ],
-  ],
-  [
-    [
-      new Card(cardNameEnum.MAKI, 10),
-      new Card(cardNameEnum.TEMAKI),
-    ],
-    [
-      new Card(cardNameEnum.MAKI, 5),
-      new Card(cardNameEnum.MAKI, 3),
-      new Card(cardNameEnum.TEMAKI),
-      new Card(cardNameEnum.TEMAKI),
-    ],
-  ],
-  [
-    [],
-    [],
-    [new Card(cardNameEnum.MAKI, 3)],
-  ]
+    [[], [], [new Card(cardNameEnum.MAKI, 3)]],
   ];
 
   const uramakis = [
@@ -213,7 +219,7 @@ describe('calculateRollPoints', function () {
     new Card(cardNameEnum.URAMAKI, 3),
     new Card(cardNameEnum.URAMAKI, 1),
     new Card(cardNameEnum.URAMAKI, 1),
-  ]
+  ];
 
   // Set up game with different roll depending on test case number (num)
   const setupGame = num => {
@@ -235,12 +241,17 @@ describe('calculateRollPoints', function () {
     });
 
     return game;
-  }
+  };
 
   const games = [setupGame(0), setupGame(1), setupGame(2)];
 
   it('should give Uramaki points correctly at the end of last turn', () => {
-    calculateTurnPoints(games[0].players, games[0].deck.menu, games[0].uramakiCountMap, games[0].uramakiStanding);
+    calculateTurnPoints(
+      games[0].players,
+      games[0].deck.menu,
+      games[0].uramakiCountMap,
+      games[0].uramakiStanding
+    );
     expect(games[0].players.map(p => p.points)).toEqual([8, 2, 8, 0, 0, 0]);
   });
 
@@ -280,12 +291,11 @@ describe('calculateRollPoints', function () {
 });
 
 describe('calculateAppetizerPoints', function () {
-  const roomCode = "code";
-  const players = ["P1", "P2", "P3", "P4", "P5", "P6"];
+  const roomCode = 'code';
+  const players = ['P1', 'P2', 'P3', 'P4', 'P5', 'P6'];
 
   const hands = [
-    [
-    ],
+    [],
     [
       new Card(cardNameEnum.DUMPLING),
       new Card(cardNameEnum.EEL),
@@ -377,50 +387,29 @@ describe('calculateAppetizerPoints', function () {
     ],
   ];
 
-  const edamameHands = [[
+  const edamameHands = [
+    [[new Card(cardNameEnum.EDAMAME)], [], [], [], [], []],
     [
-      new Card(cardNameEnum.EDAMAME),
-    ], [], [], [], [], []
-  ],
-  [
-    [
-      new Card(cardNameEnum.EDAMAME),
+      [new Card(cardNameEnum.EDAMAME)],
+      [new Card(cardNameEnum.EDAMAME)],
+      [new Card(cardNameEnum.EDAMAME)],
+      [new Card(cardNameEnum.EDAMAME)],
+      [new Card(cardNameEnum.EDAMAME)],
+      [new Card(cardNameEnum.EDAMAME), new Card(cardNameEnum.EDAMAME)],
     ],
     [
-      new Card(cardNameEnum.EDAMAME),
+      [new Card(cardNameEnum.EDAMAME)],
+      [
+        new Card(cardNameEnum.EDAMAME),
+        new Card(cardNameEnum.EDAMAME),
+        new Card(cardNameEnum.EDAMAME),
+      ],
+      [new Card(cardNameEnum.EDAMAME)],
+      [new Card(cardNameEnum.EDAMAME)],
+      [],
+      [],
     ],
-    [
-      new Card(cardNameEnum.EDAMAME),
-    ],
-    [
-      new Card(cardNameEnum.EDAMAME),
-    ],
-    [
-      new Card(cardNameEnum.EDAMAME),
-    ],
-    [
-      new Card(cardNameEnum.EDAMAME),
-      new Card(cardNameEnum.EDAMAME),
-    ],
-  ],
-  [
-    [
-      new Card(cardNameEnum.EDAMAME),
-    ],
-    [
-      new Card(cardNameEnum.EDAMAME),
-      new Card(cardNameEnum.EDAMAME),
-      new Card(cardNameEnum.EDAMAME),
-    ],
-    [
-      new Card(cardNameEnum.EDAMAME),
-    ],
-    [
-      new Card(cardNameEnum.EDAMAME),
-    ],
-    [],
-    [],
-  ]];
+  ];
 
   const game = new Game(
     _.clone(menus.firstMeal),
@@ -438,47 +427,47 @@ describe('calculateAppetizerPoints', function () {
 
   beforeEach(() => {
     // Reset points before each test
-    game.players.forEach(p => p.points = 0);
-  })
+    game.players.forEach(p => (p.points = 0));
+  });
 
   it('should give Dumpling points correctly', () => {
-    game.deck.menu.appetizers = ["Dumpling"];
+    game.deck.menu.appetizers = ['Dumpling'];
     calculateRoundPoints(game.players, game.deck.menu);
     expect(game.players.map(p => p.points)).toEqual([0, 1, 3, 6, 10, 15]);
   });
 
   it('should give Eel points correctly', () => {
-    game.deck.menu.appetizers = ["Eel"];
+    game.deck.menu.appetizers = ['Eel'];
     calculateRoundPoints(game.players, game.deck.menu);
     expect(game.players.map(p => p.points)).toEqual([0, -3, 7, 7, 7, 0]);
   });
 
   it('should give Onigiri points correctly', () => {
-    game.deck.menu.appetizers = ["Onigiri"];
+    game.deck.menu.appetizers = ['Onigiri'];
     calculateRoundPoints(game.players, game.deck.menu);
     expect(game.players.map(p => p.points)).toEqual([0, 1, 4, 9, 16, 20]);
   });
 
   it('should give Sashimi points correctly', () => {
-    game.deck.menu.appetizers = ["Sashimi"];
+    game.deck.menu.appetizers = ['Sashimi'];
     calculateRoundPoints(game.players, game.deck.menu);
     expect(game.players.map(p => p.points)).toEqual([0, 0, 0, 10, 10, 20]);
   });
 
   it('should give Tempura points correctly', () => {
-    game.deck.menu.appetizers = ["Tempura"];
+    game.deck.menu.appetizers = ['Tempura'];
     calculateRoundPoints(game.players, game.deck.menu);
     expect(game.players.map(p => p.points)).toEqual([0, 0, 5, 5, 10, 10]);
   });
 
   it('should give Tofu points correctly', () => {
-    game.deck.menu.appetizers = ["Tofu"];
+    game.deck.menu.appetizers = ['Tofu'];
     calculateRoundPoints(game.players, game.deck.menu);
     expect(game.players.map(p => p.points)).toEqual([0, 2, 6, 0, 0, 0]);
   });
 
   it('should give 0 points per card when only one player has Edamame', () => {
-    game.deck.menu.appetizers = ["Edamame"];
+    game.deck.menu.appetizers = ['Edamame'];
     game.players.forEach((p, index) => {
       p.playedCards = edamameHands[0][index];
     });
@@ -504,8 +493,8 @@ describe('calculateAppetizerPoints', function () {
 });
 
 describe('calculateSpecialPoints', function () {
-  const roomCode = "code";
-  const players = ["P1", "P2", "P3", "P4"];
+  const roomCode = 'code';
+  const players = ['P1', 'P2', 'P3', 'P4'];
 
   const hands = [
     [
@@ -587,38 +576,38 @@ describe('calculateSpecialPoints', function () {
   });
 
   beforeEach(() => {
-    game.players.forEach(p => p.points = 0);
-  })
+    game.players.forEach(p => (p.points = 0));
+  });
 
   const removeNigiriPoints = () => {
     game.players[1].points -= 2;
     game.players[2].points -= 3;
     game.players[3].points -= 3;
-  }
+  };
 
   it('should give Wasabi points correctly', () => {
-    game.deck.menu.specials = ["Wasabi"];
+    game.deck.menu.specials = ['Wasabi'];
     calculateRoundPoints(game.players, game.deck.menu);
     removeNigiriPoints();
     expect(game.players.map(p => p.points)).toEqual([0, 4, 0, 2]);
   });
 
   it('should give Soy Sauce points correctly', () => {
-    game.deck.menu.specials = ["Soy Sauce"];
+    game.deck.menu.specials = ['Soy Sauce'];
     calculateRoundPoints(game.players, game.deck.menu);
     removeNigiriPoints();
     expect(game.players.map(p => p.points)).toEqual([0, 0, 4, 8]);
   });
 
   it('should give Tea points correctly', () => {
-    game.deck.menu.specials = ["Tea"];
+    game.deck.menu.specials = ['Tea'];
     calculateRoundPoints(game.players, game.deck.menu);
     removeNigiriPoints();
     expect(game.players.map(p => p.points)).toEqual([0, 0, 4, 8]);
   });
 
   it('should give Takeout Box points correctly', () => {
-    game.deck.menu.specials = ["Takeout Box"];
+    game.deck.menu.specials = ['Takeout Box'];
     calculateRoundPoints(game.players, game.deck.menu);
     removeNigiriPoints();
     expect(game.players.map(p => p.points)).toEqual([0, 2, 4, 6]);
@@ -626,8 +615,8 @@ describe('calculateSpecialPoints', function () {
 });
 
 describe('calculateDessertPoints', function () {
-  const roomCode = "code";
-  const players = ["P1", "P2", "P3"];
+  const roomCode = 'code';
+  const players = ['P1', 'P2', 'P3'];
 
   const hands = [
     [
@@ -661,7 +650,8 @@ describe('calculateDessertPoints', function () {
           orange: 3,
         }),
       ],
-    ],[
+    ],
+    [
       [
         new Card(cardNameEnum.PUDDING),
         new Card(cardNameEnum.PUDDING),
@@ -695,7 +685,7 @@ describe('calculateDessertPoints', function () {
           orange: 2,
         }),
       ],
-    ]
+    ],
   ];
 
   const game = new Game(
@@ -709,7 +699,7 @@ describe('calculateDessertPoints', function () {
   addPlayers(game, players);
 
   game.players.forEach((p, index) => {
-    p.playedCards = hands[index];
+    p.dessertCards = hands[index];
   });
 
   // Set up game with different roll depending on test case number (num)
@@ -726,50 +716,50 @@ describe('calculateDessertPoints', function () {
 
     game.setupDeck();
     game.players.forEach((p, index) => {
-      p.playedCards = hands[num][index];
+      p.dessertCards = hands[num][index];
     });
 
     return game;
-  }
+  };
 
   const games = [setupGame(0), setupGame(1)];
 
   beforeEach(() => {
-    games.forEach(g => g.players.forEach(p => p.points = 0));
-  })
+    games.forEach(g => g.players.forEach(p => (p.points = 0)));
+  });
 
   it('should give Pudding points correctly with different counts', () => {
-    games[0].deck.menu.dessert = "Pudding";
+    games[0].deck.menu.dessert = 'Pudding';
     calculateGamePoints(games[0].players, games[0].deck.menu);
     expect(games[0].players.map(p => p.points)).toEqual([-6, 0, 6]);
   });
 
   it('should give Pudding points correctly with same counts', () => {
-    games[1].deck.menu.dessert = "Pudding";
+    games[1].deck.menu.dessert = 'Pudding';
     calculateGamePoints(games[1].players, games[1].deck.menu);
     expect(games[1].players.map(p => p.points)).toEqual([0, 0, 0]);
   });
 
   it('should give Ice Cream points correctly when count is divisible by 4', () => {
-    games[0].deck.menu.dessert = "Green Tea Ice Cream";
+    games[0].deck.menu.dessert = 'Green Tea Ice Cream';
     calculateGamePoints(games[0].players, games[0].deck.menu);
     expect(games[0].players.map(p => p.points)).toEqual([0, 12, 24]);
   });
 
   it('should give Ice Cream points correctly when count is not divisible by 4', () => {
-    games[1].deck.menu.dessert = "Green Tea Ice Cream";
+    games[1].deck.menu.dessert = 'Green Tea Ice Cream';
     calculateGamePoints(games[1].players, games[1].deck.menu);
     expect(games[1].players.map(p => p.points)).toEqual([0, 0, 12]);
   });
 
   it('should give Fruit points correctly for all same counts', () => {
-    games[0].deck.menu.dessert = "Fruit";
+    games[0].deck.menu.dessert = 'Fruit';
     calculateGamePoints(games[0].players, games[0].deck.menu);
     expect(games[0].players.map(p => p.points)).toEqual([-6, 0, 9]);
   });
 
   it('should give Fruit points correctly for different counts', () => {
-    games[1].deck.menu.dessert = "Fruit";
+    games[1].deck.menu.dessert = 'Fruit';
     calculateGamePoints(games[1].players, games[1].deck.menu);
     expect(games[1].players.map(p => p.points)).toEqual([30, 5, 0]);
   });
