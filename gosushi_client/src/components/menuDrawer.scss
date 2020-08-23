@@ -1,0 +1,69 @@
+.menu-drawer-dialog {
+  position: absolute;
+  left: 0;
+  width: 20vh;
+  height: 90%;
+}
+
+.modal-content {
+  height: 100%;
+  width: 100%;
+  background-color: var(--tan);
+  border-color: white;
+  color: white;
+}
+
+.menu-drawer-modal {
+  transition: left 0.15s linear;
+
+  &.fade {
+    left:-20vh;
+  }
+
+  &.show {
+    left:0;
+  }
+}
+
+// Remove default modal animation
+.menu-drawer-modal.fade .menu-drawer-dialog {
+  -webkit-transform: translate(0);
+  -moz-transform: translate(0);
+  transform: translate(0);
+}
+
+.menu-drawer-button {
+  transition: left 0s linear;
+  position: absolute;
+  transform: rotate(-90deg);
+  left: -40px;
+  bottom: 50%;
+  background-color: var(--tan);
+  border-color: var(--tan);
+
+  &.show {
+    transition: left 0.15s linear;
+    left: calc(20vh - 40px);
+    z-index: 1041;
+  }
+
+  // All the selectors needed to change the button to a brown palette
+  &:hover, &:focus, &:active, &:not(:disabled):not(.disabled):active, &:not(:disabled):not(.disabled):active:focus {
+    // background-color: $camel;
+    // border-color: $camel;
+    background-color: var(--camel);
+    border-color: var(--camel);
+    box-shadow: 0 0 0 0.2rem rgba(var(--light-tan-rgb),.5);
+  }
+}
+
+.menu-drawer-body {
+  margin-top: 15%;
+}
+
+.menu-card {
+  height: auto;
+  width: 70%;
+  margin: -15%;
+  filter: drop-shadow(0 0 5px var(--jet));
+}

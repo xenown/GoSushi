@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
@@ -8,10 +9,12 @@ import ResultsModal from './ResultsModal';
 import OtherPlayerGrid from './OtherPlayerGrid';
 import CardToggle from './CardToggle';
 import './board.scss';
+import Drawer from './MenuDrawer';
 
 const Board = ({ socket }) => {
   const params = useParams();
   const [hand, setHand] = useState([]);
+  const [menu, setMenu] = useState({});
   const [playersData, setPlayersData] = useState([]);
 
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
@@ -22,7 +25,7 @@ const Board = ({ socket }) => {
   const [usePlayedCard, setUsePlayedCard] = useState(false);
 
   useEffect(() => {
-    socket.emit('boardLoaded', params.roomCode);
+    socket.emit('boardLoaded', params.roomCode, _.isEmpty(menu));
 
     const handleDealHand = (hand, playersData) => {
       setHand(hand);
@@ -33,10 +36,16 @@ const Board = ({ socket }) => {
       setUsePlayedCard(false);
     };
 
+    const handleMenuData = (menuData) => {
+      setMenu(menuData)
+    };
+
     socket.on('sendTurnData', handleDealHand);
+    socket.on('sendMenuData', handleMenuData);
 
     return () => {
       socket.off('sendTurnData', handleDealHand);
+      socket.off('sendMenuData', handleMenuData);
     };
   }, [params.roomCode, socket]);
 
@@ -150,6 +159,7 @@ const Board = ({ socket }) => {
   }
   return (
     <div className="board">
+      {!_.isEmpty(menu) && <Drawer menu={menu} />}
       <SpecialModal socket={socket} />
       <ResultsModal socket={socket} />
       <div className="action-bar">

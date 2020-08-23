@@ -130,7 +130,7 @@ io.on('connection', socket => {
     io.to(roomCode).emit('startGame', roomCode);
   });
 
-  socket.on('boardLoaded', roomCode => {
+  socket.on('boardLoaded', (roomCode, sendMenu) => {
     const game = rooms[roomCode];
     if (
       game &&
@@ -148,6 +148,9 @@ io.on('connection', socket => {
         playersData.push(playersData.shift());
       }
 
+      if (sendMenu) {
+        socket.emit('sendMenuData', game.deck.menu);
+      }
       socket.emit('sendTurnData', player ? player.hand : [], playersData);
     }
   });

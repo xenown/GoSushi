@@ -34,7 +34,7 @@ const ResultsModal = ({ socket }) => {
           <Col sm={8}>Player Name</Col>
           <Col sm={2}>Points</Col>
         </Row>
-        {playersData.map(player => {
+        {playersData.map((player, index) => {
           if (player.points !== score) {
             score = player.points;
             placement += duplicates;
@@ -53,7 +53,7 @@ const ResultsModal = ({ socket }) => {
           }
 
           return (
-            <Row className={className}>
+            <Row className={className} key={index}>
               <Col sm={2}>{placement}</Col>
               <Col sm={8}>{player.name}</Col>
               <Col sm={2}>{player.points}</Col>
