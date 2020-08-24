@@ -99,7 +99,7 @@ const Board = ({ socket }) => {
       <div className="container-buttons">
         <Button
           className="button"
-          disabled={selectedCardIndex === -1 || played}
+          disabled={selectedCardIndex === -1 || played || !showPlayedCards}
           onClick={() => {
             setPlayed(true);
             socket.emit(
@@ -113,7 +113,7 @@ const Board = ({ socket }) => {
         </Button>
         <Button
           className="button"
-          disabled={selectedPlayedCard === -1 || usePlayedCard}
+          disabled={selectedPlayedCard === -1 || usePlayedCard || !showPlayedCards}
           onClick={() => {
             setUsePlayedCard(true);
             socket.emit(
@@ -135,6 +135,7 @@ const Board = ({ socket }) => {
 
   const currPlayer = playersData[0];
   const otherPlayerData = playersData.slice(1);
+  const cardsToShow = showPlayedCards ? hand : playersData[0].dessertCards;
 
   return (
     <div className="board">
@@ -149,11 +150,12 @@ const Board = ({ socket }) => {
       </div>
       <div className="action-bar">
         {renderActions()}
-        <div className="container-hand">{hand.map((card, index) => 
+        <div className="container-hand">{cardsToShow.map((card, index) => 
             <Card card={card} 
+              className={showPlayedCards ? "card-playable" : "card-played"}
               index={index}
-              isSelected={selectedCardIndex === index}
-              handleSelectCard={handleSelectCardIndex}
+              isSelected={showPlayedCards && selectedCardIndex === index}
+              handleSelectCard={showPlayedCards ? handleSelectCardIndex : () => {}}
               scaleUpFactor={2}
               imageClass="card-image-hand"
               key={`hand_${card.name}_${index}`}

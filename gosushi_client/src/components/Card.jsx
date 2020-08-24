@@ -32,7 +32,7 @@ const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth
   useChain([posRef, sizeRef]);
 
   const finalClassName = className ? className : "card-playable";
-
+  const onClick = handleSelectCard ? handleSelectCard : () => {};
   return (
       <animated.div
         className={finalClassName}
@@ -40,7 +40,7 @@ const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth
         onMouseLeave={() => setHover(false)}
         style={{...posProps, ...sizeProps, position: "relative"}}
         key={index}
-        onClick={() => handleSelectCard(index)}
+        onClick={() => onClick(index)}
       >
         <img
           className={imageClass}
