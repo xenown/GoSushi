@@ -8,7 +8,6 @@ const OtherPlayerTile = ({ player }) => {
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
   const transform = {
-    start: "translateY(0%)",
     hover: "translateY(25%)",
     noHover: "translateY(0%)"
   };
@@ -18,7 +17,7 @@ const OtherPlayerTile = ({ player }) => {
       <Card 
         card={card}
         imageClass="card-image-other-players"
-        scaleUpFactor={6}
+        scaleUpFactor={4}
         transform={transform}
       />
     </div>
