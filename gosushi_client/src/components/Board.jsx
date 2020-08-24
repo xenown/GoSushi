@@ -97,6 +97,7 @@ const Board = ({ socket }) => {
   const renderActions = () => {
     return (
       <div className="container-buttons">
+        <div>Your points: {playersData[0] && playersData[0].points}</div>
         <Button
           className="button"
           disabled={selectedCardIndex === -1 || played || !showPlayedCards}
