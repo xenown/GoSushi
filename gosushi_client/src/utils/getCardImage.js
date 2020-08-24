@@ -31,13 +31,13 @@ export const getCardImage = card => {
     case 'Tofu':
       return cardImages.tofu;
     case 'Chopsticks':
-      return cardImages.chopsticks;
+      return cardImages[`chopsticks${card.data}`];
     case 'Spoon':
-      return cardImages.spoon;
+      return cardImages[`spoon${card.data}`];
     case 'Menu':
-      return cardImages.menu;
+      return cardImages[`menu${card.data}`];
     case 'Takeout Box':
-      return cardImages.takeoutbox;
+      return cardImages[`takeoutbox${card.data}`];
     case 'Soy Sauce':
       return cardImages.soysauce;
     case 'Tea':
