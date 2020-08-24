@@ -34,7 +34,7 @@ const Card = ({ className, card, index, isSelected, played, handleSelectCard, sc
         className={finalClassName}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        style={{...posProps, ...sizeProps}}
+        style={{...posProps, ...sizeProps, position: "relative"}}
         key={index}
         disabled={played}
         onClick={handleSelectCard ? () => handleSelectCard(index) : () => {}}
