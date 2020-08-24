@@ -23,11 +23,12 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  min-height: 75px;
+  height: 10vh;
+  flex-grow: 1;
 }
 
 .card-image-other-players {
-  height: 75px;
+  height: 100%;
   padding: 4px;
 }
 
@@ -39,4 +40,10 @@
 
 .player-name {
   font-size: 18px;
+}
+
+.other-player-card {
+  margin: 0 1vh; 
+  height: 50%;
+  filter: drop-shadow(0 0 5px var(--jet));
 }

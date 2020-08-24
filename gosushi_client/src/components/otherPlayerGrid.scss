@@ -1,14 +1,10 @@
 .container-player-data {
-  display: block;
+  display: flex;
+  flex-direction: column;
   border: double;
   margin: 12px;
-  min-height: 20vh;
+  height: 20vh;
   z-index: 0;
-}
-
-.card-image-other-players {
-  height: 75px;
-  padding: 4px;
 }
 
 .badge {
@@ -16,6 +12,7 @@
   top:-5px;
   left:-5px;
   border-radius: 50%;
+  line-height: normal;
 }
 
 .other-player-cards {

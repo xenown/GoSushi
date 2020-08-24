@@ -8,19 +8,18 @@ const OtherPlayerTile = ({ player }) => {
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
   const transform = {
-    hover: "translateY(25%)",
-    noHover: "translateY(0%)"
+    hover: "scale(6) translateY(25%)",
+    noHover: "scale(1) translateY(0%)"
   };
   
   const displayPlayedCard = (card, index) => (
-    <div key={`played_${card.name}_${index}`}>
-      <Card 
-        card={card}
-        imageClass="card-image-other-players"
-        scaleUpFactor={4}
-        transform={transform}
-      />
-    </div>
+    <Card
+      key={`played_${card.name}_${index}`}
+      className="other-player-card"
+      card={card}
+      imageClass="card-image-other-players"
+      transform={transform}
+    />
   );
 
   const cardsToShow = showPlayedCards

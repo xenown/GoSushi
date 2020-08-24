@@ -57,8 +57,14 @@ const Board = ({ socket }) => {
     };
   }, [params.roomCode, socket, menu, history]);
   
-  const handleSelectCard = index => {
+  const handleSelectCardIndex = index => {
     setSelectedCardIndex(index === selectedCardIndex ? -1 : index);
+    setSelectedPlayedCard(-1);
+  };
+
+  const handleSelectPlayedCard = index => {
+    setSelectedCardIndex(-1);
+    setSelectedPlayedCard(index === selectedPlayedCard ? -1 : index);
   };
 
   const displayPlayedCard = (card, index) => {
@@ -66,24 +72,23 @@ const Board = ({ socket }) => {
       (card.name === 'Chopsticks' || card.name === 'Spoon') && hand.length > 1;
 
     let className = canUse ? 'card-played-playable' : 'card-played';
-    if (selectedPlayedCard === index) {
-      className += ' card-selected';
-    }
+
+    const transform = {
+      hover: "scale(2) translateY(0%)",
+      noHover: "scale(1) translateY(0%)",
+      selected: "scale(1) translateY(-10%)"
+    };
 
     return (
       <Card 
         card={card}
         index={index}
         className={className} 
-        isSelected={false}
-        played={true}
-        handleSelectCard={() => {
-          if (canUse) {
-            setSelectedPlayedCard(index);
-          }
-        }}
+        isSelected={selectedPlayedCard === index}
+        handleSelectCard={canUse ? handleSelectPlayedCard : () => {}}
         scaleUpFactor={2}
         imageClass="card-image-played"
+        transform={transform}
         key={`my-played-cards-${index}`}
       />
     );
@@ -148,8 +153,7 @@ const Board = ({ socket }) => {
             <Card card={card} 
               index={index}
               isSelected={selectedCardIndex === index}
-              played={false}
-              handleSelectCard={handleSelectCard}
+              handleSelectCard={handleSelectCardIndex}
               scaleUpFactor={2}
               imageClass="card-image-hand"
               key={`hand_${card.name}_${index}`}

@@ -7,8 +7,8 @@ import './otherPlayerGrid.scss';
 const OtherPlayerGrid = ({ data }) => {
 
   const displayPlayerData = player => (
-    <Col>
-      <OtherPlayerTile key={player.name} player={player} />
+    <Col key={player.name}>
+      <OtherPlayerTile player={player} />
     </Col>
   );
 
