@@ -38,7 +38,7 @@ class Game {
   checkForSpecialActions() {
     const isInSpecialActions = (newCard, newPlayerName) =>
       this.specialActions.findIndex(
-        obj => _.isEqual(obj.card, newCard) && obj.name === newPlayerName
+        obj => _.isEqual(obj.card, newCard) && obj.playerName === newPlayerName
       ) !== -1;
 
     this.players.forEach(p => {
