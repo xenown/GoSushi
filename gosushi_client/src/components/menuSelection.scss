@@ -1,5 +1,5 @@
 .menu-wrapper {
-  background-color: grey;
+  background-color: var(--camel);
   border-radius: 1rem;
   width: 100%;
   max-width: 1000px;
@@ -10,6 +10,7 @@
   margin: auto;
   font-weight: bold;
   font-size: 1.8rem;
+  color: var(--paper);
 }
 
 .menu-subheader {
@@ -21,18 +22,30 @@
 
 .menu-left-pane {
   padding: 0.5rem 1rem 1rem 1rem;
-  background-color: lightgrey;
+  background-color: var(--paper);
   border-radius: 1rem;
 }
 
+.nav-link.course-tab { color: var(--jet); }
+#v-pills-rolls-tab.active { background-color: var(--rolls) }
+#v-pills-rolls-tab:hover { color: var(--rolls) }
+#v-pills-appetizers-tab.active { background-color: var(--apps); }
+#v-pills-appetizers-tab:hover { color: var(--apps) }
+#v-pills-specials-tab.active { background-color: var(--specs); }
+#v-pills-specials-tab:hover { color: var(--specs) }
+#v-pills-desserts-tab.active { background-color: var(--dess); }
+#v-pills-desserts-tab:hover { color: var(--dess) }
+.nav-link.course-tab.active,
+.nav-link.course-tab.active:hover { color: white !important;}
+
 .menu-right-pane {
   padding: 0.5rem 0rem 1rem 0rem;
-  background-color: lightgrey;
+  background-color: var(--paper);
   border-radius: 1rem;
 }
 
 .menu-center-pane {
-  background-color: lightgrey;
+  background-color: var(--paper);
   border-radius: 1rem;
   height: 100%;
 }
@@ -43,25 +56,26 @@
 
 .default-menu-btn {
   font-size: 0.9rem;
+  box-shadow: none !important;
+  border: none;
 }
-.default-menu-btn.odd {
-  background-color: #007bffc7;
-  border-color: #007bffc7;
+.default-menu-btn.odd { background-color: var(--tan); }
+.default-menu-btn.even { background-color: var(--camel); }
+.default-menu-btn:hover,
+.default-menu-btn:active { background-color: var(--bronze) !important; }
+
+.player-count .btn {
+  background-color: var(--camel);
+  border-color: var(--camel);
+  box-shadow: none !important;
+  border: none;
 }
-.default-menu-btn.even {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-.default-menu-btn:hover {
-  background-color:#0069d9;
-  border-color: #007bff;
-}
-.default-menu-btn:focus {
-  box-shadow: none;
-}
+.player-count .btn:hover,
+.player-count .btn:active { background-color: var(--tan) !important; }
+.player-count .btn.active { background-color: var(--bronze)!important; }
 
 .course-tab {
-  background-color: gainsboro;
+  background-color: var(--paper);
 }
 
 .tab-content {

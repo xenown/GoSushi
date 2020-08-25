@@ -40,16 +40,34 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
     <div className="mb-3">
       {players.length > 0 && roomCode !== "" ? (
         <div className="center vertical menu-wrapper mb-3">
-          <p>Room code: {roomCode}</p>
-          <p>Your name: {name}</p>
-          <div className="list-wrapper">
-            {players.map(player => (
-              <div key={player}>{`${player} has joined the game`}</div>
-            ))}
-            <div>
-              {players.length}/{numPlayers} players joined
+          <div className="row no-gutters full-width ml-3 mr-3">
+            <div className="col-7 flex-column">
+              <div className="wait-room-left-pane grow">
+                <h4>Game Details:</h4>
+                <div className="row">
+                  <div className="col-5">
+                    <p>Room code:</p>
+                    <p>Your name:</p>
+                    <p>Players joined:</p>
+                  </div>
+                  <div className="col-7">
+                    <p>{roomCode}</p>
+                    <p>{name}</p>
+                    <p style={players.length === numPlayers? {color: 'green'} : {color: 'red'}}>
+                      {players.length}/{numPlayers}</p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+            <div className="col-5 flex-column">
+              <div className="wait-room-right-pane grow">
+                <h4>Players:</h4>
+                {players.map(player => (
+                  <div key={player}>{`${player}`}</div>
+                ))}
+              </div>
+            </div>
+          </div>          
         </div>
       ) : null}
       <DisplayMenu menu={menu} />

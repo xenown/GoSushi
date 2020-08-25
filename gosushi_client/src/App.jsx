@@ -43,10 +43,10 @@ const App = () => {
               </div>
               <div className="transition"></div>
               <div className="App-route-container">
-                <Link className="btn btn-outline-primary" to="/host">
+                <Link className="btn btn-danger" to="/host">
                   Host Game
                 </Link>
-                <Link className="btn btn-outline-success" to="/join">
+                <Link className="btn btn-success" to="/join">
                   Join Game
                 </Link>
               </div>
