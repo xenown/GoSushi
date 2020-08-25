@@ -42,13 +42,13 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
         <div className="center vertical menu-wrapper mb-3">
           <div className="row no-gutters full-width ml-3 mr-3">
             <div className="col-7 flex-column">
+              <h4 className="wait-room-subheader">Overview</h4>
               <div className="wait-room-left-pane grow">
-                <h4>Game Details:</h4>
                 <div className="row">
                   <div className="col-5">
-                    <p>Room code:</p>
-                    <p>Your name:</p>
-                    <p>Players joined:</p>
+                    <p><b>Room code:</b></p>
+                    <p><b>Your name:</b></p>
+                    <p><b>Players joined:</b></p>
                   </div>
                   <div className="col-7">
                     <p>{roomCode}</p>
@@ -60,8 +60,8 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
               </div>
             </div>
             <div className="col-5 flex-column">
+              <h4 className="wait-room-subheader">Players</h4>
               <div className="wait-room-right-pane grow">
-                <h4>Players:</h4>
                 {players.map(player => (
                   <div key={player}>{`${player}`}</div>
                 ))}

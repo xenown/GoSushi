@@ -16,14 +16,20 @@
 }
 
 .wait-room-left-pane {
-  margin: 1rem 1rem 1rem 1rem;
+  margin: 0 1rem 1rem 1rem;
+  padding-top: 0.4rem;
   background-color: var(--paper);
   border-radius: 1rem;
 }
 
 .wait-room-right-pane {
-  margin: 1rem 1rem 1rem 0;
+  margin: 0 1rem 1rem 0;
+  padding-top: 0.4rem;
   background-color: var(--paper);
   border-radius: 1rem;
+}
 
+.wait-room-subheader {
+  color: var(--paper);
+  margin-top: 0.5rem;
 }
