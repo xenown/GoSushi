@@ -17,6 +17,7 @@
 
 .wait-room-left-pane {
   margin: 0 1rem 1rem 1rem;
+  padding: 0.5rem 0;
   padding-top: 0.4rem;
   background-color: var(--paper);
   border-radius: 1rem;
@@ -24,7 +25,7 @@
 
 .wait-room-right-pane {
   margin: 0 1rem 1rem 0;
-  padding-top: 0.4rem;
+  padding: 0.5rem 0;
   background-color: var(--paper);
   border-radius: 1rem;
 }
