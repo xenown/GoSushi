@@ -10,7 +10,7 @@ const SpecialModal = ({ socket }) => {
   const params = useParams();
   const [specialCard, setSpecialCard] = useState(null);
   const [data, setSpecialData] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [selectedIndices, setSelectedIndices] = useState([]);
   const [alertText, setAlertText] = useState('');
 
   useEffect(() => {
@@ -40,11 +40,17 @@ const SpecialModal = ({ socket }) => {
     };
   }, [params.roomCode, socket]);
 
-  const handleFinish = card => {
-    socket.emit('handleSpecialAction', params.roomCode, specialCard, card);
+  const handleFinish = () => {
+    let cards = [];
+    data.forEach((card, index) => {
+      if (selectedIndices.includes(index)) {
+        cards.push(card);
+      }
+    });
+    socket.emit('handleSpecialAction', params.roomCode, specialCard, cards);
     setSpecialCard(null);
     setSpecialData([]);
-    setSelectedIndex(-1);
+    setSelectedIndices([]);
     setAlertText('');
   };
 
@@ -62,7 +68,7 @@ const SpecialModal = ({ socket }) => {
     let isCard = card.name !== undefined;
     let className = 'card-playable-special';
 
-    if (selectedIndex === index) {
+    if (selectedIndices.includes(index)) {
       className += ' card-selected';
     }
 
@@ -73,8 +79,14 @@ const SpecialModal = ({ socket }) => {
         onClick={() => {
           if (specialCard.name === 'Menu' && card.name === 'Menu') {
             setAlertText('You cannot choose a menu card');
+          } else if (specialCard.name === 'Takeout Box') {
+            setSelectedIndices(
+              selectedIndices.includes(index)
+                ? selectedIndices.filter(val => val !== index)
+                : selectedIndices.concat([index])
+            );
           } else {
-            setSelectedIndex(index);
+            setSelectedIndices([index]);
             setAlertText('');
           }
         }}
@@ -93,11 +105,16 @@ const SpecialModal = ({ socket }) => {
     ? `${specialCard.name} Actions`
     : 'Waiting for others';
 
+  const disableFinish =
+    data.length > 0 &&
+    selectedIndices.length === 0 &&
+    specialCard.name !== 'Takeout Box';
+
   return (
     <Modal
       show={!!specialCard || !!alertText}
       onHide={() => {
-        setSelectedIndex(-1);
+        setSelectedIndices([]);
         setAlertText('');
       }}
       backdrop="static"
@@ -114,10 +131,8 @@ const SpecialModal = ({ socket }) => {
         {!!specialCard && (
           <Button
             variant="primary"
-            disabled={data.length > 0 && selectedIndex === -1}
-            onClick={() => {
-              handleFinish(data[selectedIndex]);
-            }}
+            disabled={disableFinish}
+            onClick={handleFinish}
           >
             Finish
           </Button>
