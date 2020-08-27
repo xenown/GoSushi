@@ -22,22 +22,18 @@ io.on('connection', socket => {
     //Assuming menu contains roll, appetizers, specials, dessert
     roomCode = generateRoomCode(new Set(Object.keys(rooms)));
     if (roomCode === false) {
-      socket
-        .to(roomCode)
-        .emit(
-          'getActivePlayers',
-          `Connection failed: Could not generate unique room code.`
-        );
+      socket.emit(
+        'getActivePlayers',
+        `Connection failed: Could not generate unique room code.`
+      );
       return;
     }
     return socket.join([roomCode], e => {
       if (e) {
-        socket
-          .to(roomCode)
-          .emit(
-            'getActivePlayers',
-            `Connection failed: Error joining room: ${e}`
-          );
+        socket.emit(
+          'getActivePlayers',
+          `Connection failed: Error joining room: ${e}`
+        );
         return;
       }
       rooms[roomCode] = new Game(
