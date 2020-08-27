@@ -11,7 +11,6 @@ import Card from './Card';
 import './board.scss';
 import Drawer from './MenuDrawer';
 
-
 const Board = ({ socket }) => {
   const params = useParams();
   const history = useHistory();
@@ -40,13 +39,13 @@ const Board = ({ socket }) => {
       setMenu(menuData);
     };
 
-    const handlePlayerStatus = (playersData) => {
+    const handlePlayerStatus = playersData => {
       setPlayersData(playersData);
-    }
+    };
 
     const handleUnknownGame = () => {
       history.push('/');
-    }
+    };
 
     socket.on('sendTurnData', handleDealHand);
     socket.on('sendMenuData', handleMenuData);
@@ -60,14 +59,23 @@ const Board = ({ socket }) => {
       socket.off('unknownGame', handleUnknownGame);
     };
   }, [params.roomCode, socket, menu, history]);
-  
+
+  const currPlayer = playersData[0];
+  const otherPlayerData = playersData.slice(1);
+
   const handleSelectCardIndex = index => {
-    setSelectedCardIndex(index === selectedCardIndex ? -1 : index);
+    if (!currPlayer.isFinished) {
+      setSelectedCardIndex(index === selectedCardIndex ? -1 : index);
+    }
   };
 
   const handleSelectPlayedCard = index => {
-    const newSelected = _.includes(selectedPlayedCards, index) ? selectedPlayedCards.filter(el => el !== index) : selectedPlayedCards.concat(index);
-    setSelectedPlayedCards(newSelected);
+    if (!currPlayer.isFinished) {
+      const newSelected = _.includes(selectedPlayedCards, index)
+        ? selectedPlayedCards.filter(el => el !== index)
+        : selectedPlayedCards.concat(index);
+      setSelectedPlayedCards(newSelected);
+    }
   };
 
   const displayPlayedCard = (card, index) => {
@@ -77,16 +85,16 @@ const Board = ({ socket }) => {
     let className = canUse ? 'card-played-playable' : 'card-played';
 
     const transform = {
-      hover: "scale(2) translateY(0%)",
-      noHover: "scale(1) translateY(0%)",
-      selected: "scale(1) translateY(-10%)"
+      hover: 'scale(2) translateY(0%)',
+      noHover: 'scale(1) translateY(0%)',
+      selected: 'scale(1) translateY(-10%)',
     };
 
     return (
-      <Card 
+      <Card
         card={card}
         index={index}
-        className={className} 
+        className={className}
         isSelected={_.includes(selectedPlayedCards, index)}
         handleSelectCard={canUse ? handleSelectPlayedCard : () => {}}
         scaleUpFactor={2}
@@ -99,19 +107,21 @@ const Board = ({ socket }) => {
 
   const handleFinishTurn = () => {
     setPlayed(true);
-    const playedSpecials = selectedPlayedCards.map(e => currPlayer.playedCards[e]);
+    const playedSpecials = selectedPlayedCards.map(
+      e => currPlayer.playedCards[e]
+    );
     socket.emit(
       'finishTurn',
       params.roomCode,
       hand[selectedCardIndex],
       playedSpecials
     );
-  }
+  };
 
   const renderActions = () => {
     return (
       <div className="container-buttons">
-        <div>Your points: {playersData[0] && playersData[0].points}</div>
+        <div>Your points: {currPlayer && currPlayer.points}</div>
         <Button
           className="button"
           disabled={selectedCardIndex === -1 || played}
@@ -128,9 +138,7 @@ const Board = ({ socket }) => {
     );
   };
 
-  const currPlayer = playersData[0];
-  const otherPlayerData = playersData.slice(1);
-  const cardsToShow = showPlayedCards ? hand : playersData[0].dessertCards;
+  const cardsToShow = showPlayedCards ? hand : currPlayer.dessertCards;
 
   return (
     <div className="board">
@@ -145,16 +153,21 @@ const Board = ({ socket }) => {
       </div>
       <div className="action-bar">
         {renderActions()}
-        <div className="container-hand">{cardsToShow.map((card, index) => 
-            <Card card={card} 
-              className={showPlayedCards ? "card-playable" : "card-played"}
+        <div className="container-hand">
+          {cardsToShow.map((card, index) => (
+            <Card
+              card={card}
+              className={showPlayedCards ? 'card-playable' : 'card-played'}
               index={index}
               isSelected={showPlayedCards && selectedCardIndex === index}
-              handleSelectCard={showPlayedCards ? handleSelectCardIndex : () => {}}
+              handleSelectCard={
+                showPlayedCards ? handleSelectCardIndex : () => {}
+              }
               scaleUpFactor={2}
               imageClass="card-image-hand"
               key={`hand_${card.name}_${index}`}
-            /> )}
+            />
+          ))}
         </div>
       </div>
     </div>
