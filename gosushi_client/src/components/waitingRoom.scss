@@ -5,3 +5,32 @@
   border-radius: 1rem;
   width: 50%;
 }
+
+.full-width { width: 100%; }
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+.grow {
+  flex-grow: 1;
+}
+
+.wait-room-left-pane {
+  margin: 0 1rem 1rem 1rem;
+  padding: 0.5rem 0;
+  padding-top: 0.4rem;
+  background-color: var(--paper);
+  border-radius: 1rem;
+}
+
+.wait-room-right-pane {
+  margin: 0 1rem 1rem 0;
+  padding: 0.5rem 0;
+  background-color: var(--paper);
+  border-radius: 1rem;
+}
+
+.wait-room-subheader {
+  color: var(--paper);
+  margin-top: 0.5rem;
+}

@@ -8,8 +8,8 @@
   padding: 10vh 0 10vh 0;
 }
 
-.App-content {
-  background-color: #f6edce;
+.App-header {
+  background-color: var(--paper);
   min-height: 100vh;
   display: flex;
   flex-direction: column;

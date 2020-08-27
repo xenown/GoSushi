@@ -208,7 +208,7 @@ const HostGame = ({ socket }) => {
         <h1>Host Game</h1>
         {isCreating && createForm}
         <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
-        {numActivePlayers === numPlayers && <button className="btn btn-success ml-2 mr-2" onClick={handleStartGame}>Start Game</button>}
+        {numActivePlayers === numPlayers && <button className="btn btn-success ml-2 mr-2 mb-2" onClick={handleStartGame}>Start Game</button>}
       </div>
     </div>
   );
