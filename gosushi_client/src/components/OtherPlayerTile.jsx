@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
-
+import { Badge } from 'react-bootstrap';
 import CardToggle from './CardToggle';
-import { getCardImage } from '../utils/getCardImage';
+import Card from './Card';
 import './otherPlayerTile.scss';
 
 const OtherPlayerTile = ({ player }) => {
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
+  const transform = {
+    hover: "scale(6) translateY(25%)",
+    noHover: "scale(1) translateY(0%)"
+  };
+  
   const displayPlayedCard = (card, index) => (
-    <div key={`played_${card.name}_${index}`}>
-      <img
-        className="card-image-other-players"
-        src={getCardImage(card)}
-        alt={card.name}
-      />
-    </div>
+    <Card
+      key={`played_${card.name}_${index}`}
+      className="other-player-card"
+      card={card}
+      imageClass="card-image-other-players"
+      transform={transform}
+    />
   );
 
   const cardsToShow = showPlayedCards
@@ -23,9 +28,7 @@ const OtherPlayerTile = ({ player }) => {
 
   return (
     <div className="container-player-data">
-      <div className="points-circle">
-        <span className="points-text">{player.points}</span>
-      </div>
+      <Badge className="points-circle" variant="light">{player.points}</Badge>
       <div className="toggle-row">
         <CardToggle
           checked={showPlayedCards}

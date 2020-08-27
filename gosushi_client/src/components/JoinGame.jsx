@@ -11,7 +11,7 @@ const JoinGame = ({ socket }) => {
   const history = useHistory();
 
   useEffect(() => {
-    const handlePlayerJoined = data => {
+    const handleActivePlayer = data => {
       if (!Array.isArray(data)) {
         setMessage(data);
       } else {
@@ -19,10 +19,10 @@ const JoinGame = ({ socket }) => {
       }
     };
 
-    socket.on('playerJoined', handlePlayerJoined);
+    socket.on('getActivePlayers', handleActivePlayer);
 
     return () => {
-      socket.off('playerJoined', handlePlayerJoined);
+      socket.off('getActivePlayers', handleActivePlayer);
     };
   }, [socket]);
 

@@ -5,6 +5,7 @@ import OtherPlayerTile from './OtherPlayerTile';
 import './otherPlayerGrid.scss';
 
 const OtherPlayerGrid = ({ data }) => {
+
   const displayPlayerData = player => (
     <Col key={player.name}>
       <OtherPlayerTile player={player} />
@@ -25,7 +26,7 @@ const OtherPlayerGrid = ({ data }) => {
 
   return (
     <Container>
-      <Row xs={1} sm={2} md={numPerRow} noGutters>
+      <Row className="other-player-cards" xs={1} sm={2} md={numPerRow} noGutters>
         {data.map(displayPlayerData)}
       </Row>
     </Container>
