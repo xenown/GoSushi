@@ -22,18 +22,22 @@ io.on('connection', socket => {
     //Assuming menu contains roll, appetizers, specials, dessert
     roomCode = generateRoomCode(new Set(Object.keys(rooms)));
     if (roomCode === false) {
-      socket.to(roomCode).emit(
-        'getActivePlayers',
-        `Connection failed: Could not generate unique room code.`
-      );
+      socket
+        .to(roomCode)
+        .emit(
+          'getActivePlayers',
+          `Connection failed: Could not generate unique room code.`
+        );
       return;
     }
     return socket.join([roomCode], e => {
       if (e) {
-        socket.to(roomCode).emit(
-          'getActivePlayers',
-          `Connection failed: Error joining room: ${e}`
-        );
+        socket
+          .to(roomCode)
+          .emit(
+            'getActivePlayers',
+            `Connection failed: Error joining room: ${e}`
+          );
         return;
       }
       rooms[roomCode] = new Game(
@@ -58,13 +62,13 @@ io.on('connection', socket => {
     socket.join([roomCode], e => {
       const game = rooms[roomCode];
       if (!game) {
-        socket.to(roomCode).emit(
+        socket.emit(
           'getActivePlayers',
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
       } else if (game.players.length === game.numPlayers) {
-        socket.to(roomCode).emit(
+        socket.emit(
           'getActivePlayers',
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
@@ -74,13 +78,13 @@ io.on('connection', socket => {
           return acc || p.name === username;
         }, false)
       ) {
-        socket.to(roomCode).emit(
+        socket.emit(
           'getActivePlayers',
           `Connection failed: Player name ${username} is already in use, please use a different name.`
         );
         return;
       } else if (e) {
-        socket.to(roomCode).emit(
+        socket.emit(
           'getActivePlayers',
           `Connection failed: Error joining room: ${e}`
         );
@@ -114,8 +118,8 @@ io.on('connection', socket => {
         game.addPlayer(`Player${i}`, i);
       }
       game.isAutoPlayers = true;
-      io.to(roomCode).emit('getNumPlayers', game.numPlayers);
-      io.to(roomCode).emit(
+      socket.emit('getNumPlayers', game.numPlayers);
+      socket.emit(
         'getActivePlayers',
         game.players.map(p => p.name),
         game.deck.menu
@@ -147,11 +151,11 @@ io.on('connection', socket => {
       }
 
       if (sendMenu) {
-        io.to(roomCode).emit('sendMenuData', game.deck.menu);
+        socket.emit('sendMenuData', game.deck.menu);
       }
-      io.to(roomCode).emit('sendTurnData', player ? player.hand : [], playersData);
+      socket.emit('sendTurnData', player ? player.hand : [], playersData);
     } else {
-      io.to(roomCode).emit("unknownGame");
+      socket.emit('unknownGame');
     }
   });
 
@@ -188,11 +192,7 @@ io.on('connection', socket => {
 
       const playersData = game.getPlayersData();
       let count = 0;
-      while (
-        playersData &&
-        playersData[0] &&
-        count++ < playersData.length
-      ) {
+      while (playersData && playersData[0] && count++ < playersData.length) {
         io.to(playersData[0].socketId).emit('playerStatus', playersData);
         playersData.push(playersData.shift());
       }
@@ -205,7 +205,7 @@ io.on('connection', socket => {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
         game.handleSpecialAction(player, speCard, chosenCard);
-        socket.broadcast.to(roomCode).emit('completedSpecialAction');
+        socket.to(roomCode).emit('completedSpecialAction');
         game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
       }
     }
