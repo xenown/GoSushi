@@ -22,7 +22,7 @@ io.on('connection', socket => {
     //Assuming menu contains roll, appetizers, specials, dessert
     roomCode = generateRoomCode(new Set(Object.keys(rooms)));
     if (roomCode === false) {
-      socket.emit(
+      socket.to(roomCode).emit(
         'getActivePlayers',
         `Connection failed: Could not generate unique room code.`
       );
@@ -30,7 +30,7 @@ io.on('connection', socket => {
     }
     return socket.join([roomCode], e => {
       if (e) {
-        socket.emit(
+        socket.to(roomCode).emit(
           'getActivePlayers',
           `Connection failed: Error joining room: ${e}`
         );
@@ -48,7 +48,7 @@ io.on('connection', socket => {
       console.log(`${username} joined ${socket.id}`);
       io.to(roomCode).emit('getRoomCode', roomCode);
       io.to(roomCode).emit('getActivePlayers', [username], menu);
-      socket.emit('getNumPlayers', numPlayers);
+      io.to(roomCode).emit('getNumPlayers', numPlayers);
     });
   };
 
@@ -58,13 +58,13 @@ io.on('connection', socket => {
     socket.join([roomCode], e => {
       const game = rooms[roomCode];
       if (!game) {
-        socket.emit(
+        socket.to(roomCode).emit(
           'getActivePlayers',
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
       } else if (game.players.length === game.numPlayers) {
-        socket.emit(
+        socket.to(roomCode).emit(
           'getActivePlayers',
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
@@ -74,13 +74,13 @@ io.on('connection', socket => {
           return acc || p.name === username;
         }, false)
       ) {
-        socket.emit(
+        socket.to(roomCode).emit(
           'getActivePlayers',
           `Connection failed: Player name ${username} is already in use, please use a different name.`
         );
         return;
       } else if (e) {
-        socket.emit(
+        socket.to(roomCode).emit(
           'getActivePlayers',
           `Connection failed: Error joining room: ${e}`
         );
@@ -98,7 +98,7 @@ io.on('connection', socket => {
         players.map(p => p.name),
         game.deck.menu
       );
-      socket.emit('getNumPlayers', game.numPlayers);
+      io.to(roomCode).emit('getNumPlayers', game.numPlayers);
 
       if (players.length === game.numPlayers) {
         game.startRound();
@@ -114,7 +114,7 @@ io.on('connection', socket => {
         game.addPlayer(`Player${i}`, i);
       }
       game.isAutoPlayers = true;
-      socket.emit('getNumPlayers', game.numPlayers);
+      io.to(roomCode).emit('getNumPlayers', game.numPlayers);
       io.to(roomCode).emit(
         'getActivePlayers',
         game.players.map(p => p.name),
@@ -147,11 +147,11 @@ io.on('connection', socket => {
       }
 
       if (sendMenu) {
-        socket.emit('sendMenuData', game.deck.menu);
+        io.to(roomCode).emit('sendMenuData', game.deck.menu);
       }
-      socket.emit('sendTurnData', player ? player.hand : [], playersData);
+      io.to(roomCode).emit('sendTurnData', player ? player.hand : [], playersData);
     } else {
-      socket.emit("unknownGame");
+      io.to(roomCode).emit("unknownGame");
     }
   });
 
@@ -171,7 +171,7 @@ io.on('connection', socket => {
   const sendGameResults = (socketId, playerData, isHost) =>
     io.to(socketId).emit('gameResults', playerData, isHost);
 
-  socket.on('cardSelected', (roomCode, card) => {
+  socket.on('finishTurn', (roomCode, card, specials) => {
     const game = rooms[roomCode];
     if (
       game &&
@@ -180,22 +180,22 @@ io.on('connection', socket => {
     ) {
       const player = game.players.find(val => val.socketId === socket.id);
       player.playCardFromHand(card);
+      specials.forEach(c => player.playUsedCard(c));
 
       // keeping those seperate for now
       // might change to everyone can see everyones points rather than only seeing your own
       game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
-    }
-  });
 
-  socket.on('usePlayedCard', (roomCode, card) => {
-    const game = rooms[roomCode];
-    if (
-      game &&
-      game.players &&
-      game.players.find(val => val.socketId === socket.id)
-    ) {
-      const player = game.players.find(val => val.socketId === socket.id);
-      player.playUsedCard(card);
+      const playersData = game.getPlayersData();
+      let count = 0;
+      while (
+        playersData &&
+        playersData[0] &&
+        count++ < playersData.length
+      ) {
+        io.to(playersData[0].socketId).emit('playerStatus', playersData);
+        playersData.push(playersData.shift());
+      }
     }
   });
 
@@ -205,7 +205,7 @@ io.on('connection', socket => {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
         game.handleSpecialAction(player, speCard, chosenCard);
-        socket.broadcast.emit('completedSpecialAction');
+        socket.broadcast.to(roomCode).emit('completedSpecialAction');
         game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
       }
     }

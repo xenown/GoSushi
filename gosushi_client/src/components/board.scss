@@ -85,5 +85,31 @@
   .button {
     display: block;
     margin: 8px 0;
+    z-index: 1;
+    position: relative;
+  }
+  
+  .button .hovertext {
+    visibility: hidden;
+    width: 140px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    
+    /* Positioning for the hovertext */
+    position: absolute;
+    z-index: 1;
+    top: -5px;
+    left: 105%;
+  }
+  
+  .button:hover .hovertext {
+    visibility: visible;
+  }
+
+  .button:hover:disabled .hovertext {
+    visibility: hidden;
   }
 }

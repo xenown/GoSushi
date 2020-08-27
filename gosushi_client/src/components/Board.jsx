@@ -23,8 +23,7 @@ const Board = ({ socket }) => {
 
   const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
   const [played, setPlayed] = useState(false);
-  const [selectedPlayedCard, setSelectedPlayedCard] = useState(-1);
-  const [usePlayedCard, setUsePlayedCard] = useState(false);
+  const [selectedPlayedCards, setSelectedPlayedCards] = useState([]);
 
   useEffect(() => {
     socket.emit('boardLoaded', params.roomCode, _.isEmpty(menu));
@@ -33,14 +32,17 @@ const Board = ({ socket }) => {
       setHand(hand);
       setPlayersData(playersData);
       setSelectedCardIndex(-1);
-      setSelectedPlayedCard(-1);
+      setSelectedPlayedCards([]);
       setPlayed(false);
-      setUsePlayedCard(false);
     };
 
     const handleMenuData = menuData => {
       setMenu(menuData);
     };
+
+    const handlePlayerStatus = (playersData) => {
+      setPlayersData(playersData);
+    }
 
     const handleUnknownGame = () => {
       history.push('/');
@@ -48,23 +50,24 @@ const Board = ({ socket }) => {
 
     socket.on('sendTurnData', handleDealHand);
     socket.on('sendMenuData', handleMenuData);
+    socket.on('playerStatus', handlePlayerStatus);
     socket.on('unknownGame', handleUnknownGame);
 
     return () => {
       socket.off('sendTurnData', handleDealHand);
       socket.off('sendMenuData', handleMenuData);
+      socket.off('playerStatus', handlePlayerStatus);
       socket.off('unknownGame', handleUnknownGame);
     };
   }, [params.roomCode, socket, menu, history]);
   
   const handleSelectCardIndex = index => {
     setSelectedCardIndex(index === selectedCardIndex ? -1 : index);
-    setSelectedPlayedCard(-1);
   };
 
   const handleSelectPlayedCard = index => {
-    setSelectedCardIndex(-1);
-    setSelectedPlayedCard(index === selectedPlayedCard ? -1 : index);
+    const newSelected = _.includes(selectedPlayedCards, index) ? selectedPlayedCards.filter(el => el !== index) : selectedPlayedCards.concat(index);
+    setSelectedPlayedCards(newSelected);
   };
 
   const displayPlayedCard = (card, index) => {
@@ -84,7 +87,7 @@ const Board = ({ socket }) => {
         card={card}
         index={index}
         className={className} 
-        isSelected={selectedPlayedCard === index}
+        isSelected={_.includes(selectedPlayedCards, index)}
         handleSelectCard={canUse ? handleSelectPlayedCard : () => {}}
         scaleUpFactor={2}
         imageClass="card-image-played"
@@ -94,37 +97,28 @@ const Board = ({ socket }) => {
     );
   };
 
+  const handleFinishTurn = () => {
+    setPlayed(true);
+    const playedSpecials = selectedPlayedCards.map(e => currPlayer.playedCards[e]);
+    socket.emit(
+      'finishTurn',
+      params.roomCode,
+      hand[selectedCardIndex],
+      playedSpecials
+    );
+  }
+
   const renderActions = () => {
     return (
       <div className="container-buttons">
         <div>Your points: {playersData[0] && playersData[0].points}</div>
         <Button
           className="button"
-          disabled={selectedCardIndex === -1 || played || !showPlayedCards}
-          onClick={() => {
-            setPlayed(true);
-            socket.emit(
-              'cardSelected',
-              params.roomCode,
-              hand[selectedCardIndex]
-            );
-          }}
+          disabled={selectedCardIndex === -1 || played}
+          onClick={handleFinishTurn}
         >
-          {'Play card (you cannot undo this action)'}
-        </Button>
-        <Button
-          className="button"
-          disabled={selectedPlayedCard === -1 || usePlayedCard || !showPlayedCards}
-          onClick={() => {
-            setUsePlayedCard(true);
-            socket.emit(
-              'usePlayedCard',
-              params.roomCode,
-              currPlayer.playedCards[selectedPlayedCard]
-            );
-          }}
-        >
-          Use special card
+          Finish Turn
+          <span class="hovertext">You cannot undo this action</span>
         </Button>
         <CardToggle
           checked={showPlayedCards}

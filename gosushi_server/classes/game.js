@@ -164,9 +164,11 @@ class Game {
   getPlayersData() {
     let tempPlayers = [];
     const notCloned = ['hand', 'turnCards', 'makiCount', 'uramakiCount'];
-    this.players.forEach(p =>
-      tempPlayers.push(_.cloneDeepWith(_.omit(p, notCloned)))
-    );
+    this.players.forEach(p => {
+      const data = _.cloneDeepWith(_.omit(p, notCloned));
+      data.isFinished = p.turnCards.length !== 0;
+      tempPlayers.push(data)
+    });
     return tempPlayers;
   }
 
