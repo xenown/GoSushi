@@ -12,7 +12,7 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
   const [numPlayers, setNumPlayers] = useState('');
 
   useEffect(() => {
-    const handlePlayerJoined = (dataPlayers, dataMenu) => {
+    const handleActivePlayer = (dataPlayers, dataMenu) => {
       if (Array.isArray(dataPlayers)) {
         setPlayers(dataPlayers);
       }
@@ -25,12 +25,12 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
       history.push(`/game/${code}`);
     };
 
-    socket.on('playerJoined', handlePlayerJoined);
+    socket.on('getActivePlayers', handleActivePlayer);
     socket.on('getNumPlayers', handleNumPlayers);
     socket.on('startGame', handleStartGame);
 
     return () => {
-      socket.off('playerJoined', handlePlayerJoined);
+      socket.off('getActivePlayers', handleActivePlayer);
       socket.off('getNumPlayers', handleNumPlayers);
       socket.off('startGame', handleStartGame);
     };

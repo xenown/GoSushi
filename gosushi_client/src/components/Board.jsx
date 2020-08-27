@@ -1,18 +1,20 @@
 import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
 
-import { getCardImage } from '../utils/getCardImage';
 import SpecialModal from './SpecialModal';
 import ResultsModal from './ResultsModal';
 import OtherPlayerGrid from './OtherPlayerGrid';
 import CardToggle from './CardToggle';
+import Card from './Card';
 import './board.scss';
 import Drawer from './MenuDrawer';
 
+
 const Board = ({ socket }) => {
   const params = useParams();
+  const history = useHistory();
   const [hand, setHand] = useState([]);
   const [menu, setMenu] = useState({});
   const [playersData, setPlayersData] = useState([]);
@@ -40,80 +42,65 @@ const Board = ({ socket }) => {
       setMenu(menuData);
     };
 
+    const handleUnknownGame = () => {
+      history.push('/');
+    }
+
     socket.on('sendTurnData', handleDealHand);
     socket.on('sendMenuData', handleMenuData);
+    socket.on('unknownGame', handleUnknownGame);
 
     return () => {
       socket.off('sendTurnData', handleDealHand);
       socket.off('sendMenuData', handleMenuData);
+      socket.off('unknownGame', handleUnknownGame);
     };
-  }, [params.roomCode, socket, menu]);
-
-  const handleSelectCard = index => {
-    setSelectedCardIndex(index);
+  }, [params.roomCode, socket, menu, history]);
+  
+  const handleSelectCardIndex = index => {
+    setSelectedCardIndex(index === selectedCardIndex ? -1 : index);
+    setSelectedPlayedCard(-1);
   };
 
-  const displayHandCard = (card, index) => {
-    let className = 'card-playable';
-
-    if (selectedCardIndex === index) {
-      className += ' card-selected';
-    }
-
-    return (
-      <div
-        className={className}
-        key={index}
-        disabled={played}
-        onClick={() => handleSelectCard(index)}
-      >
-        <img
-          className="card-image-hand"
-          src={getCardImage(card)}
-          alt={card.name}
-          key={`hand_${card.name}_${index}`}
-        />
-      </div>
-    );
+  const handleSelectPlayedCard = index => {
+    setSelectedCardIndex(-1);
+    setSelectedPlayedCard(index === selectedPlayedCard ? -1 : index);
   };
 
   const displayPlayedCard = (card, index) => {
     let canUse =
       (card.name === 'Chopsticks' || card.name === 'Spoon') && hand.length > 1;
 
-    let className = canUse ? 'card-playable' : '';
+    let className = canUse ? 'card-played-playable' : 'card-played';
 
-    if (selectedPlayedCard === index) {
-      className += ' card-selected';
-    }
+    const transform = {
+      hover: "scale(2) translateY(0%)",
+      noHover: "scale(1) translateY(0%)",
+      selected: "scale(1) translateY(-10%)"
+    };
 
     return (
-      <div
-        className={className}
+      <Card 
+        card={card}
+        index={index}
+        className={className} 
+        isSelected={selectedPlayedCard === index}
+        handleSelectCard={canUse ? handleSelectPlayedCard : () => {}}
+        scaleUpFactor={2}
+        imageClass="card-image-played"
+        transform={transform}
         key={`my-played-cards-${index}`}
-        disabled={played}
-        onClick={() => {
-          if (canUse) {
-            setSelectedPlayedCard(index);
-          }
-        }}
-      >
-        <img
-          className="card-image-played"
-          src={getCardImage(card)}
-          alt={card.name}
-          key={`played_${card.name}_${index}`}
-        />
-      </div>
+      />
     );
   };
 
   const renderActions = () => {
     return (
       <div className="container-buttons">
+        <div>Your points: {playersData[0] && playersData[0].points}</div>
         <Button
           className="button"
-          disabled={selectedCardIndex === -1 || played}
+          disabled={selectedCardIndex === -1 || played || !showPlayedCards}
           onClick={() => {
             setPlayed(true);
             socket.emit(
@@ -127,7 +114,7 @@ const Board = ({ socket }) => {
         </Button>
         <Button
           className="button"
-          disabled={selectedPlayedCard === -1 || usePlayedCard}
+          disabled={selectedPlayedCard === -1 || usePlayedCard || !showPlayedCards}
           onClick={() => {
             setUsePlayedCard(true);
             socket.emit(
@@ -149,32 +136,33 @@ const Board = ({ socket }) => {
 
   const currPlayer = playersData[0];
   const otherPlayerData = playersData.slice(1);
-
-  let cardsToShow = [];
-
-  if (currPlayer) {
-    cardsToShow = showPlayedCards
-      ? currPlayer.playedCards
-      : currPlayer.dessertCards;
-  }
+  const cardsToShow = showPlayedCards ? hand : playersData[0].dessertCards;
 
   return (
     <div className="board">
       {!_.isEmpty(menu) && <Drawer menu={menu} />}
       <SpecialModal socket={socket} />
       <ResultsModal socket={socket} />
-      <div className="action-bar">
-        <div className="container-hand">{hand.map(displayHandCard)}</div>
-        {renderActions()}
-      </div>
-      <div>
-        <span>{'Your played cards:'}</span>
+      <OtherPlayerGrid data={otherPlayerData} />
+      <div className="played-cards">
         <div className="container-played-cards">
-          {cardsToShow.map(displayPlayedCard)}
+          {currPlayer && currPlayer.playedCards.map(displayPlayedCard)}
         </div>
       </div>
-      <div>Your points: {playersData[0] && playersData[0].points}</div>
-      <OtherPlayerGrid data={otherPlayerData} />
+      <div className="action-bar">
+        {renderActions()}
+        <div className="container-hand">{cardsToShow.map((card, index) => 
+            <Card card={card} 
+              className={showPlayedCards ? "card-playable" : "card-played"}
+              index={index}
+              isSelected={showPlayedCards && selectedCardIndex === index}
+              handleSelectCard={showPlayedCards ? handleSelectCardIndex : () => {}}
+              scaleUpFactor={2}
+              imageClass="card-image-hand"
+              key={`hand_${card.name}_${index}`}
+            /> )}
+        </div>
+      </div>
     </div>
   );
 };

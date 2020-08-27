@@ -15,7 +15,7 @@ import './App.scss';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
 import Board from './components/Board';
-const logo = require('./assets/sushigologo.jpg');
+const logo = require('./assets/sushigologo.png');
 
 const serverport = process.env.SERVERPORT || 4001;
 const ENDPOINT = 'http://127.0.0.1:' + serverport;
@@ -26,7 +26,7 @@ const App = () => {
   return (
     <Router>
       <div className="App">
-        <header className="App-header">
+        <div className="App-content">
           <Switch>
             <Route path="/host">
               <HostGame socket={socket} />
@@ -53,7 +53,7 @@ const App = () => {
             </Route>
             <Redirect from="/*" to="/" />
           </Switch>
-        </header>
+        </div>
       </div>
     </Router>
   );

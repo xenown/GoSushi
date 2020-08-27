@@ -1,41 +1,77 @@
 .board {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   width: 100%;
-  margin: 8px;
+  padding: 8px;
   box-sizing: border-box;
+  background-color: #F6EDCE;
+  color: rgb(136, 110, 110);
 }
 
 .action-bar {
   display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin: 2%;
+  align-items: center;
+  height: 20vh;
+}
+
+.played-cards {
+  margin: auto 10% 0 10%;
+  height: 20vh;
+  background-color: #D1AB83;
+  border-radius: 1rem;
 }
 
 .container-hand {
+  height: 100%;
   display: flex;
-  width: 90%;
   justify-content: center;
+  overflow: visible;
+  align-items: flex-end;
 }
 
 .container-played-cards {
   display: flex;
   justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.card {
+  // override some aspects from bootstrap
+  border-radius : 0.5rem
 }
 
 .card-playable {
   cursor: pointer;
+  margin: 0 1vh; 
+  height: 100%;
+  filter: drop-shadow(0 0 5px var(--jet));
 }
 
-.card-selected {
-  background-color: yellow;
+.card-played {
+  margin: 0 1vh;
+  height: 100%;
+  filter: drop-shadow(0 0 5px var(--jet));
+}
+
+.card-played-playable {
+  cursor: pointer;
+  margin: 0 1vh;
+  height: 100%;
+  filter: drop-shadow(0 0 5px var(--jet));
 }
 
 .card-image-hand {
-  height: 200px;
-  padding: 0 4px;
+  height: 100%;
 }
 
 .card-image-played {
-  height: 125px;
-  padding: 0 4px;
+  height: 100%;
+  padding: 5%;
 }
 
 .container-buttons {

@@ -12,7 +12,7 @@ const cardToggle = ({ checked, onClick }) => {
     <label className="switch">
       <div className={'slider' + (checked ? ' checked' : '')}>
         <input type="checkbox" checked={checked} onChange={onClick} />
-        <div className="slider-icon">
+        <div className="slider-icon center">
           <img
             className="toggle-image"
             src={toggleImage}

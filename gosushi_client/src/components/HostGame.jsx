@@ -16,9 +16,9 @@ const HostGame = ({ socket }) => {
   const history = useHistory();
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
+  const [numActivePlayers, setNumActivePlayers] = useState(1);
   const [numPlayers, setNumPlayers] = useState(2);
   const [isCreating, setIsCreating] = useState(true);
-  const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState('');
   const [menu, setMenu] = useState({
     roll: '',
@@ -28,27 +28,26 @@ const HostGame = ({ socket }) => {
   });
 
   useEffect(() => {
-    const handleNewPlayer = data => {
+    const handleActivePlayer = data => {
       if (!Array.isArray(data)) {
         setMessage(data);
       } else {
         setMessage(data);
+        setNumActivePlayers(data.length);
         setIsCreating(false);
       }
     };
 
-    const handleRoomFilled = () => {
-      setIsReady(true);
-    };
     socket.on('getRoomCode', data => setRoomCode(data));
-    socket.on('playerJoined', handleNewPlayer);
-    socket.on('roomFilled', handleRoomFilled);
+    socket.on('getActivePlayers', handleActivePlayer);
+    socket.on('getNumPlayers', data => setNumPlayers(data));
 
     return () => {
-      socket.off('playerJoined', handleNewPlayer);
-      socket.off('roomFilled', handleRoomFilled);
+      socket.off('getRoomCode', data => setRoomCode(data));
+      socket.off('getActivePlayers', handleActivePlayer);
+      socket.off('getNumPlayers', setNumPlayers);
     };
-  }, [socket]);
+  }, [socket, numActivePlayers, numPlayers]);
 
   const checkValidMenu = () => {
     let msg = '';
@@ -209,7 +208,7 @@ const HostGame = ({ socket }) => {
         <h1>Host Game</h1>
         {isCreating && createForm}
         <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
-        {isReady && <button className="btn btn-success ml-2 mr-2 mb-2" onClick={handleStartGame}>Start Game</button>}
+        {numActivePlayers === numPlayers && <button className="btn btn-success ml-2 mr-2 mb-2" onClick={handleStartGame}>Start Game</button>}
       </div>
     </div>
   );

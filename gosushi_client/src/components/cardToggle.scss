@@ -43,6 +43,7 @@
   -webkit-transition: 0.4s;
   transition: 0.4s;
   border-radius: 50%;
+  display: flex;
 }
 
 input:checked + .slider-icon {
@@ -54,5 +55,4 @@ input:checked + .slider-icon {
 .toggle-image {
   width: 20px;
   height: 20px;
-  margin-top: -15px;
 }
