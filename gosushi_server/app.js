@@ -219,7 +219,6 @@ io.on('connection', socket => {
         game.players.map(p => p.name),
         game.deck.menu
       );
-      io.to(roomCode).emit('roomFilled', roomCode, false);
     }
     // TODO: If the host leaves, end game
   });
