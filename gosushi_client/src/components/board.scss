@@ -12,7 +12,7 @@
 .action-bar {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: flex-start;
   margin: 2%;
   align-items: center;
   height: 20vh;
@@ -31,6 +31,7 @@
   justify-content: center;
   overflow: visible;
   align-items: flex-end;
+  flex-grow: 1;
 }
 
 .container-played-cards {
