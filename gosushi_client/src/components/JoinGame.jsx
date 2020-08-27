@@ -19,16 +19,25 @@ const JoinGame = ({ socket }) => {
       }
     };
 
+    const handleQuitGame = () => {
+      setName('');
+      setRoomCode('');
+      setIsJoining(true);
+      setMessage('Host disconnected - game terminated.');
+    };
+
     socket.on('getActivePlayers', handleActivePlayer);
+    socket.on('quitGame', handleQuitGame);
 
     return () => {
       socket.off('getActivePlayers', handleActivePlayer);
+      socket.off('quitGame', handleQuitGame);
     };
   }, [socket]);
 
   const handleSubmit = () => {
     if (name === '') {
-      setMessage("Missing player name.");
+      setMessage('Missing player name.');
       return;
     }
     socket.emit('joinGame', name, roomCode);

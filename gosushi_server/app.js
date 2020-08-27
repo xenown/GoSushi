@@ -111,9 +111,8 @@ io.on('connection', socket => {
       let game = rooms[socketToRoom[socket.id]];
 
       for (let i = 2; i <= numPlayers; i++) {
-        game.addPlayer(`Player${i}`, i);
+        game.addPlayer(`Player${i}`, i, true);
       }
-      game.isAutoPlayers = true;
       socket.emit('getNumPlayers', game.numPlayers);
       socket.emit(
         'getActivePlayers',
@@ -125,6 +124,8 @@ io.on('connection', socket => {
   });
 
   socket.on('gameInitiated', roomCode => {
+    const game = rooms[roomCode];
+    game.gameStarted = true;
     io.to(roomCode).emit('startGame', roomCode);
   });
 
@@ -189,7 +190,9 @@ io.on('connection', socket => {
       const playersData = game.getPlayersData();
       let count = 0;
       while (playersData && playersData[0] && count++ < playersData.length) {
-        io.to(playersData[0].socketId).emit('playerStatus', playersData);
+        if (playersData[0].socketId) {
+          io.to(playersData[0].socketId).emit('playerStatus', playersData);
+        }
         playersData.push(playersData.shift());
       }
     }
@@ -213,12 +216,21 @@ io.on('connection', socket => {
     let roomCode = socketToRoom[socket.id];
     const game = rooms[roomCode];
     if (game) {
-      game.players = game.players.filter(p => p.socketId !== socket.id);
-      socket.to(roomCode).emit(
-        'getActivePlayers',
-        game.players.map(p => p.name),
-        game.deck.menu
-      );
+      if (game.gameStarted && socket.id === game.hostPlayer.socketId) {
+        socket.to(roomCode).emit('quitGame');
+        delete rooms[roomCode];
+      } else if (game.gameStarted) {
+        const index = game.players.findIndex(p => p.socketId === socket.id);
+        game.players[index].isAuto = true;
+        game.players[index].socketId = null;
+      } else {
+        game.players = game.players.filter(p => p.socketId !== socket.id);
+        socket.to(roomCode).emit(
+          'getActivePlayers',
+          game.players.map(p => p.name),
+          game.deck.menu
+        );
+      }
     }
     // TODO: If the host leaves, end game
   });

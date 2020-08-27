@@ -47,16 +47,22 @@ const Board = ({ socket }) => {
       history.push('/');
     };
 
+    const handleQuitGame = () => {
+      history.push('/join');
+    };
+
     socket.on('sendTurnData', handleDealHand);
     socket.on('sendMenuData', handleMenuData);
     socket.on('playerStatus', handlePlayerStatus);
     socket.on('unknownGame', handleUnknownGame);
+    socket.on('quitGame', handleQuitGame);
 
     return () => {
       socket.off('sendTurnData', handleDealHand);
       socket.off('sendMenuData', handleMenuData);
       socket.off('playerStatus', handlePlayerStatus);
       socket.off('unknownGame', handleUnknownGame);
+      socket.off('quitGame', handleQuitGame);
     };
   }, [params.roomCode, socket, menu, history]);
 
