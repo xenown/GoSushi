@@ -2,6 +2,13 @@
   display: block;
   border: double;
   margin: 12px;
+  min-height: 20vh;
+  z-index: 0;
+  border-width: thick;
+
+  &.finished {
+    border-color: green;
+  }
 }
 
 $circle-height: 40px;

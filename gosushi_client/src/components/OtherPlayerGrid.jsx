@@ -8,7 +8,7 @@ const OtherPlayerGrid = ({ data }) => {
 
   const displayPlayerData = player => (
     <Col key={player.name}>
-      <OtherPlayerTile player={player} />
+      <OtherPlayerTile player={player} isFinished={player.isFinished}/>
     </Col>
   );
 

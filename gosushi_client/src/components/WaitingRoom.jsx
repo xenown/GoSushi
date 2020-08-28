@@ -9,7 +9,7 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
   const history = useHistory();
   const [players, setPlayers] = useState([]);
   const [menu, setMenu] = useState({});
-  const [numPlayers, setNumPlayers] = useState('');
+  const [numPlayers, setNumPlayers] = useState(0);
 
   useEffect(() => {
     const handleActivePlayer = (dataPlayers, dataMenu) => {
@@ -25,14 +25,23 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
       history.push(`/game/${code}`);
     };
 
+    const handleQuitGame = () => {
+      setPlayers([]);
+      setMenu({});
+      setNumPlayers(0);
+    }
+
     socket.on('getActivePlayers', handleActivePlayer);
     socket.on('getNumPlayers', handleNumPlayers);
     socket.on('startGame', handleStartGame);
+    socket.on('quitGame', handleQuitGame);
+    
 
     return () => {
       socket.off('getActivePlayers', handleActivePlayer);
       socket.off('getNumPlayers', handleNumPlayers);
       socket.off('startGame', handleStartGame);
+      socket.off('quitGame', handleQuitGame);
     };
   }, [history, socket]);
 

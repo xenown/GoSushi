@@ -4,7 +4,7 @@ import CardToggle from './CardToggle';
 import Card from './Card';
 import './otherPlayerTile.scss';
 
-const OtherPlayerTile = ({ player }) => {
+const OtherPlayerTile = ({ player, isFinished }) => {
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
   const transform = {
@@ -27,7 +27,7 @@ const OtherPlayerTile = ({ player }) => {
     : player.dessertCards;
 
   return (
-    <div className="container-player-data">
+    <div className={"container-player-data" + (isFinished ? " finished" : "")}>
       <Badge className="points-circle" variant="light">{player.points}</Badge>
       <div className="toggle-row">
         <CardToggle

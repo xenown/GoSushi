@@ -26,13 +26,12 @@ class Game {
     this.playedTurn = 0;
     this.uramakiCountMap = {};
     this.uramakiStanding = { value: 1 };
-    this.isAutoPlayers = false;
-    this.hasAutoPlayedTurn = false;
     this.specialActions = [];
+    this.gameStarted = false;
   }
 
-  addPlayer(name, socketId) {
-    this.players.push(new Player(name, socketId));
+  addPlayer(name, socketId, isAuto = false) {
+    this.players.push(new Player(name, socketId, isAuto));
   }
 
   checkForSpecialActions() {
@@ -68,16 +67,15 @@ class Game {
 
   finishedTurn(sendPlayerData, notifySpecialAction, sendGameResults) {
     this.playedTurn++;
-    if (this.playedTurn === this.numPlayers || this.isAutoPlayers) {
-      // if auto playing, if the auto players haven't done an initial action yet, play cards
-      if (this.isAutoPlayers && !this.hasAutoPlayedTurn) {
-        this.players.forEach((p, idx) => {
-          if (idx > 0) {
-            p.playCardFromHand(p.hand[0]);
-          }
-        });
-        this.hasAutoPlayedTurn = true;
-      }
+    const numRealPlayers = this.players.reduce((acc, p) => p.isAuto ? acc : acc + 1, 0);
+    if (this.playedTurn === numRealPlayers) {
+      this.players.forEach(p => {
+        // if auto playing, if the auto players haven't done an initial action yet, play cards
+        if (p.isAuto && !p.hasAutoPlayedCard) {
+          p.playCardFromHand(p.hand[0]);
+          p.hasAutoPlayedCard = true;
+        }
+      });
 
       this.checkForSpecialActions();
       if (this.specialActions.length > 0) {
@@ -90,7 +88,7 @@ class Game {
         let index = this.players.findIndex(p => p.name === playerName);
         let data = this.getSpecialData(playerName, card);
 
-        if (this.isAutoPlayers && index !== 0) {
+        if (this.players[index].isAuto) {
           this.handleSpecialAction(this.players[index], card, data.slice(0, 1));
           this.finishedTurn(
             sendPlayerData,
@@ -109,7 +107,7 @@ class Game {
         // TODO: notify others to wait for 'playerName' player to finish 'card.name' action
       } else {
         this.playedTurn = 0;
-        this.hasAutoPlayedTurn = false;
+        this.players.forEach(p => p.hasAutoPlayedCard = false);
         this.handleFinishedTurnActions(sendPlayerData, sendGameResults);
       }
     }
@@ -164,9 +162,11 @@ class Game {
   getPlayersData() {
     let tempPlayers = [];
     const notCloned = ['hand', 'turnCards', 'makiCount', 'uramakiCount'];
-    this.players.forEach(p =>
-      tempPlayers.push(_.cloneDeepWith(_.omit(p, notCloned)))
-    );
+    this.players.forEach(p => {
+      const data = _.cloneDeepWith(_.omit(p, notCloned));
+      data.isFinished = p.turnCards.length !== 0;
+      tempPlayers.push(data)
+    });
     return tempPlayers;
   }
 
@@ -202,6 +202,7 @@ class Game {
 
   handleSpecialAction(player, specialCard, chosenCards) {
     let specialCardCasted = new Card(specialCard);
+    player.removePlayedCard(specialCardCasted);
     if (chosenCards.length === 0) {
       _.remove(player.turnCards, c => _.isEqual(c, specialCardCasted));
       return;

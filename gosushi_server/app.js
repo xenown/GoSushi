@@ -48,7 +48,7 @@ io.on('connection', socket => {
       console.log(`${username} joined ${socket.id}`);
       io.to(roomCode).emit('getRoomCode', roomCode);
       io.to(roomCode).emit('getActivePlayers', [username], menu);
-      socket.emit('getNumPlayers', numPlayers);
+      io.to(roomCode).emit('getNumPlayers', numPlayers);
     });
   };
 
@@ -98,7 +98,7 @@ io.on('connection', socket => {
         players.map(p => p.name),
         game.deck.menu
       );
-      socket.emit('getNumPlayers', game.numPlayers);
+      io.to(roomCode).emit('getNumPlayers', game.numPlayers);
 
       if (players.length === game.numPlayers) {
         game.startRound();
@@ -111,11 +111,10 @@ io.on('connection', socket => {
       let game = rooms[socketToRoom[socket.id]];
 
       for (let i = 2; i <= numPlayers; i++) {
-        game.addPlayer(`Player${i}`, i);
+        game.addPlayer(`Player${i}`, i, true);
       }
-      game.isAutoPlayers = true;
       socket.emit('getNumPlayers', game.numPlayers);
-      io.to(roomCode).emit(
+      socket.emit(
         'getActivePlayers',
         game.players.map(p => p.name),
         game.deck.menu
@@ -125,6 +124,8 @@ io.on('connection', socket => {
   });
 
   socket.on('gameInitiated', roomCode => {
+    const game = rooms[roomCode];
+    game.gameStarted = true;
     io.to(roomCode).emit('startGame', roomCode);
   });
 
@@ -151,7 +152,7 @@ io.on('connection', socket => {
       }
       socket.emit('sendTurnData', player ? player.hand : [], playersData);
     } else {
-      socket.emit("unknownGame");
+      socket.emit('unknownGame');
     }
   });
 
@@ -171,7 +172,7 @@ io.on('connection', socket => {
   const sendGameResults = (socketId, playerData, isHost) =>
     io.to(socketId).emit('gameResults', playerData, isHost);
 
-  socket.on('cardSelected', (roomCode, card) => {
+  socket.on('finishTurn', (roomCode, card, specials) => {
     const game = rooms[roomCode];
     if (
       game &&
@@ -180,22 +181,20 @@ io.on('connection', socket => {
     ) {
       const player = game.players.find(val => val.socketId === socket.id);
       player.playCardFromHand(card);
+      specials.forEach(c => player.playUsedCard(c));
 
       // keeping those seperate for now
       // might change to everyone can see everyones points rather than only seeing your own
       game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
-    }
-  });
 
-  socket.on('usePlayedCard', (roomCode, card) => {
-    const game = rooms[roomCode];
-    if (
-      game &&
-      game.players &&
-      game.players.find(val => val.socketId === socket.id)
-    ) {
-      const player = game.players.find(val => val.socketId === socket.id);
-      player.playUsedCard(card);
+      const playersData = game.getPlayersData();
+      let count = 0;
+      while (playersData && playersData[0] && count++ < playersData.length) {
+        if (playersData[0].socketId) {
+          io.to(playersData[0].socketId).emit('playerStatus', playersData);
+        }
+        playersData.push(playersData.shift());
+      }
     }
   });
 
@@ -205,7 +204,7 @@ io.on('connection', socket => {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
         game.handleSpecialAction(player, speCard, chosenCard);
-        socket.broadcast.emit('completedSpecialAction');
+        socket.to(roomCode).emit('completedSpecialAction');
         game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
       }
     }
@@ -217,13 +216,21 @@ io.on('connection', socket => {
     let roomCode = socketToRoom[socket.id];
     const game = rooms[roomCode];
     if (game) {
-      game.players = game.players.filter(p => p.socketId !== socket.id);
-      socket.to(roomCode).emit(
-        'getActivePlayers',
-        game.players.map(p => p.name),
-        game.deck.menu
-      );
-      io.to(roomCode).emit('roomFilled', roomCode, false);
+      if (game.gameStarted && socket.id === game.hostPlayer.socketId) {
+        socket.to(roomCode).emit('quitGame');
+        delete rooms[roomCode];
+      } else if (game.gameStarted) {
+        const index = game.players.findIndex(p => p.socketId === socket.id);
+        game.players[index].isAuto = true;
+        game.players[index].socketId = null;
+      } else {
+        game.players = game.players.filter(p => p.socketId !== socket.id);
+        socket.to(roomCode).emit(
+          'getActivePlayers',
+          game.players.map(p => p.name),
+          game.deck.menu
+        );
+      }
     }
     // TODO: If the host leaves, end game
   });
