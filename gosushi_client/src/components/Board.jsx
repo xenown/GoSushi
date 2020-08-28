@@ -101,7 +101,7 @@ const Board = ({ socket }) => {
         card={card}
         index={index}
         className={className}
-        isSelected={_.includes(selectedPlayedCards, index)}
+        isSelected={showPlayedCards && _.includes(selectedPlayedCards, index)}
         handleSelectCard={canUse ? handleSelectPlayedCard : () => {}}
         scaleUpFactor={2}
         imageClass="card-image-played"
@@ -144,7 +144,7 @@ const Board = ({ socket }) => {
     );
   };
 
-  const cardsToShow = showPlayedCards ? hand : currPlayer.dessertCards;
+  const cardsToShow = currPlayer ? (showPlayedCards ? currPlayer.playedCards : currPlayer.dessertCards) : null;
 
   return (
     <div className="board">
@@ -154,21 +154,19 @@ const Board = ({ socket }) => {
       <OtherPlayerGrid data={otherPlayerData} />
       <div className="played-cards">
         <div className="container-played-cards">
-          {currPlayer && currPlayer.playedCards.map(displayPlayedCard)}
+          {currPlayer && cardsToShow.map(displayPlayedCard)}
         </div>
       </div>
       <div className="action-bar">
         {renderActions()}
         <div className="container-hand">
-          {cardsToShow.map((card, index) => (
+          {hand.map((card, index) => (
             <Card
               card={card}
-              className={showPlayedCards ? 'card-playable' : 'card-played'}
+              className="card-playable"
               index={index}
-              isSelected={showPlayedCards && selectedCardIndex === index}
-              handleSelectCard={
-                showPlayedCards ? handleSelectCardIndex : () => {}
-              }
+              isSelected={selectedCardIndex === index}
+              handleSelectCard={handleSelectCardIndex}
               scaleUpFactor={2}
               imageClass="card-image-hand"
               key={`hand_${card.name}_${index}`}

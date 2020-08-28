@@ -40,7 +40,9 @@ class Player {
       card = new Card(card);
     }
     const index = _.findIndex(this.playedCards, c => _.isEqual(c, card));
-    this.playedCards.splice(index, 1)
+    if (index >= 0){
+      this.playedCards.splice(index, 1)
+    }
   }
 }
 
