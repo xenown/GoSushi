@@ -198,12 +198,15 @@ io.on('connection', socket => {
     }
   });
 
+  const sendLogEntry = (roomCode, entry) => 
+    io.to(roomCode).emit('newLogEntry', entry);
+
   socket.on('handleSpecialAction', (roomCode, speCard, chosenCard) => {
     const game = rooms[roomCode];
     if (game && game.players) {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
-        game.handleSpecialAction(player, speCard, chosenCard);
+        game.handleSpecialAction(player, speCard, chosenCard, sendLogEntry);
         socket.to(roomCode).emit('completedSpecialAction');
         game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
       }

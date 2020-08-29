@@ -200,7 +200,10 @@ class Game {
     }
   }
 
-  handleSpecialAction(player, specialCard, chosenCards) {
+  handleSpecialAction(player, specialCard, chosenCards, sendLogEntry) {
+
+    sendLogEntry(this.roomCode, "test log entry");
+
     let specialCardCasted = new Card(specialCard);
     player.removePlayedCard(specialCardCasted);
     if (chosenCards.length === 0) {

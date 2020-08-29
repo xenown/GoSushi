@@ -8,9 +8,6 @@ import {
 } from 'react-router-dom';
 import socketIOClient from 'socket.io-client';
 
-// import 'bootstrap/dist/css/bootstrap.css';
-// import 'bootstrap/dist/css/bootstrap-theme.css';
-
 import './App.scss';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
