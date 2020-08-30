@@ -15,11 +15,11 @@ const {
 const Card = require('./card');
 
 class Game {
-  constructor(menu, playerNum, roomCode, hostPlayer, socketId) {
+  constructor(menu, playerNum, roomCode, hostPlayer, hostIp, socketId) {
     this.deck = new Deck(menu, playerNum);
     this.numPlayers = playerNum;
     this.roomCode = roomCode;
-    this.hostPlayer = new Player(hostPlayer, socketId);
+    this.hostPlayer = new Player(hostPlayer, hostIp, socketId);
     this.players = [this.hostPlayer];
     this.round = 1;
     this.hands = [];
@@ -30,8 +30,8 @@ class Game {
     this.gameStarted = false;
   }
 
-  addPlayer(name, socketId, isAuto = false) {
-    this.players.push(new Player(name, socketId, isAuto));
+  addPlayer(name, socketId, ip, isAuto = false) {
+    this.players.push(new Player(name, ip, socketId, isAuto));
   }
 
   checkForSpecialActions() {

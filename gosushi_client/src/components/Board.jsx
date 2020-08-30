@@ -52,11 +52,21 @@ const Board = ({ socket }) => {
       history.push('/join');
     };
 
+    const handlePlayerQuit = username => {
+      console.log(`${username} has left the game. Replacing with a computer.`);
+    }
+
+    const handlePlayerRejoin = username => {
+      console.log(`${username} has reconnected.`);
+    }
+
     socket.on('sendTurnData', handleDealHand);
     socket.on('sendMenuData', handleMenuData);
     socket.on('playerStatus', handlePlayerStatus);
     socket.on('unknownGame', handleUnknownGame);
     socket.on('quitGame', handleQuitGame);
+    socket.on('playerQuit', handlePlayerQuit);
+    socket.on('playerRejoin', handlePlayerRejoin);
 
     return () => {
       socket.off('sendTurnData', handleDealHand);
@@ -64,6 +74,8 @@ const Board = ({ socket }) => {
       socket.off('playerStatus', handlePlayerStatus);
       socket.off('unknownGame', handleUnknownGame);
       socket.off('quitGame', handleQuitGame);
+      socket.off('playerQuit', handlePlayerQuit);
+      socket.off('playerRejoin', handlePlayerRejoin);
     };
   }, [params.roomCode, socket, menu, history]);
 

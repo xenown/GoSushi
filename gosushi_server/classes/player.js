@@ -2,8 +2,9 @@ const _ = require('lodash');
 const Card = require('./card');
 
 class Player {
-  constructor(name, socketId, isAuto = false) {
+  constructor(name, ip, socketId, isAuto = false) {
     this.name = name;
+    this.ip = ip;
     this.socketId = socketId;
     this.hand = [];
     this.points = 0;

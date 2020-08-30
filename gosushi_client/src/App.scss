@@ -29,7 +29,10 @@
 
 .App-route-container {
   padding-top: 10vh;
-  width: 225px;
   display: flex;
   justify-content: space-between;
+}
+
+.btn-pad {
+  margin: 0 0.5vw 0 0.5vw;
 }

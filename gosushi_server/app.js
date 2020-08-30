@@ -12,11 +12,42 @@ const io = socketIo(server);
 
 const generateRoomCode = require('./util/roomCodes');
 const Game = require('./classes/game');
-const rooms = {};
-const socketToRoom = {};
+const rooms = {};   // room code to Game obj
+const socketToRoom = {};    // socket id to room code
 
 io.on('connection', socket => {
-  console.log('New client connected');
+  var clientIp = socket.request.connection.remoteAddress;
+  console.log(`New client connected from address ${clientIp}`);
+
+  const existingGames = Object.entries(rooms).filter(roomPair => {
+    return roomPair[1].players.find(player => {
+      return clientIp === player.ip && player.isAuto;
+    });
+  });
+
+  if (existingGames.length !== 0) {
+    socket.emit(
+      'rejoinOption',
+      existingGames.map(pair => { return pair[0]; })
+    );
+  };
+
+  socket.on('rejoinGame', roomCode => {
+    const game = rooms[roomCode];
+    if (game) {
+      const playerIndex = game.players.findIndex(player => {
+        return clientIp === player.ip && player.isAuto;
+      });
+      if (playerIndex >= 0){
+        socketToRoom[socket.id] = roomCode;
+        game.players[playerIndex].socketId = socket.id;
+        game.players[playerIndex].isAuto = false;
+        socket.emit('rejoinGameResult', roomCode);
+      } else {
+        socket.emit('rejoinGameResult');
+      }
+    }
+  });
 
   const handleHostGame = async (menu, numPlayers, username) => {
     //Assuming menu contains roll, appetizers, specials, dessert
@@ -41,6 +72,7 @@ io.on('connection', socket => {
         numPlayers,
         roomCode,
         username,
+        clientIp,
         socket.id
       );
 
@@ -79,6 +111,12 @@ io.on('connection', socket => {
           `Connection failed: Player name ${username} is already in use, please use a different name.`
         );
         return;
+      // } else if (game.players.find(player => { return clientIp === player.ip; })) {
+      //   socket.emit(
+      //     'getActivePlayers',
+      //     `Connection failed: You are already in this game session.`
+      //   );
+      //   return;     
       } else if (e) {
         socket.emit(
           'getActivePlayers',
@@ -87,7 +125,7 @@ io.on('connection', socket => {
         return;
       }
 
-      game.addPlayer(username, socket.id);
+      game.addPlayer(username, socket.id, clientIp);
       const { players } = game;
 
       socketToRoom[socket.id] = roomCode;
@@ -226,6 +264,8 @@ io.on('connection', socket => {
         const index = game.players.findIndex(p => p.socketId === socket.id);
         game.players[index].isAuto = true;
         game.players[index].socketId = null;
+        delete socketToRoom[socket.id];
+        socket.to(roomCode).emit('playerQuit', game.players[index].name);
       } else {
         game.players = game.players.filter(p => p.socketId !== socket.id);
         socket.to(roomCode).emit(
