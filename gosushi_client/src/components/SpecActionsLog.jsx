@@ -25,11 +25,11 @@ const SpecActionsLog = ({ socket }) => {
           if (entry.stolenFromPlayer) {
             details = <span>, stealing a(n) <b className={cCardCN}>{entry.chosenCard}</b> from <b>{entry.stolenFromPlayer}</b>'s hand'.</span> 
           } else {
-            details = <span>, but found no player holding the requested <b>{entry.chosenCard}</b>.</span>
+            details = <span>, but found no player holding the requested <b className={cCardCN}>{entry.chosenCard}</b>.</span>
           }
           break;
         case 'Takeout Box':
-            details = <span> boxing <b>{entry.boxCards}</b> item(s) from their hand. </span>
+            details = <span>, boxing <b>{entry.boxCards}</b> item(s) from their hand. </span>
           break;
         default:
       }
@@ -39,10 +39,8 @@ const SpecActionsLog = ({ socket }) => {
     }
 
     const handleNewLogEntry = (entry) => {
-      console.log("New log entry: ");
-      console.log(entry);
       setNumNewEntries(numNewEntries + 1);
-      setEntries(entries.concat([processEntry(entry)]));
+      setEntries([processEntry(entry)].concat(entries));
     };
 
     socket.on('newLogEntry', handleNewLogEntry);
@@ -54,9 +52,11 @@ const SpecActionsLog = ({ socket }) => {
 
   const popover = (
     <Popover id="popover-basic" className="spec-actions-log">
-      <Popover.Title as="h3">Special Actions Log</Popover.Title>
+      <Popover.Title className="popover-header" as="h3">Special Actions Log</Popover.Title>
       <Popover.Content className="popover-body">
-        {entries.reverse().map((action, index) => (<div className="log-item" key={index}>{action}</div>))}
+        {(entries.length !== 0)? 
+          entries.map((action, index) => (<div className="log-item" key={index}>{action}</div>))
+          : <div>No special cards have been played yet.</div>}
       </Popover.Content>
     </Popover>
   );
