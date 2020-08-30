@@ -1,0 +1,41 @@
+.spec-actions-log-container {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+}
+
+.spec-actions-log-button {
+    color: white
+}
+
+.spec-actions-log {
+    width: 50vh;
+    max-width: 50vh;
+}
+
+.popover-body {
+    max-height: 20vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+$circle-height: 20px;
+.new-entries-circle {
+    position: absolute;
+    bottom: -8px;
+    left: -8px;
+    height: $circle-height;
+    width: $circle-height;
+    border-radius: 50%;
+    background-color: red;
+    color: white;
+    font-size: $circle-height/2;
+    line-height: normal;
+}
+
+.log-item {
+    margin-top: 0.35rem;
+    line-height: 1.1rem;
+}

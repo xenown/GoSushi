@@ -65,7 +65,7 @@ class Game {
     this.specialActions.sort((i1, i2) => i1.card.data - i2.card.data);
   }
 
-  finishedTurn(sendPlayerData, notifySpecialAction, sendGameResults) {
+  finishedTurn(sendPlayerData, notifySpecialAction, sendGameResults, sendLogEntry) {
     this.playedTurn++;
     const numRealPlayers = this.players.reduce((acc, p) => p.isAuto ? acc : acc + 1, 0);
     if (this.playedTurn === numRealPlayers) {
@@ -89,11 +89,12 @@ class Game {
         let data = this.getSpecialData(playerName, card);
 
         if (this.players[index].isAuto) {
-          this.handleSpecialAction(this.players[index], card, data.slice(0, 1));
+          this.handleSpecialAction(this.players[index], card, data.slice(0, 1), sendLogEntry);
           this.finishedTurn(
             sendPlayerData,
             notifySpecialAction,
-            sendGameResults
+            sendGameResults,
+            sendLogEntry
           );
         } else {
           notifySpecialAction(
@@ -201,8 +202,10 @@ class Game {
   }
 
   handleSpecialAction(player, specialCard, chosenCards, sendLogEntry) {
-
-    sendLogEntry(this.roomCode, "test log entry");
+    let specialLogEntry = { 
+      player: player.name,
+      playedCard: specialCard.name
+    };
 
     let specialCardCasted = new Card(specialCard);
     player.removePlayedCard(specialCardCasted);
@@ -225,8 +228,10 @@ class Game {
       case 'Chopsticks':
         // add card to player's turn cards from their hand
         player.playCardFromHand(chosenCards[0]);
-
         player.hand.push(player.turnCardsReuse.splice(indexOfSpe, 1)[0]);
+
+        // update played special card log
+        specialLogEntry.chosenCard = chosenCards[0].name;
         break;
       case 'Menu':
         // choose a card from the top 4 in the unused deck, shuffle the rest
@@ -234,6 +239,9 @@ class Game {
 
         //remove special card from turn cards and add the one from the deck
         player.turnCards.splice(indexOfSpe, 1, cardFromDeck);
+
+        // update played special card log
+        specialLogEntry.chosenCard = chosenCards[0].name;
         break;
       case 'Special Order':
         // add the card to the player's turn cards
@@ -241,6 +249,9 @@ class Game {
 
         //remove special card from turn cards (the chosen card is duplicated and replaces it)
         player.turnCards.splice(indexOfSpe, 1, duplicate);
+
+        // update played special card log
+        specialLogEntry.chosenCard = chosenCards[0].name;
         break;
       case 'Spoon':
         // find the first person on the left (at the back of the players array) who has chosenCard in their hand
@@ -248,6 +259,9 @@ class Game {
         let indexCurrPlayer = this.players.findIndex(
           p => p.socketId === player.socketId
         );
+
+        // update played special card log
+        specialLogEntry.chosenCard = chosenCards[0];
 
         // the player to the left of another is the one before it in the array
         const nextLeftPlayerIndex = idx =>
@@ -263,6 +277,7 @@ class Game {
           if (cardInHand !== -1) {
             player.playedCards.push(p.hand[cardInHand]);
             p.hand[cardInHand] = specialCardCasted;
+            specialLogEntry.stolenFromPlayer = p.name;
             break;
           }
         }
@@ -281,9 +296,11 @@ class Game {
           }
         }
         player.turnCards.splice(indexOfSpe, 1);
+        specialLogEntry.boxCards = chosenCards.length;
         break;
       default:
     }
+    sendLogEntry(this.roomCode, specialLogEntry);
   }
 
   resetGame() {
