@@ -134,7 +134,7 @@ const Board = ({ socket }) => {
           onClick={handleFinishTurn}
         >
           Finish Turn
-          <span class="hovertext">You cannot undo this action</span>
+          <span className="hovertext">You cannot undo this action</span>
         </Button>
         <CardToggle
           checked={showPlayedCards}

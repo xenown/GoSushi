@@ -33,7 +33,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
   const getCardStyle = item => "menu-item game-card" + (validMenuOption(item) ? "": " disable-card");
 
   const selectRoll = item => {
-    let menucopy = _.clone(menu);
+    let menucopy = _.cloneDeep(menu);
     menucopy.roll = item;
     handleMenu(menucopy);
   };
@@ -43,7 +43,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
       return;
     }
 
-    let menucopy = _.clone(menu);
+    let menucopy = _.cloneDeep(menu);
     let newAppetizer = menu.appetizers.slice();
     if (menu.appetizers.includes(item)) {
       _.remove(newAppetizer, i => i === item);
@@ -60,7 +60,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
       return;
     }
 
-    let menucopy = _.clone(menu);
+    let menucopy = _.cloneDeep(menu);
     let newSpecial = menu.specials.slice();
     if (menu.specials.includes(item)) {
       _.remove(newSpecial, i => i === item);
@@ -73,7 +73,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
   };
 
   const selectDessert = item => {
-    let menucopy = _.clone(menu);
+    let menucopy = _.cloneDeep(menu);
     menucopy.dessert = item;
     handleMenu(menucopy);
   };
@@ -85,7 +85,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
       menu.appetizers = suggestedMenus[name]['appetizers'];
       menu.specials = suggestedMenus[name]['specials'];
       menu.dessert = suggestedMenus[name]['dessert'];
-      handleMenu(menu);
+      handleMenu(_.cloneDeep(menu));
     };
   });
 
@@ -150,17 +150,9 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className={getCardStyle(item)}
+                    className={getCardStyle(item) + (menu.roll === item ? " select-roll" : "")}
                     key={item}
                     onClick={() => selectRoll(item)}
-                    style={
-                      menu.roll === item
-                        ? {
-                            border: '4px solid #741b47',
-                            borderRadius: '18px',
-                          }
-                        : null
-                    }
                   />
                 ))}
               </div>
@@ -170,21 +162,15 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                 role="tabpanel"
               >
                 {Object.values(appetizersEnum).map(item => (
-                  <img
-                    src={menuCardImageMap[item]}
-                    alt={item}
-                    className={getCardStyle(item)}
-                    key={item}
-                    onClick={() => selectAppetizer(item)}
-                    style={
-                      menu.appetizers.includes(item)
-                        ? {
-                            border: '4px solid #3c9fa7',
-                            borderRadius: '18px',
-                          }
-                        : null
-                    }
-                  />
+                  <div key={item} className={getCardStyle(item) + (menu.appetizers.includes(item) ? " select-appetizer": "")}>
+                    <img
+                      src={menuCardImageMap[item]}
+                      alt={item}
+                      className="img"
+                      onClick={() => selectAppetizer(item)}
+                    />
+                    <span className="hovertext">This menu item cannot be chosen when there are {numPlayers} players.</span>
+                  </div>
                 ))}
               </div>
               <div
@@ -193,21 +179,15 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                 role="tabpanel"
               >
                 {Object.values(specialsEnum).map(item => (
-                  <img
-                    src={menuCardImageMap[item]}
-                    alt={item}
-                    className={getCardStyle(item)}
-                    key={item}
-                    onClick={() => selectSpecial(item)}
-                    style={
-                      menu.specials.includes(item)
-                        ? {
-                            border: '4px solid #ff9900',
-                            borderRadius: '18px',
-                          }
-                        : null
-                    }
-                  />
+                  <div key={item} className={getCardStyle(item) + (menu.specials.includes(item) ? " select-special": "")}>
+                    <img
+                      src={menuCardImageMap[item]}
+                      alt={item}
+                      className="img"
+                      onClick={() => selectSpecial(item)}
+                    />
+                    <span className="hovertext">This menu item cannot be chosen when there are {numPlayers} players.</span>
+                  </div>
                 ))}
               </div>
               <div
@@ -219,17 +199,9 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className={getCardStyle(item)}
+                    className={getCardStyle(item) + (menu.dessert === item ? " select-dessert" : "")}
                     key={item}
                     onClick={() => selectDessert(item)}
-                    style={
-                      menu.dessert === item
-                        ? {
-                            border: '4px solid #b90064',
-                            borderRadius: '18px',
-                          }
-                        : null
-                    }
                   />
                 ))}
               </div>

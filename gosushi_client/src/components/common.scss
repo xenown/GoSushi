@@ -15,3 +15,16 @@
 .vertical {
   flex-direction: column;
 }
+
+.hovertext {
+  visibility: hidden;
+  width: 140px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+
+  position: absolute;
+  z-index: 1;
+}
