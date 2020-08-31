@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button, Modal, Container, Form } from 'react-bootstrap';
 
-// import './resultsModal.scss';
-
 const RejoinModal = ({ socket, rooms, open, hide }) => {
   const history = useHistory();
   const [roomIndex, setRoomIndex] = useState(0);
