@@ -23,7 +23,7 @@ const SpecActionsLog = ({ socket }) => {
           break;
         case 'Spoon':
           if (entry.stolenFromPlayer) {
-            details = <span>, stealing a(n) <b className={cCardCN}>{entry.chosenCard}</b> from <b>{entry.stolenFromPlayer}</b>'s hand'.</span> 
+            details = <span>, stealing a(n) <b className={cCardCN}>{entry.chosenCard}</b> from <b>{entry.stolenFromPlayer}</b>'s hand.</span> 
           } else {
             details = <span>, but found no player holding the requested <b className={cCardCN}>{entry.chosenCard}</b>.</span>
           }
