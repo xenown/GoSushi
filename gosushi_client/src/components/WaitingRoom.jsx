@@ -29,13 +29,12 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
       setPlayers([]);
       setMenu({});
       setNumPlayers(0);
-    }
+    };
 
     socket.on('getActivePlayers', handleActivePlayer);
     socket.on('getNumPlayers', handleNumPlayers);
     socket.on('startGame', handleStartGame);
     socket.on('quitGame', handleQuitGame);
-    
 
     return () => {
       socket.off('getActivePlayers', handleActivePlayer);
@@ -47,7 +46,7 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
 
   return (
     <div className="mb-3">
-      {players.length > 0 && roomCode !== "" ? (
+      {players.length > 0 && roomCode !== '' ? (
         <div className="center vertical menu-wrapper mb-3">
           <div className="row no-gutters full-width ml-3 mr-3">
             <div className="col-7 flex-column">
@@ -55,15 +54,38 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
               <div className="wait-room-left-pane grow">
                 <div className="row">
                   <div className="col-5">
-                    <p><b>Room code:</b></p>
-                    <p><b>Your name:</b></p>
-                    <p><b>Players joined:</b></p>
+                    <p>
+                      <b>Room code:</b>
+                    </p>
+                    <p>
+                      <b>Your name:</b>
+                    </p>
+                    <p>
+                      <b>Players joined:</b>
+                    </p>
+                    <p>
+                      <b>Rules:</b>
+                    </p>
                   </div>
                   <div className="col-7">
                     <p>{roomCode}</p>
                     <p>{name}</p>
-                    <p style={players.length === numPlayers? {color: 'green'} : {color: 'red'}}>
-                      {players.length}/{numPlayers}</p>
+                    <p
+                      style={
+                        players.length === numPlayers
+                          ? { color: 'green' }
+                          : { color: 'red' }
+                      }
+                    >
+                      {players.length}/{numPlayers}
+                    </p>
+                    <a
+                      href="https://gamewright.com/pdfs/Rules/SushiGoPartyTM-RULES.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Read the Rules
+                    </a>
                   </div>
                 </div>
               </div>
@@ -76,7 +98,7 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
                 ))}
               </div>
             </div>
-          </div>          
+          </div>
         </div>
       ) : null}
       <DisplayMenu menu={menu} />
