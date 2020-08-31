@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useParams, useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
 import MenuSelection from './MenuSelection';
 import DisplayMenu from './DisplayMenu';
@@ -13,9 +13,9 @@ import './common.scss';
 const dev = process.env.NODE_ENV === 'development';
 
 const HostGame = ({ socket }) => {
+  const params = useParams();
   const history = useHistory();
   const [name, setName] = useState('');
-  const [roomCode, setRoomCode] = useState('');
   const [numActivePlayers, setNumActivePlayers] = useState(1);
   const [numPlayers, setNumPlayers] = useState(2);
   const [isCreating, setIsCreating] = useState(true);
@@ -38,12 +38,10 @@ const HostGame = ({ socket }) => {
       }
     };
 
-    socket.on('getRoomCode', data => setRoomCode(data));
     socket.on('getActivePlayers', handleActivePlayer);
     socket.on('getNumPlayers', data => setNumPlayers(data));
 
     return () => {
-      socket.off('getRoomCode', data => setRoomCode(data));
       socket.off('getActivePlayers', handleActivePlayer);
       socket.off('getNumPlayers', setNumPlayers);
     };
@@ -73,12 +71,12 @@ const HostGame = ({ socket }) => {
     if (msg !== '') {
       setMessage(msg);
       return;
-    } else if (name === ''){
-      setMessage("Missing player name.");
+    } else if (name === '') {
+      setMessage('Missing player name.');
       return;
     }
 
-    socket.emit('hostGame', menu, numPlayers, name);
+    socket.emit('hostGame', params.roomCode, menu, numPlayers, name);
     setMessage('Loading...');
   };
 
@@ -89,14 +87,16 @@ const HostGame = ({ socket }) => {
     console.log(menu);
 
     // Remove menu items that are not allowed with the current number of players
-    menu.appetizers = menu.appetizers.filter(a => validMenuOption(a, numPlayers));
+    menu.appetizers = menu.appetizers.filter(a =>
+      validMenuOption(a, numPlayers)
+    );
     menu.specials = menu.specials.filter(s => validMenuOption(s, numPlayers));
 
     setMenu(menu);
   };
 
   const handleStartGame = () => {
-    socket.emit('gameInitiated', roomCode);
+    socket.emit('gameInitiated', params.roomCode);
   };
 
   const handleAutoPlayers = () => {
@@ -104,16 +104,17 @@ const HostGame = ({ socket }) => {
     if (msg !== '') {
       setMessage(msg);
       return;
-    } else if (name === ''){
-      setMessage("Missing player name.");
+    } else if (name === '') {
+      setMessage('Missing player name.');
       return;
     }
 
-    socket.emit('autoPlayers', menu, numPlayers, name);
+    socket.emit('autoPlayers', params.roomCode, menu, numPlayers, name);
     setMessage('Loading...');
   };
 
-  const validMenuOption = (item, num) => invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(num) : true;
+  const validMenuOption = (item, num) =>
+    invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(num) : true;
 
   const handleNumPlayers = num => {
     // Remove menu items that are not allowed with the new number of players
@@ -126,7 +127,11 @@ const HostGame = ({ socket }) => {
 
   const createForm = (
     <div className="center vertical">
-      <MenuSelection handleMenu={handleMenu} menu={menu} numPlayers={numPlayers}/>
+      <MenuSelection
+        handleMenu={handleMenu}
+        menu={menu}
+        numPlayers={numPlayers}
+      />
       <DisplayMenu menu={menu} />
       <br />
 
@@ -207,8 +212,15 @@ const HostGame = ({ socket }) => {
       <div className="col">
         <h1>Host Game</h1>
         {isCreating && createForm}
-        <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
-        {numActivePlayers === numPlayers && <button className="btn btn-success ml-2 mr-2 mb-2" onClick={handleStartGame}>Start Game</button>}
+        <WaitingRoom name={name} roomCode={params.roomCode} socket={socket} />
+        {numActivePlayers === numPlayers && (
+          <button
+            className="btn btn-success ml-2 mr-2 mb-2"
+            onClick={handleStartGame}
+          >
+            Start Game
+          </button>
+        )}
       </div>
     </div>
   );
