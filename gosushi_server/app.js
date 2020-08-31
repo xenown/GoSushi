@@ -6,7 +6,12 @@ const port = process.env.SERVERPORT;
 const index = require('./routes/index');
 
 const app = express();
+const cors = require('cors');
+
+app.set('port', port);
+app.use(cors());
 app.use(index);
+
 const server = http.createServer(app);
 const io = socketIo(server);
 
@@ -15,19 +20,33 @@ const Game = require('./classes/game');
 const rooms = {};
 const socketToRoom = {};
 
+index.get('/generateRoomCode', (req, res) => {
+  console.log('heyyy new roomcode');
+  const roomCode = generateRoomCode(new Set(Object.keys(rooms)));
+  res.status(200).send({ roomCode: roomCode });
+});
+
 io.on('connection', socket => {
   console.log('New client connected');
 
-  const handleHostGame = async (menu, numPlayers, username) => {
+  const handleHostGame = async (roomCode, menu, numPlayers, username) => {
     //Assuming menu contains roll, appetizers, specials, dessert
-    roomCode = generateRoomCode(new Set(Object.keys(rooms)));
     if (roomCode === false) {
       socket.emit(
         'getActivePlayers',
         `Connection failed: Could not generate unique room code.`
       );
       return;
+    } else if (
+      !!rooms[roomCode] &&
+      rooms[roomCode].hostPlayer.socketId != socket.id
+    ) {
+      socket.emit(
+        'getActivePlayers',
+        `Connection failed: The provided room code is in use with a different host.`
+      );
     }
+
     return socket.join([roomCode], e => {
       if (e) {
         socket.emit(
@@ -36,17 +55,21 @@ io.on('connection', socket => {
         );
         return;
       }
-      rooms[roomCode] = new Game(
-        menu,
-        numPlayers,
-        roomCode,
-        username,
-        socket.id
-      );
+
+      if (!!rooms[roomCode]) {
+        rooms[roomCode].newGame(menu, numPlayers);
+      } else {
+        rooms[roomCode] = new Game(
+          menu,
+          numPlayers,
+          roomCode,
+          username,
+          socket.id
+        );
+      }
 
       socketToRoom[socket.id] = roomCode;
       console.log(`${username} joined ${socket.id}`);
-      io.to(roomCode).emit('getRoomCode', roomCode);
       io.to(roomCode).emit('getActivePlayers', [username], menu);
       io.to(roomCode).emit('getNumPlayers', numPlayers);
     });
@@ -106,8 +129,8 @@ io.on('connection', socket => {
     });
   });
 
-  socket.on('autoPlayers', (menu, numPlayers, username) => {
-    handleHostGame(menu, numPlayers, username).then(() => {
+  socket.on('autoPlayers', (roomCode, menu, numPlayers, username) => {
+    handleHostGame(roomCode, menu, numPlayers, username).then(() => {
       let game = rooms[socketToRoom[socket.id]];
 
       for (let i = 2; i <= numPlayers; i++) {
@@ -127,6 +150,7 @@ io.on('connection', socket => {
     const game = rooms[roomCode];
     game.gameStarted = true;
     io.to(roomCode).emit('startGame', roomCode);
+    io.to(roomCode).emit('updateRoundNumber', 1);
   });
 
   socket.on('boardLoaded', (roomCode, sendMenu) => {
@@ -169,6 +193,9 @@ io.on('connection', socket => {
       }
     });
 
+  const updateRound = (roomCode, roundNumber) =>
+    io.to(roomCode).emit('updateRoundNumber', roundNumber);
+
   const sendGameResults = (socketId, playerData, isHost) =>
     io.to(socketId).emit('gameResults', playerData, isHost);
 
@@ -185,7 +212,13 @@ io.on('connection', socket => {
 
       // keeping those seperate for now
       // might change to everyone can see everyones points rather than only seeing your own
-      game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults, sendLogEntry);
+      game.finishedTurn(
+        sendTurnData,
+        doSpecialAction,
+        sendGameResults,
+        updateRound,
+        sendLogEntry
+      );
 
       const playersData = game.getPlayersData();
       let count = 0;
@@ -198,7 +231,7 @@ io.on('connection', socket => {
     }
   });
 
-  const sendLogEntry = (roomCode, entry) => 
+  const sendLogEntry = (roomCode, entry) =>
     io.to(roomCode).emit('newLogEntry', entry);
 
   socket.on('handleSpecialAction', (roomCode, speCard, chosenCard) => {
@@ -208,9 +241,25 @@ io.on('connection', socket => {
       if (player) {
         game.handleSpecialAction(player, speCard, chosenCard, sendLogEntry);
         socket.to(roomCode).emit('completedSpecialAction');
-        game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults, sendLogEntry);
+        game.finishedTurn(
+          sendTurnData,
+          doSpecialAction,
+          sendGameResults,
+          sendLogEntry
+        );
       }
     }
+  });
+
+  socket.on('leaveRoom', roomCode => {
+    socket.leave(roomCode, () => {
+      const game = rooms[roomCode];
+      if (game && game.players) {
+        game.players = game.players.filter(p => p.socketId !== socket.id);
+      }
+      delete socketToRoom[socket.id];
+      console.log(`${socket.id} has left room ${roomCode}`);
+    });
   });
 
   socket.on('disconnect', () => {

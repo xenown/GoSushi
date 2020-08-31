@@ -68,7 +68,12 @@ const ResultsModal = ({ socket }) => {
     <Modal
       show={playersData.length > 0}
       onHide={() => {
-        isHost ? history.push('/host') : history.push('/join');
+        if (isHost) {
+          history.push(`/host/${params.roomCode}`);
+        } else {
+          socket.emit('leaveRoom');
+          history.push('/join');
+        }
       }}
       backdrop="static"
       keyboard={false}
@@ -81,7 +86,12 @@ const ResultsModal = ({ socket }) => {
         <Button
           variant="primary"
           onClick={() => {
-            isHost ? history.push('/host') : history.push('/join');
+            if (isHost) {
+              history.push(`/host/${params.roomCode}`);
+            } else {
+              socket.emit('leaveRoom', params.roomCode);
+              history.push('/join');
+            }
           }}
         >
           End Game
