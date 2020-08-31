@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   BrowserRouter as Router,
-  Link,
   Redirect,
   Route,
   Switch,
@@ -9,10 +8,10 @@ import {
 import socketIOClient from 'socket.io-client';
 
 import './App.scss';
+import Home from './components/Home';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
 import Board from './components/Board';
-const logo = require('./assets/sushigologo.png');
 
 const serverport = process.env.SERVERPORT || 4001;
 const ENDPOINT = 'http://127.0.0.1:' + serverport;
@@ -25,7 +24,7 @@ const App = () => {
       <div className="App">
         <div className="App-content">
           <Switch>
-            <Route path="/host">
+            <Route path="/host/:roomCode">
               <HostGame socket={socket} />
             </Route>
             <Route path="/join">
@@ -35,18 +34,7 @@ const App = () => {
               <Board socket={socket} />
             </Route>
             <Route exact path="/">
-              <div className="App-logo">
-                <img src={logo} style={{ height: '40vh' }} alt="logo" />
-              </div>
-              <div className="transition"></div>
-              <div className="App-route-container">
-                <Link className="btn btn-danger" to="/host">
-                  Host Game
-                </Link>
-                <Link className="btn btn-success" to="/join">
-                  Join Game
-                </Link>
-              </div>
+              <Home endpoint={ENDPOINT} />
             </Route>
             <Redirect from="/*" to="/" />
           </Switch>
