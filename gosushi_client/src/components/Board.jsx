@@ -17,6 +17,7 @@ const Board = ({ socket }) => {
   const [hand, setHand] = useState([]);
   const [menu, setMenu] = useState({});
   const [playersData, setPlayersData] = useState([]);
+  const [roundNumber, updateRoundNumber] = useState(1);
 
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
@@ -47,6 +48,10 @@ const Board = ({ socket }) => {
       history.push('/');
     };
 
+    const handleRoundUpdate = roundNum => {
+      updateRoundNumber(roundNum);
+    };
+
     const handleQuitGame = () => {
       history.push('/join');
     };
@@ -55,6 +60,7 @@ const Board = ({ socket }) => {
     socket.on('sendMenuData', handleMenuData);
     socket.on('playerStatus', handlePlayerStatus);
     socket.on('unknownGame', handleUnknownGame);
+    socket.on('updateRoundNumber', handleRoundUpdate);
     socket.on('quitGame', handleQuitGame);
 
     return () => {
@@ -127,6 +133,7 @@ const Board = ({ socket }) => {
   const renderActions = () => {
     return (
       <div className="container-buttons">
+        <div>Round Number: {roundNumber}</div>
         <div>Your points: {currPlayer && currPlayer.points}</div>
         <Button
           className="button"
@@ -144,7 +151,11 @@ const Board = ({ socket }) => {
     );
   };
 
-  const cardsToShow = currPlayer ? (showPlayedCards ? currPlayer.playedCards : currPlayer.dessertCards) : null;
+  const cardsToShow = currPlayer
+    ? showPlayedCards
+      ? currPlayer.playedCards
+      : currPlayer.dessertCards
+    : null;
 
   return (
     <div className="board">
