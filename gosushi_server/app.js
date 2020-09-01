@@ -185,7 +185,7 @@ io.on('connection', socket => {
 
       // keeping those seperate for now
       // might change to everyone can see everyones points rather than only seeing your own
-      game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
+      game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults, sendLogEntry);
 
       const playersData = game.getPlayersData();
       let count = 0;
@@ -198,14 +198,17 @@ io.on('connection', socket => {
     }
   });
 
+  const sendLogEntry = (roomCode, entry) => 
+    io.to(roomCode).emit('newLogEntry', entry);
+
   socket.on('handleSpecialAction', (roomCode, speCard, chosenCard) => {
     const game = rooms[roomCode];
     if (game && game.players) {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
-        game.handleSpecialAction(player, speCard, chosenCard);
+        game.handleSpecialAction(player, speCard, chosenCard, sendLogEntry);
         socket.to(roomCode).emit('completedSpecialAction');
-        game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults);
+        game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults, sendLogEntry);
       }
     }
   });

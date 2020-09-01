@@ -10,6 +10,7 @@ import CardToggle from './CardToggle';
 import Card from './Card';
 import './board.scss';
 import Drawer from './MenuDrawer';
+import SpecActionsLog from './SpecActionsLog'
 
 const Board = ({ socket }) => {
   const params = useParams();
@@ -134,7 +135,7 @@ const Board = ({ socket }) => {
           onClick={handleFinishTurn}
         >
           Finish Turn
-          <span class="hovertext">You cannot undo this action</span>
+          <span className="hovertext">You cannot undo this action</span>
         </Button>
         <CardToggle
           checked={showPlayedCards}
@@ -151,6 +152,7 @@ const Board = ({ socket }) => {
       {!_.isEmpty(menu) && <Drawer menu={menu} />}
       <SpecialModal socket={socket} />
       <ResultsModal socket={socket} />
+      <SpecActionsLog socket={socket} />
       <OtherPlayerGrid data={otherPlayerData} />
       <div className="played-cards">
         <div className="container-played-cards">

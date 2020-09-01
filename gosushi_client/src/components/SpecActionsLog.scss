@@ -1,0 +1,89 @@
+.spec-actions-log-container {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+}
+
+.spec-actions-log-button {
+    color: white
+}
+
+.spec-actions-log {
+    width: 50vh;
+    max-width: 50vh;
+}
+
+.popover-header {
+    color: black;
+    background-color: var(--dark-paper);
+}
+
+.popover-body {
+    height: 30vh;
+    max-height: 30vh;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    display: flex;
+    flex-direction: column-reverse;
+    background-color: var(--light-paper);
+}
+
+$circle-height: 20px;
+.new-entries-circle {
+    position: absolute;
+    bottom: -8px;
+    left: -8px;
+    height: $circle-height;
+    width: $circle-height;
+    border-radius: 50%;
+    background-color: red;
+    color: white;
+    font-size: $circle-height/2;
+    line-height: normal;
+}
+
+.log-item {
+    margin-top: 0.35rem;
+    line-height: 1.1rem;
+}
+
+.log-maki { color: var(--maki); }
+.log-temaki { color: var(--temaki); }
+.log-uramaki { color: var(--uramaki); }
+.log-dumpling { color: var(--dumpling); }
+.log-edamame { color: var(--edamame); }
+.log-eel { color: var(--eel); }
+.log-onigiri { color: var(--onigiri); }
+.log-misosoup { color: var(--misosoup); }
+.log-sashimi { color: var(--sashimi); }
+.log-tempura { color: var(--tempura); }
+.log-tofu { color: var(--tofu); }
+.log-chopsticks { color: var(--chopsticks); }
+.log-spoon { color: var(--spoon); }
+.log-menu { color: var(--menu); }
+.log-takeoutbox { color: var(--takeoutbox); }
+.log-soysauce { color: var(--soysauce); }
+.log-tea { color: var(--tea); }
+.log-wasabi { color: var(--wasabi); }
+.log-specialorder { color: var(--specialorder); }
+.log-pudding { color: var(--pudding); }
+.log-greenteaicecream { color: var(--greenteaicecream); }
+.log-fruit { color: var(--fruit); }
+.log-squidnigiri, 
+.log-eggnigiri, 
+.log-salmonnigiri,
+.log-nigiri { color: var(--nigiri); }
+
+/* CUSTOM SCROLLBAR */
+::-webkit-scrollbar {
+width: 10px;
+}
+::-webkit-scrollbar-track {
+background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+background: #888;
+}
+::-webkit-scrollbar-thumb:hover {
+background: #555;
+}
