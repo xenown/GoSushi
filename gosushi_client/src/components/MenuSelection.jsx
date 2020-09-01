@@ -32,49 +32,27 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
   const validMenuOption = item => invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(numPlayers) : true;
   const getCardStyle = item => "menu-item game-card" + (validMenuOption(item) ? "": " disable-card");
 
-  const selectRoll = item => {
+  const selectSingleCourse = (item, course) => {
     let menucopy = _.cloneDeep(menu);
-    menucopy.roll = item;
+    menucopy[course] = item;
     handleMenu(menucopy);
   };
 
-  const selectAppetizer = item => {
+  const selectMultiCourse = (item, course) => {
     if (!validMenuOption(item)){
       return;
     }
 
+    const maxItems = course === "appetizers" ? 3 : 2;
     let menucopy = _.cloneDeep(menu);
-    let newAppetizer = menu.appetizers.slice();
-    if (menu.appetizers.includes(item)) {
-      _.remove(newAppetizer, i => i === item);
-      menucopy.appetizers = newAppetizer;
-    } else if (menu.appetizers.length < 3) {
-      newAppetizer.push(item);
-      menucopy.appetizers = newAppetizer;
+    let newCourse = menu[course].slice();
+    if (menu[course].includes(item)) {
+      _.remove(newCourse, i => i === item);
+      menucopy[course] = newCourse;
+    } else if (menu[course].length < maxItems) {
+      newCourse.push(item);
+      menucopy[course] = newCourse;
     }
-    handleMenu(menucopy);
-  };
-
-  const selectSpecial = item => {
-    if (!validMenuOption(item)){
-      return;
-    }
-
-    let menucopy = _.cloneDeep(menu);
-    let newSpecial = menu.specials.slice();
-    if (menu.specials.includes(item)) {
-      _.remove(newSpecial, i => i === item);
-      menucopy.specials = newSpecial;
-    } else if (menu.specials.length < 2) {
-      newSpecial.push(item);
-      menucopy.specials = newSpecial;
-    }
-    handleMenu(menucopy);
-  };
-
-  const selectDessert = item => {
-    let menucopy = _.cloneDeep(menu);
-    menucopy.dessert = item;
     handleMenu(menucopy);
   };
 
@@ -152,7 +130,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                     alt={item}
                     className={getCardStyle(item) + (menu.roll === item ? " select-roll" : "")}
                     key={item}
-                    onClick={() => selectRoll(item)}
+                    onClick={() => selectSingleCourse(item, "roll")}
                   />
                 ))}
               </div>
@@ -167,7 +145,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                       src={menuCardImageMap[item]}
                       alt={item}
                       className="img"
-                      onClick={() => selectAppetizer(item)}
+                      onClick={() => selectMultiCourse(item, "appetizers")}
                     />
                     <span className="hovertext">This menu item cannot be chosen when there are {numPlayers} players.</span>
                   </div>
@@ -184,7 +162,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                       src={menuCardImageMap[item]}
                       alt={item}
                       className="img"
-                      onClick={() => selectSpecial(item)}
+                      onClick={() => selectMultiCourse(item, "specials")}
                     />
                     <span className="hovertext">This menu item cannot be chosen when there are {numPlayers} players.</span>
                   </div>
@@ -201,7 +179,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                     alt={item}
                     className={getCardStyle(item) + (menu.dessert === item ? " select-dessert" : "")}
                     key={item}
-                    onClick={() => selectDessert(item)}
+                    onClick={() => selectSingleCourse(item, "dessert")}
                   />
                 ))}
               </div>
