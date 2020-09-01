@@ -32,49 +32,27 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
   const validMenuOption = item => invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(numPlayers) : true;
   const getCardStyle = item => "menu-item game-card" + (validMenuOption(item) ? "": " disable-card");
 
-  const selectRoll = item => {
-    let menucopy = _.clone(menu);
-    menucopy.roll = item;
+  const selectSingleCourse = (item, course) => {
+    let menucopy = _.cloneDeep(menu);
+    menucopy[course] = item;
     handleMenu(menucopy);
   };
 
-  const selectAppetizer = item => {
+  const selectMultiCourse = (item, course) => {
     if (!validMenuOption(item)){
       return;
     }
 
-    let menucopy = _.clone(menu);
-    let newAppetizer = menu.appetizers.slice();
-    if (menu.appetizers.includes(item)) {
-      _.remove(newAppetizer, i => i === item);
-      menucopy.appetizers = newAppetizer;
-    } else if (menu.appetizers.length < 3) {
-      newAppetizer.push(item);
-      menucopy.appetizers = newAppetizer;
+    const maxItems = course === "appetizers" ? 3 : 2;
+    let menucopy = _.cloneDeep(menu);
+    let newCourse = menu[course].slice();
+    if (menu[course].includes(item)) {
+      _.remove(newCourse, i => i === item);
+      menucopy[course] = newCourse;
+    } else if (menu[course].length < maxItems) {
+      newCourse.push(item);
+      menucopy[course] = newCourse;
     }
-    handleMenu(menucopy);
-  };
-
-  const selectSpecial = item => {
-    if (!validMenuOption(item)){
-      return;
-    }
-
-    let menucopy = _.clone(menu);
-    let newSpecial = menu.specials.slice();
-    if (menu.specials.includes(item)) {
-      _.remove(newSpecial, i => i === item);
-      menucopy.specials = newSpecial;
-    } else if (menu.specials.length < 2) {
-      newSpecial.push(item);
-      menucopy.specials = newSpecial;
-    }
-    handleMenu(menucopy);
-  };
-
-  const selectDessert = item => {
-    let menucopy = _.clone(menu);
-    menucopy.dessert = item;
     handleMenu(menucopy);
   };
 
@@ -85,7 +63,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
       menu.appetizers = suggestedMenus[name]['appetizers'];
       menu.specials = suggestedMenus[name]['specials'];
       menu.dessert = suggestedMenus[name]['dessert'];
-      handleMenu(menu);
+      handleMenu(_.cloneDeep(menu));
     };
   });
 
@@ -150,17 +128,9 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className={getCardStyle(item)}
+                    className={getCardStyle(item) + (menu.roll === item ? " select-roll" : "")}
                     key={item}
-                    onClick={() => selectRoll(item)}
-                    style={
-                      menu.roll === item
-                        ? {
-                            border: '4px solid #741b47',
-                            borderRadius: '18px',
-                          }
-                        : null
-                    }
+                    onClick={() => selectSingleCourse(item, "roll")}
                   />
                 ))}
               </div>
@@ -170,21 +140,15 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                 role="tabpanel"
               >
                 {Object.values(appetizersEnum).map(item => (
-                  <img
-                    src={menuCardImageMap[item]}
-                    alt={item}
-                    className={getCardStyle(item)}
-                    key={item}
-                    onClick={() => selectAppetizer(item)}
-                    style={
-                      menu.appetizers.includes(item)
-                        ? {
-                            border: '4px solid #3c9fa7',
-                            borderRadius: '18px',
-                          }
-                        : null
-                    }
-                  />
+                  <div key={item} className={getCardStyle(item) + (menu.appetizers.includes(item) ? " select-appetizer": "")}>
+                    <img
+                      src={menuCardImageMap[item]}
+                      alt={item}
+                      className="img"
+                      onClick={() => selectMultiCourse(item, "appetizers")}
+                    />
+                    <span className="hovertext">This menu item cannot be chosen when there are {numPlayers} players.</span>
+                  </div>
                 ))}
               </div>
               <div
@@ -193,21 +157,15 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                 role="tabpanel"
               >
                 {Object.values(specialsEnum).map(item => (
-                  <img
-                    src={menuCardImageMap[item]}
-                    alt={item}
-                    className={getCardStyle(item)}
-                    key={item}
-                    onClick={() => selectSpecial(item)}
-                    style={
-                      menu.specials.includes(item)
-                        ? {
-                            border: '4px solid #ff9900',
-                            borderRadius: '18px',
-                          }
-                        : null
-                    }
-                  />
+                  <div key={item} className={getCardStyle(item) + (menu.specials.includes(item) ? " select-special": "")}>
+                    <img
+                      src={menuCardImageMap[item]}
+                      alt={item}
+                      className="img"
+                      onClick={() => selectMultiCourse(item, "specials")}
+                    />
+                    <span className="hovertext">This menu item cannot be chosen when there are {numPlayers} players.</span>
+                  </div>
                 ))}
               </div>
               <div
@@ -219,17 +177,9 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                   <img
                     src={menuCardImageMap[item]}
                     alt={item}
-                    className={getCardStyle(item)}
+                    className={getCardStyle(item) + (menu.dessert === item ? " select-dessert" : "")}
                     key={item}
-                    onClick={() => selectDessert(item)}
-                    style={
-                      menu.dessert === item
-                        ? {
-                            border: '4px solid #b90064',
-                            borderRadius: '18px',
-                          }
-                        : null
-                    }
+                    onClick={() => selectSingleCourse(item, "dessert")}
                   />
                 ))}
               </div>

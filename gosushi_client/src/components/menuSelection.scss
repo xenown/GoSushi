@@ -111,8 +111,70 @@
 .game-card {
   height: 150px;
   width: 125px;
+
+  .img {
+    height: 100%;
+  }
 }
 
 .disable-card {
-  opacity: 0.5;
+  z-index: 1;
+  position: relative;
+  
+  .img {
+    opacity: 0.5;
+  }
+}
+
+.game-card .hovertext {
+  display: none;
+}
+
+.disable-card .hovertext {
+  display: inline-block;
+  opacity: 1;
+  font-size: small;
+  
+  /* Positioning for the hovertext */
+  bottom: 105%;
+  left: -5%;
+}
+
+.disable-card .hovertext::after {
+  content: " ";
+  position: absolute;
+  top: 100%; /* At the bottom of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.disable-card:hover .hovertext {
+  visibility: visible;
+}
+
+.disable-card:hover:disabled .hovertext {
+  visibility: hidden;
+}
+
+.select-roll {
+  border: 4px solid var(--rolls);
+  border-radius: 18px;
+}
+
+.select-appetizer {
+  border: 4px solid var(--apps);
+  border-radius: 18px;
+}
+
+.select-special {
+  border: 4px solid var(--specs);
+  border-radius: 18px;
+}
+
+.select-dessert {
+  border: 4px solid var(--dess);
+  border-radius: 18px;
 }

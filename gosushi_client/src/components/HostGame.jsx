@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
@@ -74,7 +75,7 @@ const HostGame = ({ socket }) => {
       setMessage(msg);
       return;
     } else if (name === ''){
-      setMessage("Missing player name.");
+      setMessage('Missing player name.');
       return;
     }
 
@@ -88,11 +89,22 @@ const HostGame = ({ socket }) => {
     console.log('HOSTGAME MENU:');
     console.log(menu);
 
-    // Remove menu items that are not allowed with the current number of players
-    menu.appetizers = menu.appetizers.filter(a => validMenuOption(a, numPlayers));
-    menu.specials = menu.specials.filter(s => validMenuOption(s, numPlayers));
+    // Remove menu items that are not allowed with the new number of players
+    const removedAppetizers = _.remove(menu.appetizers, a => !validMenuOption(a, numPlayers));
+    const removedSpecials = _.remove(menu.specials, s => !validMenuOption(s, numPlayers));
+
+    let msg = '';
+    if (!_.isEmpty(removedAppetizers)) {
+      msg += `The following appetizer(s) cannot be chosen when there are ${numPlayers} players: `;
+      msg += _.join(removedAppetizers, ', ') + '. '
+    }
+    if (!_.isEmpty(removedSpecials)) {
+      msg += `The following special(s) cannot be chosen when there are ${numPlayers} players: `;
+      msg += _.join(removedSpecials, ', ') + '. '
+    }
 
     setMenu(menu);
+    setMessage(msg);
   };
 
   const handleStartGame = () => {
@@ -105,7 +117,7 @@ const HostGame = ({ socket }) => {
       setMessage(msg);
       return;
     } else if (name === ''){
-      setMessage("Missing player name.");
+      setMessage('Missing player name.');
       return;
     }
 
@@ -117,11 +129,22 @@ const HostGame = ({ socket }) => {
 
   const handleNumPlayers = num => {
     // Remove menu items that are not allowed with the new number of players
-    menu.appetizers = menu.appetizers.filter(a => validMenuOption(a, num));
-    menu.specials = menu.specials.filter(s => validMenuOption(s, num));
+    const removedAppetizers = _.remove(menu.appetizers, a => !validMenuOption(a, num));
+    const removedSpecials = _.remove(menu.specials, s => !validMenuOption(s, num));
 
-    setNumPlayers(num);
+    let msg = '';
+    if (!_.isEmpty(removedAppetizers)) {
+      msg += `The following appetizer(s) cannot be chosen when there are ${num} players: `;
+      msg += _.join(removedAppetizers, ', ') + '. '
+    }
+    if (!_.isEmpty(removedSpecials)) {
+      msg += `The following special(s) cannot be chosen when there are ${num} players: `;
+      msg += _.join(removedSpecials, ', ') + '.'
+    }
+
     setMenu(menu);
+    setMessage(msg);
+    setNumPlayers(num);
   };
 
   const createForm = (
@@ -154,13 +177,13 @@ const HostGame = ({ socket }) => {
         <label
           className="btn btn-primary active"
           key={`2-player`}
-          onClick={() => setNumPlayers(2)}
         >
           <input
             type="radio"
             name="options"
             id="option0"
             autoComplete="off"
+            onClick={() => handleNumPlayers(2)}
             defaultChecked
           />
           2-player
@@ -169,13 +192,13 @@ const HostGame = ({ socket }) => {
           <label
             className="btn btn-primary"
             key={`${players}-player`}
-            onClick={() => handleNumPlayers(players)}
           >
             <input
               type="radio"
               name="options"
               id={'option' + index + 1}
               autoComplete="off"
+              onClick={() => handleNumPlayers(players)}
             />
             {players}-player
           </label>
