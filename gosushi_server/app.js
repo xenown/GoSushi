@@ -184,11 +184,19 @@ io.on('connection', socket => {
       ) {
         playersData.push(playersData.shift());
       }
-
       if (sendMenu) {
         socket.emit('sendMenuData', game.deck.menu);
       }
       socket.emit('sendTurnData', player ? player.hand : [], playersData);
+      if (game.specialActions.length > 0) {   // everyone has played their cards, now performing special actions
+        let { card, playerName } = game.specialActions[0];
+        if (playerName === player.name) {
+          let data = game.getSpecialData(playerName, card);
+          io.to(player.socketId).emit('doSpecialAction', card, data);
+        } else {
+          io.to(player.socketId).emit('waitForAction', playerName, card.name);
+        }
+      }
     } else {
       socket.emit('unknownGame');
     }
@@ -245,6 +253,7 @@ io.on('connection', socket => {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
         game.handleSpecialAction(player, speCard, chosenCard, sendLogEntry);
+        game.specialActions.shift();
         socket.to(roomCode).emit('completedSpecialAction');
         game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults, sendLogEntry);
       }
@@ -266,6 +275,7 @@ io.on('connection', socket => {
         game.players[index].socketId = null;
         delete socketToRoom[socket.id];
         socket.to(roomCode).emit('playerQuit', game.players[index].name);
+        io.to(game.hostPlayer.socketId).emit('hostplayerQuit', game.players[index].name);
       } else {
         game.players = game.players.filter(p => p.socketId !== socket.id);
         socket.to(roomCode).emit(
