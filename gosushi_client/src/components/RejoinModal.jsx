@@ -41,7 +41,7 @@ const RejoinModal = ({ socket, rooms, open, hide }) => {
                   id={`${roomCode}`}
                   label={`${roomCode}`}
                   checked={index === roomIndex}
-                  onClick={() => { setRoomIndex(index); }}
+                  onChange={() => { setRoomIndex(index); }}
                 />
               </div>
             );
