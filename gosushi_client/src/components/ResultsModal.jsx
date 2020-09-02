@@ -68,11 +68,11 @@ const ResultsModal = ({ socket }) => {
     <Modal
       show={playersData.length > 0}
       onHide={() => {
+        socket.emit('resetRoom', params.roomCode);
         if (isHost) {
           history.push(`/host/${params.roomCode}`);
         } else {
-          socket.emit('leaveRoom');
-          history.push('/join');
+          history.push(`/join/${params.roomCode}`);
         }
       }}
       backdrop="static"
@@ -86,11 +86,11 @@ const ResultsModal = ({ socket }) => {
         <Button
           variant="primary"
           onClick={() => {
+            socket.emit('resetRoom', params.roomCode);
             if (isHost) {
               history.push(`/host/${params.roomCode}`);
             } else {
-              socket.emit('leaveRoom', params.roomCode);
-              history.push('/join');
+              history.push(`/join/${params.roomCode}`);
             }
           }}
         >

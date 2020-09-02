@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import DisplayMenu from './DisplayMenu';
-import './common.scss';
 import './menuSelection.scss';
 import './waitingRoom.scss';
 
@@ -13,9 +12,7 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
 
   useEffect(() => {
     const handleActivePlayer = (dataPlayers, dataMenu) => {
-      if (Array.isArray(dataPlayers)) {
-        setPlayers(dataPlayers);
-      }
+      setPlayers(dataPlayers);
       setMenu(dataMenu);
     };
 
@@ -94,7 +91,7 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
               <h4 className="wait-room-subheader">Players</h4>
               <div className="wait-room-right-pane grow">
                 {players.map(player => (
-                  <div key={player}>{`${player}`}</div>
+                  <div key={player.name}>{`${player.name}`}</div>
                 ))}
               </div>
             </div>

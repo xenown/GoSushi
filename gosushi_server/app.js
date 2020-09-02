@@ -21,7 +21,6 @@ const rooms = {};
 const socketToRoom = {};
 
 index.get('/generateRoomCode', (req, res) => {
-  console.log('heyyy new roomcode');
   const roomCode = generateRoomCode(new Set(Object.keys(rooms)));
   res.status(200).send({ roomCode: roomCode });
 });
@@ -33,7 +32,7 @@ io.on('connection', socket => {
     //Assuming menu contains roll, appetizers, specials, dessert
     if (roomCode === false) {
       socket.emit(
-        'getActivePlayers',
+        'connectionFailed',
         `Connection failed: Could not generate unique room code.`
       );
       return;
@@ -42,22 +41,16 @@ io.on('connection', socket => {
       rooms[roomCode].hostPlayer.socketId != socket.id
     ) {
       socket.emit(
-        'getActivePlayers',
+        'connectionFailed',
         `Connection failed: The provided room code is in use with a different host.`
       );
     }
 
-    return socket.join([roomCode], e => {
-      if (e) {
-        socket.emit(
-          'getActivePlayers',
-          `Connection failed: Error joining room: ${e}`
-        );
-        return;
-      }
+    if (!!socket.rooms[roomCode]) {
+      console.log(`${username} already in room ${roomCode}`);
 
       if (!!rooms[roomCode]) {
-        rooms[roomCode].newGame(menu, numPlayers);
+        rooms[roomCode].newGame(menu, numPlayers, username);
       } else {
         rooms[roomCode] = new Game(
           menu,
@@ -68,11 +61,40 @@ io.on('connection', socket => {
         );
       }
 
-      socketToRoom[socket.id] = roomCode;
-      console.log(`${username} joined ${socket.id}`);
-      io.to(roomCode).emit('getActivePlayers', [username], menu);
+      let activePlayers = rooms[roomCode].players.map(p => ({
+        name: p.name,
+        socketId: p.socketId,
+      }));
+
+      io.to(roomCode).emit('getActivePlayers', activePlayers, menu);
       io.to(roomCode).emit('getNumPlayers', numPlayers);
-    });
+    } else {
+      socket.join([roomCode], e => {
+        if (e) {
+          socket.emit(
+            'connectionFailed',
+            `Connection failed: Error joining room: ${e}`
+          );
+          return;
+        }
+        rooms[roomCode] = new Game(
+          menu,
+          numPlayers,
+          roomCode,
+          username,
+          socket.id
+        );
+
+        socketToRoom[socket.id] = roomCode;
+        console.log(
+          `${username} with socketId ${socket.id} joined ${roomCode}`
+        );
+
+        const playerData = { name: username, socketId: socket.id };
+        io.to(roomCode).emit('getActivePlayers', [playerData], menu);
+        io.to(roomCode).emit('getNumPlayers', numPlayers);
+      });
+    }
   };
 
   socket.on('hostGame', handleHostGame);
@@ -82,13 +104,13 @@ io.on('connection', socket => {
       const game = rooms[roomCode];
       if (!game) {
         socket.emit(
-          'getActivePlayers',
+          'connectionFailed',
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
       } else if (game.players.length === game.numPlayers) {
         socket.emit(
-          'getActivePlayers',
+          'connectionFailed',
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
         return;
@@ -98,13 +120,13 @@ io.on('connection', socket => {
         }, false)
       ) {
         socket.emit(
-          'getActivePlayers',
+          'connectionFailed',
           `Connection failed: Player name ${username} is already in use, please use a different name.`
         );
         return;
       } else if (e) {
         socket.emit(
-          'getActivePlayers',
+          'connectionFailed',
           `Connection failed: Error joining room: ${e}`
         );
         return;
@@ -114,11 +136,14 @@ io.on('connection', socket => {
       const { players } = game;
 
       socketToRoom[socket.id] = roomCode;
-      console.log(`joined ${socket.id}`);
+      console.log(`${username} with socketId ${socket.id} joined ${roomCode}`);
 
       io.to(roomCode).emit(
         'getActivePlayers',
-        players.map(p => p.name),
+        players.map(p => ({
+          name: p.name,
+          socketId: p.socketId,
+        })),
         game.deck.menu
       );
       io.to(roomCode).emit('getNumPlayers', game.numPlayers);
@@ -139,7 +164,10 @@ io.on('connection', socket => {
       socket.emit('getNumPlayers', game.numPlayers);
       socket.emit(
         'getActivePlayers',
-        game.players.map(p => p.name),
+        game.players.map(p => ({
+          name: p.name,
+          socketId: p.socketId,
+        })),
         game.deck.menu
       );
       game.startRound();
@@ -228,6 +256,16 @@ io.on('connection', socket => {
         }
         playersData.push(playersData.shift());
       }
+
+      if (game.isGameOver) {
+        io.to(roomCode).emit(
+          'getActivePlayers',
+          game.players.map(p => ({
+            name: p.name,
+            socketId: p.socketId,
+          }))
+        );
+      }
     }
   });
 
@@ -251,15 +289,17 @@ io.on('connection', socket => {
     }
   });
 
-  socket.on('leaveRoom', roomCode => {
-    socket.leave(roomCode, () => {
-      const game = rooms[roomCode];
-      if (game && game.players) {
-        game.players = game.players.filter(p => p.socketId !== socket.id);
-      }
-      delete socketToRoom[socket.id];
-      console.log(`${socket.id} has left room ${roomCode}`);
-    });
+  socket.on('resetRoom', roomCode => {
+    const game = rooms[roomCode];
+    if (!!socketToRoom[socket.id]) {
+      socket.emit(
+        'getActivePlayers',
+        game.players.map(p => ({
+          name: p.name,
+          socketId: p.socketId,
+        }))
+      );
+    }
   });
 
   socket.on('disconnect', () => {
@@ -279,7 +319,10 @@ io.on('connection', socket => {
         game.players = game.players.filter(p => p.socketId !== socket.id);
         socket.to(roomCode).emit(
           'getActivePlayers',
-          game.players.map(p => p.name),
+          game.players.map(p => ({
+            name: p.name,
+            socketId: p.socketId,
+          })),
           game.deck.menu
         );
       }

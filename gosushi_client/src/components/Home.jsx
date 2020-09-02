@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useHistory } from 'react-router-dom';
+import './common.scss';
 const logo = require('../assets/sushigologo.png');
 
 const Home = ({ endpoint }) => {
@@ -24,7 +25,7 @@ const Home = ({ endpoint }) => {
         <Link className="btn btn-danger" onClick={handleHostClick}>
           Host Game
         </Link>
-        <Link className="btn btn-success" to="/join">
+        <Link className="btn btn-success" to="/join/new">
           Join Game
         </Link>
         <a

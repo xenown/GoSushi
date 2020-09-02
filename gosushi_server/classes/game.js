@@ -31,11 +31,12 @@ class Game {
     this.isGameOver = false;
   }
 
-  newGame(menu, playerNum) {
+  newGame(menu, playerNum, hostPlayer) {
     this.deck = new Deck(menu, playerNum);
     this.numPlayers = playerNum;
     this.round = 1;
     this.hands = [];
+    this.hostPlayer.name = hostPlayer;
     this.playedTurn = 0;
     this.uramakiCountMap = {};
     this.uramakiStanding = { value: 1 };
@@ -373,6 +374,9 @@ class Game {
       );
     });
     console.log('End of game');
+
+    // keep only the real players for the next game
+    this.players = this.players.filter(p => !p.isAuto);
   }
 
   setupDeck() {

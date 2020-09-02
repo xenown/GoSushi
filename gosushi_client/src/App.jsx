@@ -27,7 +27,7 @@ const App = () => {
             <Route path="/host/:roomCode">
               <HostGame socket={socket} />
             </Route>
-            <Route path="/join">
+            <Route path="/join/:roomCode">
               <JoinGame socket={socket} />
             </Route>
             <Route path="/game/:roomCode">
@@ -36,6 +36,7 @@ const App = () => {
             <Route exact path="/">
               <Home endpoint={ENDPOINT} />
             </Route>
+            <Redirect from="/join" to="/join/new" />
             <Redirect from="/*" to="/" />
           </Switch>
         </div>

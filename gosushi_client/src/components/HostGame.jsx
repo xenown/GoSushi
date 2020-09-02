@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
+import { ButtonGroup, ToggleButton } from 'react-bootstrap';
 import { useParams, useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
 import MenuSelection from './MenuSelection';
@@ -9,7 +10,7 @@ import {
   MENU_APPETIZER_COUNT,
   MENU_SPECIAL_COUNT,
 } from '../utils/menuSelectionUtils';
-import './common.scss';
+import './hostGame.scss';
 
 const dev = process.env.NODE_ENV === 'development';
 
@@ -29,24 +30,30 @@ const HostGame = ({ socket }) => {
   });
 
   useEffect(() => {
-    const handleActivePlayer = data => {
-      if (!Array.isArray(data)) {
-        setMessage(data);
-      } else {
-        setMessage(data);
-        setNumActivePlayers(data.length);
+    const handleActivePlayer = (data, menu) => {
+      setName(data[0].name || name);
+      setNumActivePlayers(data.length);
+      setNumPlayers(Math.max(data.length, numPlayers));
+
+      if (!!menu) {
         setIsCreating(false);
       }
     };
 
+    const handleNumPlayer = data => setNumPlayers(data);
+
+    const handleError = err => setMessage(err);
+
     socket.on('getActivePlayers', handleActivePlayer);
-    socket.on('getNumPlayers', data => setNumPlayers(data));
+    socket.on('getNumPlayers', handleNumPlayer);
+    socket.on('connectionFailed', handleError);
 
     return () => {
       socket.off('getActivePlayers', handleActivePlayer);
-      socket.off('getNumPlayers', setNumPlayers);
+      socket.off('getNumPlayers', handleNumPlayer);
+      socket.off('connectionFailed', handleError);
     };
-  }, [socket, numActivePlayers, numPlayers]);
+  }, [socket, numActivePlayers, numPlayers, name]);
 
   const checkValidMenu = () => {
     let msg = '';
@@ -133,6 +140,12 @@ const HostGame = ({ socket }) => {
     invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(num) : true;
 
   const handleNumPlayers = num => {
+    let msg = '';
+    if (num < numActivePlayers && numActivePlayers > 1) {
+      msg += `There are already ${numActivePlayers} players, cannot create a game with only ${num} players.`;
+    } else {
+      setNumPlayers(num);
+    }
     // Remove menu items that are not allowed with the new number of players
     const removedAppetizers = _.remove(
       menu.appetizers,
@@ -143,7 +156,6 @@ const HostGame = ({ socket }) => {
       s => !validMenuOption(s, num)
     );
 
-    let msg = '';
     if (!_.isEmpty(removedAppetizers)) {
       msg += `The following appetizer(s) cannot be chosen when there are ${num} players: `;
       msg += _.join(removedAppetizers, ', ') + '. ';
@@ -155,11 +167,10 @@ const HostGame = ({ socket }) => {
 
     setMenu(menu);
     setMessage(msg);
-    setNumPlayers(num);
   };
 
   const createForm = (
-    <div className="center vertical">
+    <div className="center vertical container-hostgame">
       <MenuSelection
         handleMenu={handleMenu}
         menu={menu}
@@ -180,39 +191,42 @@ const HostGame = ({ socket }) => {
             className="form-control"
             aria-label="Name"
             aria-describedby="inputGroup-sizing-default"
+            value={name}
             onChange={e => setName(e.target.value)}
           />
         </div>
       </div>
 
-      <div
-        className="player-count btn-group btn-group-toggle mb-3"
-        data-toggle="buttons"
-      >
-        <label className="btn btn-primary active" key={`2-player`}>
-          <input
+      <ButtonGroup className="player-count mb-3" toggle>
+        <ToggleButton
+          key={`2-player`}
+          className="toggle-player-number"
+          type="radio"
+          name="options"
+          value="option0"
+          onChange={() => handleNumPlayers(2)}
+          checked={2 === numPlayers}
+          disabled={2 < numActivePlayers}
+        >
+          2-player
+          <span className="hovertext">{`There are already ${numActivePlayers} players, cannot create a game with only ${2}.`}</span>
+        </ToggleButton>
+        {[3, 4, 5, 6, 7, 8].map((players, index) => (
+          <ToggleButton
+            key={`${players}-player`}
+            className="toggle-player-number"
             type="radio"
             name="options"
-            id="option0"
-            autoComplete="off"
-            onClick={() => handleNumPlayers(2)}
-            defaultChecked
-          />
-          2-player
-        </label>
-        {[3, 4, 5, 6, 7, 8].map((players, index) => (
-          <label className="btn btn-primary" key={`${players}-player`}>
-            <input
-              type="radio"
-              name="options"
-              id={'option' + index + 1}
-              autoComplete="off"
-              onClick={() => handleNumPlayers(players)}
-            />
+            value={'option' + index + 1}
+            onChange={() => handleNumPlayers(players)}
+            checked={players === numPlayers}
+            disabled={players < numActivePlayers}
+          >
             {players}-player
-          </label>
+            <span className="hovertext">{`There are already ${numActivePlayers} players, cannot create a game with only ${players}.`}</span>
+          </ToggleButton>
         ))}
-      </div>
+      </ButtonGroup>
 
       <div>
         <p>{message}</p>
@@ -240,7 +254,7 @@ const HostGame = ({ socket }) => {
         <h1>Host Game</h1>
         {isCreating && createForm}
         <WaitingRoom name={name} roomCode={params.roomCode} socket={socket} />
-        {numActivePlayers === numPlayers && (
+        {numActivePlayers === numPlayers && !isCreating && (
           <button
             className="btn btn-success ml-2 mr-2 mb-2"
             onClick={handleStartGame}
