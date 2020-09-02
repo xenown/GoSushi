@@ -275,7 +275,6 @@ io.on('connection', socket => {
         game.players[index].socketId = null;
         delete socketToRoom[socket.id];
         socket.to(roomCode).emit('playerQuit', game.players[index].name);
-        io.to(game.hostPlayer.socketId).emit('hostplayerQuit', game.players[index].name);
       } else {
         game.players = game.players.filter(p => p.socketId !== socket.id);
         socket.to(roomCode).emit(
