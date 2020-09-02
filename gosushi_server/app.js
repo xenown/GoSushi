@@ -39,10 +39,16 @@ io.on('connection', socket => {
         return clientIp === player.ip && player.isAuto;
       });
       if (playerIndex >= 0){
-        socketToRoom[socket.id] = roomCode;
-        game.players[playerIndex].socketId = socket.id;
-        game.players[playerIndex].isAuto = false;
-        socket.emit('rejoinGameResult', roomCode);
+        socket.join([roomCode], e => {
+          if (e) {
+            socket.emit('rejoinGameResult');
+          } else {
+            socketToRoom[socket.id] = roomCode;
+            game.players[playerIndex].socketId = socket.id;
+            game.players[playerIndex].isAuto = false;
+            socket.emit('rejoinGameResult', roomCode);
+          }
+        });
       } else {
         socket.emit('rejoinGameResult');
       }
@@ -244,8 +250,9 @@ io.on('connection', socket => {
     }
   });
 
-  const sendLogEntry = (roomCode, entry) => 
+  const sendLogEntry = (roomCode, entry) => {
     io.to(roomCode).emit('newLogEntry', entry);
+  };
 
   socket.on('handleSpecialAction', (roomCode, speCard, chosenCard) => {
     const game = rooms[roomCode];
