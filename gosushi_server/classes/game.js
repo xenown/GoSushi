@@ -39,7 +39,7 @@ class Game {
     this.hostPlayer.name = hostPlayer;
     this.playedTurn = 0;
     this.uramakiCountMap = {};
-    this.uramakiStanding = { value: 1 };
+    this.uramakiStanding.value = 1;
     this.specialActions = [];
     this.gameStarted = false;
     this.isGameOver = false;
@@ -178,6 +178,9 @@ class Game {
         this.round++;
         updateRound(this.roomCode, this.round);
         console.log('End of round');
+
+        // reset uramaki standing
+        this.uramakiStanding.value = 1;
 
         // remove and add desserts
         this.startRound();
