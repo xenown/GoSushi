@@ -73,7 +73,7 @@ const Board = ({ socket }) => {
     socket.on('playerStatus', handlePlayerStatus);
     socket.on('unknownGame', handleUnknownGame);
     socket.on('quitGame', handleQuitGame);
-    socket.on('playerQuit', handlePlayerQuit);
+    // socket.on('playerQuit', handlePlayerQuit);
     socket.on('playerRejoin', handlePlayerRejoin);
 
     return () => {
@@ -82,7 +82,7 @@ const Board = ({ socket }) => {
       socket.off('playerStatus', handlePlayerStatus);
       socket.off('unknownGame', handleUnknownGame);
       socket.off('quitGame', handleQuitGame);
-      socket.off('playerQuit', handlePlayerQuit);
+      // socket.off('playerQuit', handlePlayerQuit);
       socket.off('playerRejoin', handlePlayerRejoin);
     };
   }, [params.roomCode, socket, menu, history]);

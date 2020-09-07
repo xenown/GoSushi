@@ -47,6 +47,7 @@ io.on('connection', socket => {
             game.players[playerIndex].socketId = socket.id;
             game.players[playerIndex].isAuto = false;
             socket.emit('rejoinGameResult', roomCode);
+            sendLogEntry(roomCode, {player: game.players[playerIndex].name, playedCard: "Player Reconnect"});
           }
         });
       } else {
@@ -281,7 +282,8 @@ io.on('connection', socket => {
         game.players[index].isAuto = true;
         game.players[index].socketId = null;
         delete socketToRoom[socket.id];
-        socket.to(roomCode).emit('playerQuit', game.players[index].name);
+        // socket.to(roomCode).emit('playerQuit', game.players[index].name);
+        sendLogEntry(roomCode, {player: game.players[index].name, playedCard: "Player Quit"});
       } else {
         game.players = game.players.filter(p => p.socketId !== socket.id);
         socket.to(roomCode).emit(
