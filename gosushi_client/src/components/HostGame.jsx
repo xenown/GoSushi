@@ -122,6 +122,7 @@ const HostGame = ({ socket }) => {
 
     setMenu(menu);
     setMessage(msg);
+    socket.emit('broadcastSelection', menu, numPlayers, roomCode);
   };
 
   const handleStartGame = () => {
@@ -173,6 +174,7 @@ const HostGame = ({ socket }) => {
 
     setMenu(menu);
     setMessage(msg);
+    socket.emit('broadcastSelection', menu, num, roomCode);
   };
 
   const createForm = (

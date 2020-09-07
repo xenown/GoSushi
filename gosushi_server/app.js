@@ -209,6 +209,12 @@ io.on('connection', socket => {
     }
   });
 
+  // update the data in the WaitingRoom so that other players can see the changes in the selection
+  socket.on('broadcastSelection', (menu, numPlayers, roomCode) => {
+    socket.to(roomCode).emit('gameInformation', menu, roomCode); // socket emit because don't need to update menu in HostGame (don't emit to sender)
+    io.to(roomCode).emit('getNumPlayers', numPlayers); // io emit so that the WaitingRoom in HostGame updates (do emit to sender)
+  });
+
   const sendTurnData = (socketId, hand, otherPlayerData) =>
     io.to(socketId).emit('sendTurnData', hand, otherPlayerData);
 
@@ -300,6 +306,7 @@ io.on('connection', socket => {
           socketId: p.socketId,
         }))
       );
+      socket.emit('getNumPlayers', game.players.length);
       socket.emit('gameInformation', null, roomCode);
     }
   });

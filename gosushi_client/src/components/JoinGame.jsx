@@ -7,7 +7,12 @@ const JoinGame = ({ socket }) => {
   const [roomCode, setRoomCode] = useState('');
   const [isJoining, setIsJoining] = useState(true);
   const [message, setMessage] = useState('');
-  const [menu, setMenu] = useState({});
+  const [menu, setMenu] = useState({
+    roll: '',
+    appetizers: [],
+    specials: [],
+    dessert: '',
+  });
   const history = useHistory();
 
   useEffect(() => {
@@ -26,7 +31,12 @@ const JoinGame = ({ socket }) => {
 
     const handleQuitGame = () => {
       setName('');
-      setMenu({});
+      setMenu({
+        roll: '',
+        appetizers: [],
+        specials: [],
+        dessert: '',
+      });
       setRoomCode('');
       setIsJoining(true);
       setMessage('Host disconnected - game terminated.');
@@ -97,7 +107,7 @@ const JoinGame = ({ socket }) => {
     roomCode,
     menu,
     socket,
-    shouldDisplayMenu: true,
+    shouldDisplayMenu: !isJoining,
   };
 
   return (
