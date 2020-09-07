@@ -24,19 +24,18 @@ const App = () => {
       <div className="App">
         <div className="App-content">
           <Switch>
-            <Route path="/host/:roomCode">
+            <Route path="/host">
               <HostGame socket={socket} />
             </Route>
-            <Route path="/join/:roomCode">
+            <Route path="/join">
               <JoinGame socket={socket} />
             </Route>
             <Route path="/game/:roomCode">
               <Board socket={socket} />
             </Route>
             <Route exact path="/">
-              <Home endpoint={ENDPOINT} />
+              <Home />
             </Route>
-            <Redirect from="/join" to="/join/new" />
             <Redirect from="/*" to="/" />
           </Switch>
         </div>

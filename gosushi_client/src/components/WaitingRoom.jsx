@@ -4,16 +4,14 @@ import DisplayMenu from './DisplayMenu';
 import './menuSelection.scss';
 import './waitingRoom.scss';
 
-const WaitingRoom = ({ name, roomCode, socket }) => {
+const WaitingRoom = ({ name, roomCode, menu, shouldDisplayMenu, socket }) => {
   const history = useHistory();
   const [players, setPlayers] = useState([]);
-  const [menu, setMenu] = useState({});
   const [numPlayers, setNumPlayers] = useState(0);
 
   useEffect(() => {
-    const handleActivePlayer = (dataPlayers, dataMenu) => {
+    const handleActivePlayer = dataPlayers => {
       setPlayers(dataPlayers);
-      setMenu(dataMenu);
     };
 
     const handleNumPlayers = data => setNumPlayers(data);
@@ -24,7 +22,6 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
 
     const handleQuitGame = () => {
       setPlayers([]);
-      setMenu({});
       setNumPlayers(0);
     };
 
@@ -98,7 +95,7 @@ const WaitingRoom = ({ name, roomCode, socket }) => {
           </div>
         </div>
       ) : null}
-      <DisplayMenu menu={menu} />
+      {shouldDisplayMenu && <DisplayMenu menu={menu} />}
     </div>
   );
 };

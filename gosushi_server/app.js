@@ -6,10 +6,10 @@ const port = process.env.SERVERPORT;
 const index = require('./routes/index');
 
 const app = express();
-const cors = require('cors');
+// const cors = require('cors');
 
 app.set('port', port);
-app.use(cors());
+// app.use(cors());
 app.use(index);
 
 const server = http.createServer(app);
@@ -20,55 +20,32 @@ const Game = require('./classes/game');
 const rooms = {};
 const socketToRoom = {};
 
-index.get('/generateRoomCode', (req, res) => {
-  const roomCode = generateRoomCode(new Set(Object.keys(rooms)));
-  res.status(200).send({ roomCode: roomCode });
-});
-
 io.on('connection', socket => {
   console.log('New client connected');
 
-  const handleHostGame = async (roomCode, menu, numPlayers, username) => {
+  const handleHostGame = async (menu, numPlayers, username) => {
     //Assuming menu contains roll, appetizers, specials, dessert
-    if (roomCode === false) {
-      socket.emit(
-        'connectionFailed',
-        `Connection failed: Could not generate unique room code.`
-      );
-      return;
-    } else if (
-      !!rooms[roomCode] &&
-      rooms[roomCode].hostPlayer.socketId != socket.id
-    ) {
-      socket.emit(
-        'connectionFailed',
-        `Connection failed: The provided room code is in use with a different host.`
-      );
-    }
 
-    if (!!socket.rooms[roomCode]) {
-      console.log(`${username} already in room ${roomCode}`);
+    if (!socketToRoom[socket.id]) {
+      const roomCode = generateRoomCode(new Set(Object.keys(rooms)));
 
-      if (!!rooms[roomCode]) {
-        rooms[roomCode].newGame(menu, numPlayers, username);
-      } else {
-        rooms[roomCode] = new Game(
-          menu,
-          numPlayers,
-          roomCode,
-          username,
-          socket.id
+      if (roomCode === false) {
+        socket.emit(
+          'connectionFailed',
+          `Connection failed: Could not generate unique room code.`
         );
+        return;
+      } else if (
+        !!rooms[roomCode] &&
+        rooms[roomCode].hostPlayer.socketId != socket.id
+      ) {
+        socket.emit(
+          'connectionFailed',
+          `Connection failed: The provided room code is in use with a different host.`
+        );
+        return;
       }
 
-      let activePlayers = rooms[roomCode].players.map(p => ({
-        name: p.name,
-        socketId: p.socketId,
-      }));
-
-      io.to(roomCode).emit('getActivePlayers', activePlayers, menu);
-      io.to(roomCode).emit('getNumPlayers', numPlayers);
-    } else {
       socket.join([roomCode], e => {
         if (e) {
           socket.emit(
@@ -91,9 +68,34 @@ io.on('connection', socket => {
         );
 
         const playerData = { name: username, socketId: socket.id };
-        io.to(roomCode).emit('getActivePlayers', [playerData], menu);
+        io.to(roomCode).emit('gameInformation', menu, roomCode);
+        io.to(roomCode).emit('getActivePlayers', [playerData]);
         io.to(roomCode).emit('getNumPlayers', numPlayers);
       });
+    } else {
+      const roomCode = socketToRoom[socket.id];
+      console.log(`${username} already in room ${roomCode}`);
+
+      if (!!rooms[roomCode]) {
+        rooms[roomCode].newGame(menu, numPlayers, username);
+      } else {
+        rooms[roomCode] = new Game(
+          menu,
+          numPlayers,
+          roomCode,
+          username,
+          socket.id
+        );
+      }
+
+      let activePlayers = rooms[roomCode].players.map(p => ({
+        name: p.name,
+        socketId: p.socketId,
+      }));
+
+      io.to(roomCode).emit('gameInformation', menu, roomCode);
+      io.to(roomCode).emit('getActivePlayers', activePlayers, menu);
+      io.to(roomCode).emit('getNumPlayers', numPlayers);
     }
   };
 
@@ -138,13 +140,13 @@ io.on('connection', socket => {
       socketToRoom[socket.id] = roomCode;
       console.log(`${username} with socketId ${socket.id} joined ${roomCode}`);
 
+      io.to(roomCode).emit('gameInformation', game.deck.menu, roomCode);
       io.to(roomCode).emit(
         'getActivePlayers',
         players.map(p => ({
           name: p.name,
           socketId: p.socketId,
-        })),
-        game.deck.menu
+        }))
       );
       io.to(roomCode).emit('getNumPlayers', game.numPlayers);
 
@@ -154,21 +156,22 @@ io.on('connection', socket => {
     });
   });
 
-  socket.on('autoPlayers', (roomCode, menu, numPlayers, username) => {
-    handleHostGame(roomCode, menu, numPlayers, username).then(() => {
+  socket.on('autoPlayers', (menu, numPlayers, username) => {
+    handleHostGame(menu, numPlayers, username).then(() => {
       let game = rooms[socketToRoom[socket.id]];
 
       for (let i = 2; i <= numPlayers; i++) {
         game.addPlayer(`Player${i}`, i, true);
       }
+
+      socket.emit('gameInformation', menu, roomCode);
       socket.emit('getNumPlayers', game.numPlayers);
       socket.emit(
         'getActivePlayers',
         game.players.map(p => ({
           name: p.name,
           socketId: p.socketId,
-        })),
-        game.deck.menu
+        }))
       );
       game.startRound();
     });
@@ -299,6 +302,7 @@ io.on('connection', socket => {
           socketId: p.socketId,
         }))
       );
+      socket.emit('gameInformation', null, roomCode);
     }
   });
 

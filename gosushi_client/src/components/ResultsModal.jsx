@@ -70,9 +70,9 @@ const ResultsModal = ({ socket }) => {
       onHide={() => {
         socket.emit('resetRoom', params.roomCode);
         if (isHost) {
-          history.push(`/host/${params.roomCode}`);
+          history.push(`/host`);
         } else {
-          history.push(`/join/${params.roomCode}`);
+          history.push(`/join`);
         }
       }}
       backdrop="static"
@@ -88,9 +88,9 @@ const ResultsModal = ({ socket }) => {
           onClick={() => {
             socket.emit('resetRoom', params.roomCode);
             if (isHost) {
-              history.push(`/host/${params.roomCode}`);
+              history.push(`/host`);
             } else {
-              history.push(`/join/${params.roomCode}`);
+              history.push(`/join`);
             }
           }}
         >

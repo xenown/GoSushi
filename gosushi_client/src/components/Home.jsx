@@ -1,20 +1,9 @@
 import React from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './common.scss';
 const logo = require('../assets/sushigologo.png');
 
-const Home = ({ endpoint }) => {
-  const history = useHistory();
-  const handleHostClick = () => {
-    console.log('host clicked');
-    fetch(`${endpoint}/generateRoomCode`)
-      .then(res => res.json())
-      .then(res => {
-        console.log(res.roomCode);
-        history.push(`/host/${res.roomCode}`);
-      });
-  };
-
+const Home = () => {
   return (
     <>
       <div className="App-logo">
@@ -22,10 +11,10 @@ const Home = ({ endpoint }) => {
       </div>
       <div className="transition"></div>
       <div className="App-route-container">
-        <Link className="btn btn-danger" onClick={handleHostClick}>
+        <Link className="btn btn-danger" to="/host">
           Host Game
         </Link>
-        <Link className="btn btn-success" to="/join/new">
+        <Link className="btn btn-success" to="/join">
           Join Game
         </Link>
         <a

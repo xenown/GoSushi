@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
 import { ButtonGroup, ToggleButton } from 'react-bootstrap';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
 import MenuSelection from './MenuSelection';
 import DisplayMenu from './DisplayMenu';
@@ -15,7 +15,6 @@ import './hostGame.scss';
 const dev = process.env.NODE_ENV === 'development';
 
 const HostGame = ({ socket }) => {
-  const params = useParams();
   const history = useHistory();
   const [name, setName] = useState('');
   const [numActivePlayers, setNumActivePlayers] = useState(1);
@@ -29,26 +28,33 @@ const HostGame = ({ socket }) => {
     dessert: '',
   });
 
+  const [roomCode, setRoomCode] = useState(null);
+
   useEffect(() => {
-    const handleActivePlayer = (data, menu) => {
+    const handleActivePlayer = data => {
       setName(data[0].name || name);
       setNumActivePlayers(data.length);
       setNumPlayers(Math.max(data.length, numPlayers));
+    };
 
+    const handleGameCreated = (menu, roomCode) => {
       if (!!menu) {
         setIsCreating(false);
       }
+      setRoomCode(roomCode);
     };
 
     const handleNumPlayer = data => setNumPlayers(data);
 
     const handleError = err => setMessage(err);
 
+    socket.on('gameInformation', handleGameCreated);
     socket.on('getActivePlayers', handleActivePlayer);
     socket.on('getNumPlayers', handleNumPlayer);
     socket.on('connectionFailed', handleError);
 
     return () => {
+      socket.off('gameInformation', handleGameCreated);
       socket.off('getActivePlayers', handleActivePlayer);
       socket.off('getNumPlayers', handleNumPlayer);
       socket.off('connectionFailed', handleError);
@@ -84,7 +90,7 @@ const HostGame = ({ socket }) => {
       return;
     }
 
-    socket.emit('hostGame', params.roomCode, menu, numPlayers, name);
+    socket.emit('hostGame', menu, numPlayers, name);
     setMessage('Loading...');
   };
 
@@ -119,7 +125,7 @@ const HostGame = ({ socket }) => {
   };
 
   const handleStartGame = () => {
-    socket.emit('gameInitiated', params.roomCode);
+    socket.emit('gameInitiated', roomCode);
   };
 
   const handleAutoPlayers = () => {
@@ -132,7 +138,7 @@ const HostGame = ({ socket }) => {
       return;
     }
 
-    socket.emit('autoPlayers', params.roomCode, menu, numPlayers, name);
+    socket.emit('autoPlayers', menu, numPlayers, name);
     setMessage('Loading...');
   };
 
@@ -253,7 +259,13 @@ const HostGame = ({ socket }) => {
       <div className="col">
         <h1>Host Game</h1>
         {isCreating && createForm}
-        <WaitingRoom name={name} roomCode={params.roomCode} socket={socket} />
+        <WaitingRoom
+          name={name}
+          roomCode={roomCode}
+          menu={menu}
+          socket={socket}
+          shouldDisplayMenu={!isCreating}
+        />
         {numActivePlayers === numPlayers && !isCreating && (
           <button
             className="btn btn-success ml-2 mr-2 mb-2"

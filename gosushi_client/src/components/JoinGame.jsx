@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
 
 const JoinGame = ({ socket }) => {
-  const params = useParams();
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [isJoining, setIsJoining] = useState(true);
   const [message, setMessage] = useState('');
+  const [menu, setMenu] = useState({});
   const history = useHistory();
 
   useEffect(() => {
     const handleActivePlayer = data => {
       let currPlayer = data.find(obj => obj.socketId === socket.id);
-      if (params.roomCode !== 'new') {
-        setRoomCode(params.roomCode);
-      }
       setName(currPlayer.name);
+    };
+
+    const handleGameInfo = (menu, roomCode) => {
+      setMenu(menu);
+      setRoomCode(roomCode);
       setIsJoining(false);
     };
 
@@ -24,21 +26,24 @@ const JoinGame = ({ socket }) => {
 
     const handleQuitGame = () => {
       setName('');
+      setMenu({});
       setRoomCode('');
       setIsJoining(true);
       setMessage('Host disconnected - game terminated.');
     };
 
+    socket.on('gameInformation', handleGameInfo);
     socket.on('getActivePlayers', handleActivePlayer);
     socket.on('connectionFailed', handleError);
     socket.on('quitGame', handleQuitGame);
 
     return () => {
+      socket.off('gameInformation', handleGameInfo);
       socket.off('getActivePlayers', handleActivePlayer);
       socket.off('connectionFailed', handleError);
       socket.off('quitGame', handleQuitGame);
     };
-  }, [socket, params.roomCode]);
+  }, [socket]);
 
   const handleSubmit = () => {
     if (name === '') {
@@ -87,12 +92,20 @@ const JoinGame = ({ socket }) => {
     </div>
   );
 
+  const waitingRoomProps = {
+    name,
+    roomCode,
+    menu,
+    socket,
+    shouldDisplayMenu: true,
+  };
+
   return (
     <div className="full row center">
       <div className="col">
         <h1>Join Game</h1>
         {isJoining && joinForm}
-        <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
+        <WaitingRoom {...waitingRoomProps} />
       </div>
     </div>
   );
