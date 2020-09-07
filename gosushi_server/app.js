@@ -149,10 +149,6 @@ io.on('connection', socket => {
         }))
       );
       io.to(roomCode).emit('getNumPlayers', game.numPlayers);
-
-      if (players.length === game.numPlayers) {
-        game.startRound();
-      }
     });
   });
 
@@ -179,7 +175,9 @@ io.on('connection', socket => {
 
   socket.on('gameInitiated', roomCode => {
     const game = rooms[roomCode];
+    game.startRound();
     game.gameStarted = true;
+
     io.to(roomCode).emit('startGame', roomCode);
     io.to(roomCode).emit('updateRoundNumber', 1);
   });

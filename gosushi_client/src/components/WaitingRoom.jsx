@@ -71,7 +71,7 @@ const WaitingRoom = ({ name, roomCode, menu, shouldDisplayMenu, socket }) => {
                           : { color: 'red' }
                       }
                     >
-                      {players.length}/{numPlayers}
+                      {players.length}/{numPlayers || '?'}
                     </p>
                     <a
                       href="https://gamewright.com/pdfs/Rules/SushiGoPartyTM-RULES.pdf"

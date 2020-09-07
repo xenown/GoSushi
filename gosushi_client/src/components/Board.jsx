@@ -10,7 +10,7 @@ import CardToggle from './CardToggle';
 import Card from './Card';
 import './board.scss';
 import Drawer from './MenuDrawer';
-import SpecActionsLog from './SpecActionsLog'
+import SpecActionsLog from './SpecActionsLog';
 
 const Board = ({ socket }) => {
   const params = useParams();
