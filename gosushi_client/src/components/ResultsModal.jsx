@@ -4,7 +4,7 @@ import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
 
 import './resultsModal.scss';
 
-const ResultsModal = ({ socket }) => {
+const ResultsModal = ({ socket, playerName }) => {
   const history = useHistory();
   const params = useParams();
   const [playersData, setPlayersData] = useState([]);
@@ -24,7 +24,7 @@ const ResultsModal = ({ socket }) => {
   }, [params.roomCode, socket]);
 
   const onClose = () => {
-    socket.emit('resetRoom', params.roomCode);
+    socket.emit('resetRoom', params.roomCode, playerName);
     if (isHost) {
       history.push(`/host`);
     } else {

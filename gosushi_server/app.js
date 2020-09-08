@@ -74,7 +74,7 @@ io.on('connection', socket => {
       });
     } else {
       const roomCode = socketToRoom[socket.id];
-      console.log(`${username} already in room ${roomCode}`);
+      console.log(`${username} already in room ${roomCode} => likely reusing room`);
 
       if (!!rooms[roomCode]) {
         rooms[roomCode].newGame(menu, numPlayers, username);
@@ -154,7 +154,8 @@ io.on('connection', socket => {
 
   socket.on('autoPlayers', (menu, numPlayers, username) => {
     handleHostGame(menu, numPlayers, username).then(() => {
-      let game = rooms[socketToRoom[socket.id]];
+      const roomCode = socketToRoom[socket.id];
+      let game = rooms[roomCode];
 
       for (let i = 2; i <= numPlayers; i++) {
         game.addPlayer(`Player${i}`, i, true);
@@ -185,7 +186,9 @@ io.on('connection', socket => {
     if (
       game &&
       game.players &&
-      game.players.find(val => val.socketId === socket.id)
+      game.players.find(val => val.socketId === socket.id) &&
+      !game.isGameOver &&
+      game.gameStarted
     ) {
       const player = game.players.find(val => val.socketId === socket.id);
 
@@ -262,15 +265,6 @@ io.on('connection', socket => {
         playersData.push(playersData.shift());
       }
 
-      if (game.isGameOver) {
-        io.to(roomCode).emit(
-          'getActivePlayers',
-          game.players.map(p => ({
-            name: p.name,
-            socketId: p.socketId,
-          }))
-        );
-      }
     }
   });
 
@@ -294,9 +288,11 @@ io.on('connection', socket => {
     }
   });
 
-  socket.on('resetRoom', roomCode => {
+  // client emit when they continue after game is over
+  socket.on('resetRoom', (roomCode, playerName) => {
     const game = rooms[roomCode];
     if (!!socketToRoom[socket.id]) {
+      game.addPlayer(playerName, socket.id);
       socket.emit(
         'getActivePlayers',
         game.players.map(p => ({
@@ -304,7 +300,7 @@ io.on('connection', socket => {
           socketId: p.socketId,
         }))
       );
-      socket.emit('getNumPlayers', game.players.length);
+      socket.emit('getNumPlayers', game.numPlayers);
       socket.emit('gameInformation', null, roomCode);
     }
   });

@@ -13,6 +13,7 @@ const {
   specialActionsPlayed,
 } = require('../util/cardCategories');
 const Card = require('./card');
+const dev = process.env.SHORT;
 
 class Game {
   constructor(menu, playerNum, roomCode, hostPlayer, socketId) {
@@ -34,9 +35,10 @@ class Game {
   newGame(menu, playerNum, hostPlayer) {
     this.deck = new Deck(menu, playerNum);
     this.numPlayers = playerNum;
+    this.hostPlayer.name = hostPlayer;
+    // Reset remaining parameters
     this.round = 1;
     this.hands = [];
-    this.hostPlayer.name = hostPlayer;
     this.playedTurn = 0;
     this.uramakiCountMap = {};
     this.uramakiStanding.value = 1;
@@ -172,8 +174,8 @@ class Game {
         );
         p.playedCards = [];
       });
-
-      if (this.round < 3) {
+      const maxRound = dev ? 1 : 3;
+      if (this.round < maxRound) {
         // go to next round
         this.round++;
         updateRound(this.roomCode, this.round);
@@ -378,8 +380,8 @@ class Game {
     });
     console.log('End of game');
 
-    // keep only the real players for the next game
-    this.players = this.players.filter(p => !p.isAuto);
+    // keep only the host
+    this.players = [];
   }
 
   setupDeck() {

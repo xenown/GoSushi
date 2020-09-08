@@ -163,7 +163,7 @@ const Board = ({ socket }) => {
     <div className="board">
       {!_.isEmpty(menu) && <Drawer menu={menu} />}
       <SpecialModal socket={socket} />
-      <ResultsModal socket={socket} />
+      <ResultsModal socket={socket} playerName={currPlayer ? currPlayer.name : ""} />
       <SpecActionsLog socket={socket} />
       <OtherPlayerGrid data={otherPlayerData} />
       <div className="played-cards">
