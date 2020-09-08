@@ -160,8 +160,6 @@ io.on('connection', socket => {
         game.addPlayer(`Player${i}`, i, true);
       }
 
-      socket.emit('gameInformation', menu, roomCode);
-      socket.emit('getNumPlayers', game.numPlayers);
       socket.emit(
         'getActivePlayers',
         game.players.map(p => ({

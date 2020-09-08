@@ -69,6 +69,7 @@ const Board = ({ socket }) => {
       socket.off('sendMenuData', handleMenuData);
       socket.off('playerStatus', handlePlayerStatus);
       socket.off('unknownGame', handleUnknownGame);
+      socket.off('updateRoundNumber', handleRoundUpdate);
       socket.off('quitGame', handleQuitGame);
     };
   }, [params.roomCode, socket, menu, history]);
