@@ -94,7 +94,7 @@ io.on('connection', socket => {
       }));
 
       io.to(roomCode).emit('gameInformation', menu, roomCode);
-      io.to(roomCode).emit('getActivePlayers', activePlayers, menu);
+      io.to(roomCode).emit('getActivePlayers', activePlayers);
       io.to(roomCode).emit('getNumPlayers', numPlayers);
     }
   };
@@ -315,10 +315,10 @@ io.on('connection', socket => {
     let roomCode = socketToRoom[socket.id];
     const game = rooms[roomCode];
     if (game) {
-      if (game.gameStarted && socket.id === game.hostPlayer.socketId) {
+      if (socket.id === game.hostPlayer.socketId) {
         socket.to(roomCode).emit('quitGame');
         delete rooms[roomCode];
-      } else if (game.gameStarted) {
+      } else if (game.gameStarted && !game.isGameOver) {
         const index = game.players.findIndex(p => p.socketId === socket.id);
         game.players[index].isAuto = true;
         game.players[index].socketId = null;
@@ -329,12 +329,10 @@ io.on('connection', socket => {
           game.players.map(p => ({
             name: p.name,
             socketId: p.socketId,
-          })),
-          game.deck.menu
+          }))
         );
       }
     }
-    // TODO: If the host leaves, end game
   });
 });
 
