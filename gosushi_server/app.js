@@ -293,14 +293,14 @@ io.on('connection', socket => {
     const game = rooms[roomCode];
     if (!!socketToRoom[socket.id]) {
       game.addPlayer(playerName, socket.id);
-      socket.emit(
+      io.to(roomCode).emit(
         'getActivePlayers',
         game.players.map(p => ({
           name: p.name,
           socketId: p.socketId,
         }))
       );
-      socket.emit('getNumPlayers', game.numPlayers);
+      io.to(roomCode).emit('getNumPlayers', game.numPlayers);
       socket.emit('gameInformation', null, roomCode);
     }
   });
