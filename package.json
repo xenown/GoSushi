@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node gosushi_server/app",
+    "build": "cd gosushi_client && npm install && npm run build",
     "test": "npx jasmine"
   },
   "keywords": [],
