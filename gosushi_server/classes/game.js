@@ -16,11 +16,11 @@ const Card = require('./card');
 const dev = process.env.SHORT;
 
 class Game {
-  constructor(menu, playerNum, roomCode, hostPlayer, socketId) {
+  constructor(menu, playerNum, roomCode, hostPlayer, hostIp, socketId) {
     this.deck = new Deck(menu, playerNum);
     this.numPlayers = playerNum;
     this.roomCode = roomCode;
-    this.hostPlayer = new Player(hostPlayer, socketId);
+    this.hostPlayer = new Player(hostPlayer, hostIp, socketId);
     this.players = [this.hostPlayer];
     this.round = 1;
     this.hands = [];
@@ -51,8 +51,8 @@ class Game {
     });
   }
 
-  addPlayer(name, socketId, isAuto = false) {
-    this.players.push(new Player(name, socketId, isAuto));
+  addPlayer(name, socketId, ip, isAuto = false) {
+    this.players.push(new Player(name, ip, socketId, isAuto));
   }
 
   checkForSpecialActions() {
@@ -102,16 +102,19 @@ class Game {
       this.players.forEach(p => {
         // if auto playing, if the auto players haven't done an initial action yet, play cards
         if (p.isAuto && !p.hasAutoPlayedCard) {
-          p.playCardFromHand(p.hand[0]);
           p.hasAutoPlayedCard = true;
         }
+        // Remove everyone's chosen cards from their hand
+        p.turnCards.forEach(card => {
+          p.removeCardfromHand(card);
+        });
       });
 
       this.checkForSpecialActions();
       if (this.specialActions.length > 0) {
         this.playedTurn -= 1;
 
-        let { card, playerName } = this.specialActions.shift();
+        let { card, playerName } = this.specialActions[0];
 
         // console.log(`player ${playerName} plays special card: ${card.name}`);
 
@@ -206,7 +209,7 @@ class Game {
   // get the data that needs to be sent to the front-end, only clone necessary information
   getPlayersData() {
     let tempPlayers = [];
-    const notCloned = ['hand', 'turnCards', 'makiCount', 'uramakiCount'];
+    const notCloned = ['hand', 'makiCount', 'uramakiCount'];
     this.players.forEach(p => {
       const data = _.cloneDeepWith(_.omit(p, notCloned));
       data.isFinished = p.turnCards.length !== 0;

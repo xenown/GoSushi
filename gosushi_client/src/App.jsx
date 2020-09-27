@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BrowserRouter as Router,
   Redirect,
@@ -12,13 +12,51 @@ import Home from './components/Home';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
 import Board from './components/Board';
+import RejoinModal from './components/RejoinModal';
+import ConnectionModal from './components/ConnectionModal';
 
 const serverport = process.env.SERVERPORT || 4001;
 const ENDPOINT = 'http://127.0.0.1:' + serverport;
+// const ENDPOINT = 'http://192.168.1.106:' + serverport;
 console.log(ENDPOINT);
 const socket = socketIOClient(ENDPOINT);
 
 const App = () => {
+  const [existingGames, setExistingGames] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [connected, setConnected] = useState(false);
+  const [disconnectedMsg, setDisconnectedMsg] = useState("");
+
+  useEffect(() => {
+    const handleRejoinOptions = (rooms) => { setExistingGames(rooms); setModalOpen(true); };
+    const handleConnect = () => { 
+      setConnected(true); 
+      setDisconnectedMsg("");
+    };
+    const handleConnectError = (error) => {
+      setConnected(false);
+      setDisconnectedMsg("Unable to connect. Trying again...");
+      socket.connect();
+    };
+    const handleDisconnection = (reason) => {
+      setConnected(false);
+      setDisconnectedMsg(reason === 'io server disconnect' ? "Server disconnected. Reconnecting..." : "Client disconnected. Reconnecting...");
+      socket.connect();
+    };
+
+    socket.on('connect', handleConnect);
+    socket.on('connect_error', handleConnectError);
+    socket.on('disconnect', handleDisconnection);
+    socket.on('rejoinOption', handleRejoinOptions);
+
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('connect_error', handleConnectError);
+      socket.off('disconnect', handleDisconnection);
+      socket.off('rejoinOption', handleRejoinOptions);
+    };
+  });
+
   return (
     <Router>
       <div className="App">
@@ -34,10 +72,12 @@ const App = () => {
               <Board socket={socket} />
             </Route>
             <Route exact path="/">
-              <Home />
+              <Home hasExistingGames={existingGames.length > 0} handleJoinExisiting={() => { setModalOpen(true); }} />
             </Route>
             <Redirect from="/*" to="/" />
           </Switch>
+          <RejoinModal socket={socket} rooms={existingGames} open={modalOpen} hide={() => setModalOpen(false)} />
+          <ConnectionModal open={!connected} message={disconnectedMsg} />
         </div>
       </div>
     </Router>

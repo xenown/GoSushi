@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import './common.scss';
 const logo = require('../assets/sushigologo.png');
 
-const Home = () => {
+const Home = ({ hasExistingGames, handleJoinExisiting}) => {
   return (
     <>
       <div className="App-logo">
@@ -14,11 +14,12 @@ const Home = () => {
         <Link className="btn btn-danger" to="/host">
           Host Game
         </Link>
-        <Link className="btn btn-success" to="/join">
+        {hasExistingGames && <div className="btn btn-warning btn-pad" onClick={handleJoinExisiting}>Join Existing Game</div>}
+        <Link className="btn btn-success btn-pad" to="/join">
           Join Game
         </Link>
         <a
-          className="btn btn-info"
+          className="btn btn-info btn-pad"
           href="https://gamewright.com/pdfs/Rules/SushiGoPartyTM-RULES.pdf"
           target="_blank"
           rel="noopener noreferrer"
