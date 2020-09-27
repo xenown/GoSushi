@@ -2,8 +2,9 @@ const _ = require('lodash');
 const Card = require('./card');
 
 class Player {
-  constructor(name, socketId, isAuto = false) {
+  constructor(name, ip, socketId, isAuto = false) {
     this.name = name;
+    this.ip = ip;
     this.socketId = socketId;
     this.hand = [];
     this.points = 0;
@@ -22,7 +23,17 @@ class Player {
       card = new Card(card);
     }
     const index = _.findIndex(this.hand, c => _.isEqual(c, card));
-    this.turnCards = this.turnCards.concat(this.hand.splice(index, 1));
+    this.turnCards = this.turnCards.concat(this.hand[index]);
+  }
+
+  removeCardfromHand(card) {
+    if (typeof card !== Card) {
+      card = new Card(card);
+    }
+    const index = _.findIndex(this.hand, c => _.isEqual(c, card));
+    if (index >= 0){
+      this.hand.splice(index, 1)
+    }
   }
 
   playUsedCard(card) {

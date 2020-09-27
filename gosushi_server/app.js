@@ -12,11 +12,49 @@ const io = socketIo(server);
 
 const generateRoomCode = require('./util/roomCodes');
 const Game = require('./classes/game');
-const rooms = {};
-const socketToRoom = {};
+const rooms = {};   // room code to Game obj
+const socketToRoom = {};    // socket id to room code
 
 io.on('connection', socket => {
-  console.log('New client connected');
+  var clientIp = socket.request.connection.remoteAddress;
+  console.log(`New client connected from address ${clientIp}`);
+
+  const existingGames = Object.entries(rooms).filter(roomPair => {
+    return roomPair[1].players.find(player => {
+      return clientIp === player.ip && player.isAuto;
+    });
+  });
+
+  if (existingGames.length !== 0) {
+    socket.emit(
+      'rejoinOption',
+      existingGames.map(pair => { return pair[0]; })
+    );
+  };
+
+  socket.on('rejoinGame', roomCode => {
+    const game = rooms[roomCode];
+    if (game) {
+      const playerIndex = game.players.findIndex(player => {
+        return clientIp === player.ip && player.isAuto;
+      });
+      if (playerIndex >= 0){
+        socket.join([roomCode], e => {
+          if (e) {
+            socket.emit('rejoinGameResult');
+          } else {
+            socketToRoom[socket.id] = roomCode;
+            game.players[playerIndex].socketId = socket.id;
+            game.players[playerIndex].isAuto = false;
+            socket.emit('rejoinGameResult', roomCode);
+            sendLogEntry(roomCode, {player: game.players[playerIndex].name, playedCard: "Player Reconnect"});
+          }
+        });
+      } else {
+        socket.emit('rejoinGameResult');
+      }
+    }
+  });
 
   const handleHostGame = async (menu, numPlayers, username) => {
     //Assuming menu contains roll, appetizers, specials, dessert
@@ -41,6 +79,7 @@ io.on('connection', socket => {
         numPlayers,
         roomCode,
         username,
+        clientIp,
         socket.id
       );
 
@@ -79,6 +118,12 @@ io.on('connection', socket => {
           `Connection failed: Player name ${username} is already in use, please use a different name.`
         );
         return;
+      // } else if (game.players.find(player => { return clientIp === player.ip; })) {
+      //   socket.emit(
+      //     'getActivePlayers',
+      //     `Connection failed: You are already in this game session.`
+      //   );
+      //   return;     
       } else if (e) {
         socket.emit(
           'getActivePlayers',
@@ -87,7 +132,7 @@ io.on('connection', socket => {
         return;
       }
 
-      game.addPlayer(username, socket.id);
+      game.addPlayer(username, socket.id, clientIp);
       const { players } = game;
 
       socketToRoom[socket.id] = roomCode;
@@ -146,11 +191,19 @@ io.on('connection', socket => {
       ) {
         playersData.push(playersData.shift());
       }
-
       if (sendMenu) {
         socket.emit('sendMenuData', game.deck.menu);
       }
       socket.emit('sendTurnData', player ? player.hand : [], playersData);
+      if (game.specialActions.length > 0) {   // everyone has played their cards, now performing special actions
+        let { card, playerName } = game.specialActions[0];
+        if (playerName === player.name) {
+          let data = game.getSpecialData(playerName, card);
+          io.to(player.socketId).emit('doSpecialAction', card, data);
+        } else {
+          io.to(player.socketId).emit('waitForAction', playerName, card.name);
+        }
+      }
     } else {
       socket.emit('unknownGame');
     }
@@ -198,8 +251,9 @@ io.on('connection', socket => {
     }
   });
 
-  const sendLogEntry = (roomCode, entry) => 
+  const sendLogEntry = (roomCode, entry) => {
     io.to(roomCode).emit('newLogEntry', entry);
+  };
 
   socket.on('handleSpecialAction', (roomCode, speCard, chosenCard) => {
     const game = rooms[roomCode];
@@ -207,6 +261,7 @@ io.on('connection', socket => {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
         game.handleSpecialAction(player, speCard, chosenCard, sendLogEntry);
+        game.specialActions.shift();
         socket.to(roomCode).emit('completedSpecialAction');
         game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults, sendLogEntry);
       }
@@ -226,6 +281,9 @@ io.on('connection', socket => {
         const index = game.players.findIndex(p => p.socketId === socket.id);
         game.players[index].isAuto = true;
         game.players[index].socketId = null;
+        delete socketToRoom[socket.id];
+        // socket.to(roomCode).emit('playerQuit', game.players[index].name);
+        sendLogEntry(roomCode, {player: game.players[index].name, playedCard: "Player Quit"});
       } else {
         game.players = game.players.filter(p => p.socketId !== socket.id);
         socket.to(roomCode).emit(

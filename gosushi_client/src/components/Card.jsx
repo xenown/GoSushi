@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useSpring, useChain, animated, config } from 'react-spring';
 import { getCardImage } from '../utils/getCardImage';
+import { Spinner } from 'react-bootstrap';
 
 const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth, startHeight, scaleUpFactor, transform, imageClass}) => {
   const [hoverTimer, setHoverTimer] = useState(null);
   const [isHover, setHover] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const posRef = useRef();
   const posProps= useSpring({
@@ -44,9 +46,11 @@ const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth
       >
         <img
           className={imageClass}
+          onLoad={() => setImgLoaded(true)}
           src={getCardImage(card)}
           alt={card.name}
         />
+        {!imgLoaded && <Spinner animation="border" variant="primary" />}
       </animated.div>
   );
 };

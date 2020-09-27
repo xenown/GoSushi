@@ -21,7 +21,7 @@ const Board = ({ socket }) => {
 
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
-  const [selectedCardIndex, setSelectedCardIndex] = useState(-1);
+  const [selectedHandCards, setSelectedHandCards] = useState([]);
   const [played, setPlayed] = useState(false);
   const [selectedPlayedCards, setSelectedPlayedCards] = useState([]);
 
@@ -31,9 +31,17 @@ const Board = ({ socket }) => {
     const handleDealHand = (hand, playersData) => {
       setHand(hand);
       setPlayersData(playersData);
-      setSelectedCardIndex(-1);
-      setSelectedPlayedCards([]);
-      setPlayed(false);
+      let selectedIndices = [];
+      playersData[0].turnCards.forEach(card => {
+        selectedIndices.push(hand.findIndex(handCard => _.isEqual(handCard, card)));
+      })
+      setSelectedHandCards(selectedIndices);
+      selectedIndices = [];
+      playersData[0].turnCardsReuse.forEach(card => {
+        selectedIndices.push(playersData[0].playedCards.findIndex(playedCard => _.isEqual(playedCard, card)));
+      })
+      setSelectedPlayedCards(selectedIndices);
+      setPlayed(playersData[0].isFinished);
     };
 
     const handleMenuData = menuData => {
@@ -52,11 +60,21 @@ const Board = ({ socket }) => {
       history.push('/join');
     };
 
+    const handlePlayerQuit = username => {
+      console.log(`${username} has left the game. Replacing with a computer.`);
+    }
+
+    const handlePlayerRejoin = username => {
+      console.log(`${username} has reconnected.`);
+    }
+
     socket.on('sendTurnData', handleDealHand);
     socket.on('sendMenuData', handleMenuData);
     socket.on('playerStatus', handlePlayerStatus);
     socket.on('unknownGame', handleUnknownGame);
     socket.on('quitGame', handleQuitGame);
+    // socket.on('playerQuit', handlePlayerQuit);
+    socket.on('playerRejoin', handlePlayerRejoin);
 
     return () => {
       socket.off('sendTurnData', handleDealHand);
@@ -64,6 +82,8 @@ const Board = ({ socket }) => {
       socket.off('playerStatus', handlePlayerStatus);
       socket.off('unknownGame', handleUnknownGame);
       socket.off('quitGame', handleQuitGame);
+      // socket.off('playerQuit', handlePlayerQuit);
+      socket.off('playerRejoin', handlePlayerRejoin);
     };
   }, [params.roomCode, socket, menu, history]);
 
@@ -71,13 +91,13 @@ const Board = ({ socket }) => {
   const otherPlayerData = playersData.slice(1);
 
   const handleSelectCardIndex = index => {
-    if (!currPlayer.isFinished) {
-      setSelectedCardIndex(index === selectedCardIndex ? -1 : index);
+    if (!played) {
+      setSelectedHandCards(index === selectedHandCards[0] ? [] : [index]);
     }
   };
 
   const handleSelectPlayedCard = index => {
-    if (!currPlayer.isFinished) {
+    if (!played) {
       const newSelected = _.includes(selectedPlayedCards, index)
         ? selectedPlayedCards.filter(el => el !== index)
         : selectedPlayedCards.concat(index);
@@ -120,7 +140,7 @@ const Board = ({ socket }) => {
     socket.emit(
       'finishTurn',
       params.roomCode,
-      hand[selectedCardIndex],
+      hand[selectedHandCards[0]],
       playedSpecials
     );
   };
@@ -131,7 +151,7 @@ const Board = ({ socket }) => {
         <div>Your points: {currPlayer && currPlayer.points}</div>
         <Button
           className="button"
-          disabled={selectedCardIndex === -1 || played}
+          disabled={selectedHandCards.length === 0 || played}
           onClick={handleFinishTurn}
         >
           Finish Turn
@@ -167,7 +187,7 @@ const Board = ({ socket }) => {
               card={card}
               className="card-playable"
               index={index}
-              isSelected={selectedCardIndex === index}
+              isSelected={selectedHandCards.includes(index)}
               handleSelectCard={handleSelectCardIndex}
               scaleUpFactor={2}
               imageClass="card-image-hand"

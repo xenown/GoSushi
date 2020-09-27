@@ -31,6 +31,10 @@ const SpecActionsLog = ({ socket }) => {
         case 'Takeout Box':
             details = <span>, boxing <b>{entry.boxCards}</b> item(s) from their hand. </span>
           break;
+        case 'Player Quit':
+          return <span><b>{entry.player}</b> has quit.</span>
+        case 'Player Reconnect':
+          return <span><b>{entry.player}</b> has reconnected.</span>
         default:
       }
       return <span>
