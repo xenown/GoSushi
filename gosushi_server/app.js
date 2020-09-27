@@ -2,8 +2,9 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 
-const port = process.env.SERVERPORT;
+const port = process.env.PORT || 5000;
 const index = require('./routes/index');
+const path = require('path');
 
 const app = express();
 // const cors = require('cors');
@@ -11,6 +12,11 @@ const app = express();
 app.set('port', port);
 // app.use(cors());
 app.use(index);
+
+app.use(express.static(path.resolve(__dirname, '../gosushi_client/build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../gosushi_client/build', 'index.html'));
+})
 
 const server = http.createServer(app);
 const io = socketIo(server);

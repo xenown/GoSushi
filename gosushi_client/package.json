@@ -36,6 +36,7 @@
       "last 1 safari version"
     ]
   },
+  "proxy": "http://localhost:5000",
   "devDependencies": {
     "bootstrap": "^4.4.1",
     "jquery": "^3.5.1"
