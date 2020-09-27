@@ -110,7 +110,7 @@ io.on('connection', socket => {
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
-      } else if (game.players.length === game.numPlayers) {
+      } else if (game.players.length === game.numPlayers || game.players.length >= 8) {
         socket.emit(
           'connectionFailed',
           `Connection failed: Room with code "${roomCode}" is already full.`
