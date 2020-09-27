@@ -140,7 +140,7 @@ io.on('connection', socket => {
       socketToRoom[socket.id] = roomCode;
       console.log(`${username} with socketId ${socket.id} joined ${roomCode}`);
 
-      io.to(roomCode).emit('gameInformation', game.deck.menu, roomCode);
+      io.to(roomCode).emit('gameInformation', game.deck && game.deck.menu, roomCode);
       io.to(roomCode).emit(
         'getActivePlayers',
         players.map(p => ({
@@ -292,7 +292,11 @@ io.on('connection', socket => {
   socket.on('resetRoom', (roomCode, playerName) => {
     const game = rooms[roomCode];
     if (!!socketToRoom[socket.id]) {
-      game.addPlayer(playerName, socket.id);
+      if (game.hostPlayer.socketId === socket.id) {
+        game.players.unshift(game.hostPlayer);
+      } else {
+        game.addPlayer(playerName, socket.id);
+      }
       io.to(roomCode).emit(
         'getActivePlayers',
         game.players.map(p => ({

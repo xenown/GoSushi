@@ -32,7 +32,8 @@ const HostGame = ({ socket }) => {
 
   useEffect(() => {
     const handleActivePlayer = data => {
-      setName(data[0].name || name);
+      let currPlayer = data.find(obj => obj.socketId === socket.id);
+      setName(currPlayer.name || name);
       setNumActivePlayers(data.length);
       setNumPlayers(Math.max(data.length, numPlayers));
     };

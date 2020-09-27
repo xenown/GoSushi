@@ -382,6 +382,7 @@ class Game {
 
     // keep only the host
     this.players = [];
+    delete this.deck;
   }
 
   setupDeck() {
