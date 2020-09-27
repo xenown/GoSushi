@@ -378,7 +378,6 @@ io.on('connection', socket => {
         game.players[index].isAuto = true;
         game.players[index].socketId = null;
         delete socketToRoom[socket.id];
-        // socket.to(roomCode).emit('playerQuit', game.players[index].name);
         sendLogEntry(roomCode, {player: game.players[index].name, playedCard: "Player Quit"});
       } else {
         game.players = game.players.filter(p => p.socketId !== socket.id);

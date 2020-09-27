@@ -21,7 +21,10 @@ const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth
   const transformNoHoverSelected = transform && transform.noHoverSelected ? transform.noHoverSelected : "scale(1) translateY(-10%)";
   const width = startWidth ? startWidth : null;
   const height = startHeight ? startHeight : null;
+
+  // eslint-disable-next-line
   const scaleDirectHover = height ? { height: `${height * scaleUpFactor}vh` } : width ? { width: `${width * scaleUpFactor}vw` } : {};
+  // eslint-disable-next-line
   const scaleDirectNoHover = height ? { height: `${height}vh` } : width ? { width: `${width}vw` } : {};
 
   const sizeRef = useRef();
