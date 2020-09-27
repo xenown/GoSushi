@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import React, { useState, useEffect } from 'react';
+import { ButtonGroup, ToggleButton } from 'react-bootstrap';
 import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
 import MenuSelection from './MenuSelection';
@@ -9,14 +10,13 @@ import {
   MENU_APPETIZER_COUNT,
   MENU_SPECIAL_COUNT,
 } from '../utils/menuSelectionUtils';
-import './common.scss';
+import './hostGame.scss';
 
 const dev = process.env.NODE_ENV === 'development';
 
 const HostGame = ({ socket }) => {
   const history = useHistory();
   const [name, setName] = useState('');
-  const [roomCode, setRoomCode] = useState('');
   const [numActivePlayers, setNumActivePlayers] = useState(1);
   const [numPlayers, setNumPlayers] = useState(2);
   const [isCreating, setIsCreating] = useState(true);
@@ -28,27 +28,39 @@ const HostGame = ({ socket }) => {
     dessert: '',
   });
 
+  const [roomCode, setRoomCode] = useState(null);
+
   useEffect(() => {
     const handleActivePlayer = data => {
-      if (!Array.isArray(data)) {
-        setMessage(data);
-      } else {
-        setMessage(data);
-        setNumActivePlayers(data.length);
+      let currPlayer = data.find(obj => obj.socketId === socket.id);
+      setName(currPlayer.name || name);
+      setNumActivePlayers(data.length);
+      setNumPlayers(Math.max(data.length, numPlayers));
+    };
+
+    const handleGameCreated = (menu, roomCode) => {
+      if (!!menu) {
         setIsCreating(false);
       }
+      setRoomCode(roomCode);
     };
 
-    socket.on('getRoomCode', data => setRoomCode(data));
+    const handleNumPlayer = data => setNumPlayers(data);
+
+    const handleError = err => setMessage(err);
+
+    socket.on('gameInformation', handleGameCreated);
     socket.on('getActivePlayers', handleActivePlayer);
-    socket.on('getNumPlayers', data => setNumPlayers(data));
+    socket.on('getNumPlayers', handleNumPlayer);
+    socket.on('connectionFailed', handleError);
 
     return () => {
-      socket.off('getRoomCode', data => setRoomCode(data));
+      socket.off('gameInformation', handleGameCreated);
       socket.off('getActivePlayers', handleActivePlayer);
-      socket.off('getNumPlayers', setNumPlayers);
+      socket.off('getNumPlayers', handleNumPlayer);
+      socket.off('connectionFailed', handleError);
     };
-  }, [socket, numActivePlayers, numPlayers]);
+  }, [socket, numActivePlayers, numPlayers, name]);
 
   const checkValidMenu = () => {
     let msg = '';
@@ -74,7 +86,7 @@ const HostGame = ({ socket }) => {
     if (msg !== '') {
       setMessage(msg);
       return;
-    } else if (name === ''){
+    } else if (name === '') {
       setMessage('Missing player name.');
       return;
     }
@@ -90,21 +102,28 @@ const HostGame = ({ socket }) => {
     console.log(menu);
 
     // Remove menu items that are not allowed with the new number of players
-    const removedAppetizers = _.remove(menu.appetizers, a => !validMenuOption(a, numPlayers));
-    const removedSpecials = _.remove(menu.specials, s => !validMenuOption(s, numPlayers));
+    const removedAppetizers = _.remove(
+      menu.appetizers,
+      a => !validMenuOption(a, numPlayers)
+    );
+    const removedSpecials = _.remove(
+      menu.specials,
+      s => !validMenuOption(s, numPlayers)
+    );
 
     let msg = '';
     if (!_.isEmpty(removedAppetizers)) {
       msg += `The following appetizer(s) cannot be chosen when there are ${numPlayers} players: `;
-      msg += _.join(removedAppetizers, ', ') + '. '
+      msg += _.join(removedAppetizers, ', ') + '. ';
     }
     if (!_.isEmpty(removedSpecials)) {
       msg += `The following special(s) cannot be chosen when there are ${numPlayers} players: `;
-      msg += _.join(removedSpecials, ', ') + '. '
+      msg += _.join(removedSpecials, ', ') + '. ';
     }
 
     setMenu(menu);
     setMessage(msg);
+    socket.emit('broadcastSelection', menu, numPlayers, roomCode);
   };
 
   const handleStartGame = () => {
@@ -116,7 +135,7 @@ const HostGame = ({ socket }) => {
     if (msg !== '') {
       setMessage(msg);
       return;
-    } else if (name === ''){
+    } else if (name === '') {
       setMessage('Missing player name.');
       return;
     }
@@ -125,31 +144,47 @@ const HostGame = ({ socket }) => {
     setMessage('Loading...');
   };
 
-  const validMenuOption = (item, num) => invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(num) : true;
+  const validMenuOption = (item, num) =>
+    invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(num) : true;
 
   const handleNumPlayers = num => {
-    // Remove menu items that are not allowed with the new number of players
-    const removedAppetizers = _.remove(menu.appetizers, a => !validMenuOption(a, num));
-    const removedSpecials = _.remove(menu.specials, s => !validMenuOption(s, num));
-
     let msg = '';
+    if (num < numActivePlayers && numActivePlayers > 1) {
+      msg += `There are already ${numActivePlayers} players, cannot create a game with only ${num} players.`;
+    } else {
+      setNumPlayers(num);
+    }
+    // Remove menu items that are not allowed with the new number of players
+    const removedAppetizers = _.remove(
+      menu.appetizers,
+      a => !validMenuOption(a, num)
+    );
+    const removedSpecials = _.remove(
+      menu.specials,
+      s => !validMenuOption(s, num)
+    );
+
     if (!_.isEmpty(removedAppetizers)) {
       msg += `The following appetizer(s) cannot be chosen when there are ${num} players: `;
-      msg += _.join(removedAppetizers, ', ') + '. '
+      msg += _.join(removedAppetizers, ', ') + '. ';
     }
     if (!_.isEmpty(removedSpecials)) {
       msg += `The following special(s) cannot be chosen when there are ${num} players: `;
-      msg += _.join(removedSpecials, ', ') + '.'
+      msg += _.join(removedSpecials, ', ') + '.';
     }
 
     setMenu(menu);
     setMessage(msg);
-    setNumPlayers(num);
+    socket.emit('broadcastSelection', menu, num, roomCode);
   };
 
   const createForm = (
-    <div className="center vertical">
-      <MenuSelection handleMenu={handleMenu} menu={menu} numPlayers={numPlayers}/>
+    <div className="center vertical container-hostgame">
+      <MenuSelection
+        handleMenu={handleMenu}
+        menu={menu}
+        numPlayers={numPlayers}
+      />
       <DisplayMenu menu={menu} />
       <br />
 
@@ -165,45 +200,42 @@ const HostGame = ({ socket }) => {
             className="form-control"
             aria-label="Name"
             aria-describedby="inputGroup-sizing-default"
+            value={name}
             onChange={e => setName(e.target.value)}
           />
         </div>
       </div>
 
-      <div
-        className="player-count btn-group btn-group-toggle mb-3"
-        data-toggle="buttons"
-      >
-        <label
-          className="btn btn-primary active"
+      <ButtonGroup className="player-count mb-3" toggle>
+        <ToggleButton
           key={`2-player`}
+          className="toggle-player-number"
+          type="radio"
+          name="options"
+          value="option0"
+          onChange={() => handleNumPlayers(2)}
+          checked={2 === numPlayers}
+          disabled={2 < numActivePlayers}
         >
-          <input
+          2-player
+          <span className="hovertext">{`There are already ${numActivePlayers} players, cannot create a game with only ${2}.`}</span>
+        </ToggleButton>
+        {[3, 4, 5, 6, 7, 8].map((players, index) => (
+          <ToggleButton
+            key={`${players}-player`}
+            className="toggle-player-number"
             type="radio"
             name="options"
-            id="option0"
-            autoComplete="off"
-            onClick={() => handleNumPlayers(2)}
-            defaultChecked
-          />
-          2-player
-        </label>
-        {[3, 4, 5, 6, 7, 8].map((players, index) => (
-          <label
-            className="btn btn-primary"
-            key={`${players}-player`}
+            value={'option' + index + 1}
+            onChange={() => handleNumPlayers(players)}
+            checked={players === numPlayers}
+            disabled={players < numActivePlayers}
           >
-            <input
-              type="radio"
-              name="options"
-              id={'option' + index + 1}
-              autoComplete="off"
-              onClick={() => handleNumPlayers(players)}
-            />
             {players}-player
-          </label>
+            <span className="hovertext">{`There are already ${numActivePlayers} players, cannot create a game with only ${players}.`}</span>
+          </ToggleButton>
         ))}
-      </div>
+      </ButtonGroup>
 
       <div>
         <p>{message}</p>
@@ -230,8 +262,21 @@ const HostGame = ({ socket }) => {
       <div className="col">
         <h1>Host Game</h1>
         {isCreating && createForm}
-        <WaitingRoom name={name} roomCode={roomCode} socket={socket} />
-        {numActivePlayers === numPlayers && <button className="btn btn-success ml-2 mr-2 mb-2" onClick={handleStartGame}>Start Game</button>}
+        <WaitingRoom
+          name={name}
+          roomCode={roomCode}
+          menu={menu}
+          socket={socket}
+          shouldDisplayMenu={!isCreating}
+        />
+        {numActivePlayers === numPlayers && !isCreating && (
+          <button
+            className="btn btn-success ml-2 mr-2 mb-2"
+            onClick={handleStartGame}
+          >
+            Start Game
+          </button>
+        )}
       </div>
     </div>
   );

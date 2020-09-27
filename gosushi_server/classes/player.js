@@ -41,9 +41,7 @@ class Player {
       card = new Card(card);
     }
     const index = _.findIndex(this.playedCards, c => _.isEqual(c, card));
-    this.turnCardsReuse = this.turnCardsReuse.concat(
-      this.playedCards[index]
-    );
+    this.turnCardsReuse = this.turnCardsReuse.concat(this.playedCards[index]);
   }
 
   removePlayedCard(card) {
@@ -51,9 +49,21 @@ class Player {
       card = new Card(card);
     }
     const index = _.findIndex(this.playedCards, c => _.isEqual(c, card));
-    if (index >= 0){
-      this.playedCards.splice(index, 1)
+    if (index >= 0) {
+      this.playedCards.splice(index, 1);
     }
+  }
+
+  resetPlayer() {
+    this.hand = [];
+    this.points = 0;
+    this.playedCards = [];
+    this.turnCards = [];
+    this.turnCardsReuse = [];
+    this.dessertCards = [];
+    this.makiCount = 0;
+    this.uramakiCount = 0;
+    this.hasAutoPlayedCard = false;
   }
 }
 

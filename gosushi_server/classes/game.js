@@ -13,6 +13,7 @@ const {
   specialActionsPlayed,
 } = require('../util/cardCategories');
 const Card = require('./card');
+const dev = process.env.SHORT;
 
 class Game {
   constructor(menu, playerNum, roomCode, hostPlayer, hostIp, socketId) {
@@ -28,6 +29,26 @@ class Game {
     this.uramakiStanding = { value: 1 };
     this.specialActions = [];
     this.gameStarted = false;
+    this.isGameOver = false;
+  }
+
+  newGame(menu, playerNum, hostPlayer) {
+    this.deck = new Deck(menu, playerNum);
+    this.numPlayers = playerNum;
+    this.hostPlayer.name = hostPlayer;
+    // Reset remaining parameters
+    this.round = 1;
+    this.hands = [];
+    this.playedTurn = 0;
+    this.uramakiCountMap = {};
+    this.uramakiStanding.value = 1;
+    this.specialActions = [];
+    this.gameStarted = false;
+    this.isGameOver = false;
+
+    this.players.forEach(p => {
+      p.resetPlayer();
+    });
   }
 
   addPlayer(name, socketId, ip, isAuto = false) {
@@ -65,9 +86,18 @@ class Game {
     this.specialActions.sort((i1, i2) => i1.card.data - i2.card.data);
   }
 
-  finishedTurn(sendPlayerData, notifySpecialAction, sendGameResults, sendLogEntry) {
+  finishedTurn(
+    sendPlayerData,
+    notifySpecialAction,
+    sendGameResults,
+    updateRound,
+    sendLogEntry
+  ) {
     this.playedTurn++;
-    const numRealPlayers = this.players.reduce((acc, p) => p.isAuto ? acc : acc + 1, 0);
+    const numRealPlayers = this.players.reduce(
+      (acc, p) => (p.isAuto ? acc : acc + 1),
+      0
+    );
     if (this.playedTurn === numRealPlayers) {
       this.players.forEach(p => {
         // if auto playing, if the auto players haven't done an initial action yet, play cards
@@ -92,11 +122,17 @@ class Game {
         let data = this.getSpecialData(playerName, card);
 
         if (this.players[index].isAuto) {
-          this.handleSpecialAction(this.players[index], card, data.slice(0, 1), sendLogEntry);
+          this.handleSpecialAction(
+            this.players[index],
+            card,
+            data.slice(0, 1),
+            sendLogEntry
+          );
           this.finishedTurn(
             sendPlayerData,
             notifySpecialAction,
             sendGameResults,
+            updateRound,
             sendLogEntry
           );
         } else {
@@ -111,13 +147,17 @@ class Game {
         // TODO: notify others to wait for 'playerName' player to finish 'card.name' action
       } else {
         this.playedTurn = 0;
-        this.players.forEach(p => p.hasAutoPlayedCard = false);
-        this.handleFinishedTurnActions(sendPlayerData, sendGameResults);
+        this.players.forEach(p => (p.hasAutoPlayedCard = false));
+        this.handleFinishedTurnActions(
+          sendPlayerData,
+          sendGameResults,
+          updateRound
+        );
       }
     }
   }
 
-  handleFinishedTurnActions(sendPlayerData, sendGameResults) {
+  handleFinishedTurnActions(sendPlayerData, sendGameResults, updateRound) {
     calculateTurnPoints(
       this.players,
       this.deck.menu,
@@ -137,11 +177,15 @@ class Game {
         );
         p.playedCards = [];
       });
-
-      if (this.round < 3) {
+      const maxRound = dev ? 1 : 3;
+      if (this.round < maxRound) {
         // go to next round
         this.round++;
+        updateRound(this.roomCode, this.round);
         console.log('End of round');
+
+        // reset uramaki standing
+        this.uramakiStanding.value = 1;
 
         // remove and add desserts
         this.startRound();
@@ -169,7 +213,7 @@ class Game {
     this.players.forEach(p => {
       const data = _.cloneDeepWith(_.omit(p, notCloned));
       data.isFinished = p.turnCards.length !== 0;
-      tempPlayers.push(data)
+      tempPlayers.push(data);
     });
     return tempPlayers;
   }
@@ -205,9 +249,9 @@ class Game {
   }
 
   handleSpecialAction(player, specialCard, chosenCards, sendLogEntry) {
-    let specialLogEntry = { 
+    let specialLogEntry = {
       player: player.name,
-      playedCard: specialCard.name
+      playedCard: specialCard.name,
     };
 
     let specialCardCasted = new Card(specialCard);
@@ -306,13 +350,6 @@ class Game {
     sendLogEntry(this.roomCode, specialLogEntry);
   }
 
-  resetGame() {
-    this.players.forEach(p => {
-      p.playedCards = [];
-      p.dessertCards = [];
-    });
-  }
-
   startRound() {
     this.setupDeck();
 
@@ -325,6 +362,7 @@ class Game {
   }
 
   handleEndGame(sendPlayerData, sendGameResults) {
+    this.isGameOver = true;
     calculateGamePoints(this.players, this.deck.menu);
     let tempPlayers = this.getPlayersData();
     this.players.forEach(p => {
@@ -344,6 +382,10 @@ class Game {
       );
     });
     console.log('End of game');
+
+    // keep only the host
+    this.players = [];
+    delete this.deck;
   }
 
   setupDeck() {
@@ -357,25 +399,11 @@ class Game {
     }
   }
 
-  getPlayerHands() {
-    return this.players.map(p => p.hand);
-  }
-
   // rotate player hands - "pass hand to player on your left"
   rotateHands(hands) {
     const firstHand = hands.shift();
     hands.push(firstHand);
     this.players.forEach((p, idx) => (p.hand = hands[idx]));
-  }
-
-  sumCardData(name, player) {
-    return player.playedCards.reduce(
-      (accum, curr) => (accum += curr.name === name ? curr.data : 0)
-    );
-  }
-
-  calculateEndPoints() {
-    // Desserts
   }
 }
 

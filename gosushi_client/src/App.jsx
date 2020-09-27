@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   BrowserRouter as Router,
-  Link,
   Redirect,
   Route,
   Switch,
@@ -9,12 +8,12 @@ import {
 import socketIOClient from 'socket.io-client';
 
 import './App.scss';
+import Home from './components/Home';
 import HostGame from './components/HostGame';
 import JoinGame from './components/JoinGame';
 import Board from './components/Board';
 import RejoinModal from './components/RejoinModal';
 import ConnectionModal from './components/ConnectionModal';
-const logo = require('./assets/sushigologo.png');
 
 const serverport = process.env.SERVERPORT || 4001;
 const ENDPOINT = 'http://127.0.0.1:' + serverport;
@@ -73,19 +72,7 @@ const App = () => {
               <Board socket={socket} />
             </Route>
             <Route exact path="/">
-              <div className="App-logo">
-                <img src={logo} style={{ height: '40vh' }} alt="logo" />
-              </div>
-              <div className="transition"></div>
-              <div className="App-route-container">
-                <Link className="btn btn-danger btn-pad" to="/host">
-                  Host Game
-                </Link>
-                {existingGames.length > 0 && <div className="btn btn-warning btn-pad" onClick={ () => { setModalOpen(true); } }>Join Existing Game</div>}
-                <Link className="btn btn-success btn-pad" to="/join">
-                  Join Game
-                </Link>
-              </div>
+              <Home hasExistingGames={existingGames.length > 0} handleJoinExisiting={() => { setModalOpen(true); }} />
             </Route>
             <Redirect from="/*" to="/" />
           </Switch>

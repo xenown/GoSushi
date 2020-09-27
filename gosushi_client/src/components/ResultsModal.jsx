@@ -4,7 +4,7 @@ import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
 
 import './resultsModal.scss';
 
-const ResultsModal = ({ socket }) => {
+const ResultsModal = ({ socket, playerName }) => {
   const history = useHistory();
   const params = useParams();
   const [playersData, setPlayersData] = useState([]);
@@ -22,6 +22,15 @@ const ResultsModal = ({ socket }) => {
       socket.off('gameResults', handleEndGame);
     };
   }, [params.roomCode, socket]);
+
+  const onClose = () => {
+    socket.emit('resetRoom', params.roomCode, playerName);
+    if (isHost) {
+      history.push(`/host`);
+    } else {
+      history.push(`/join`);
+    }
+  };
 
   const bodyContent = () => {
     let placement = 0;
@@ -67,9 +76,7 @@ const ResultsModal = ({ socket }) => {
   return (
     <Modal
       show={playersData.length > 0}
-      onHide={() => {
-        isHost ? history.push('/host') : history.push('/join');
-      }}
+      onHide={onClose}
       backdrop="static"
       keyboard={false}
     >
@@ -78,12 +85,7 @@ const ResultsModal = ({ socket }) => {
       </Modal.Header>
       <Modal.Body>{bodyContent()}</Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="primary"
-          onClick={() => {
-            isHost ? history.push('/host') : history.push('/join');
-          }}
-        >
+        <Button variant="primary" onClick={onClose}>
           End Game
         </Button>
       </Modal.Footer>

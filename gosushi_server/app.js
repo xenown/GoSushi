@@ -6,7 +6,12 @@ const port = process.env.SERVERPORT;
 const index = require('./routes/index');
 
 const app = express();
+// const cors = require('cors');
+
+app.set('port', port);
+// app.use(cors());
 app.use(index);
+
 const server = http.createServer(app);
 const io = socketIo(server);
 
@@ -58,37 +63,79 @@ io.on('connection', socket => {
 
   const handleHostGame = async (menu, numPlayers, username) => {
     //Assuming menu contains roll, appetizers, specials, dessert
-    roomCode = generateRoomCode(new Set(Object.keys(rooms)));
-    if (roomCode === false) {
-      socket.emit(
-        'getActivePlayers',
-        `Connection failed: Could not generate unique room code.`
-      );
-      return;
-    }
-    return socket.join([roomCode], e => {
-      if (e) {
+
+    if (!socketToRoom[socket.id]) {
+      const roomCode = generateRoomCode(new Set(Object.keys(rooms)));
+
+      if (roomCode === false) {
         socket.emit(
-          'getActivePlayers',
-          `Connection failed: Error joining room: ${e}`
+          'connectionFailed',
+          `Connection failed: Could not generate unique room code.`
+        );
+        return;
+      } else if (
+        !!rooms[roomCode] &&
+        rooms[roomCode].hostPlayer.socketId != socket.id
+      ) {
+        socket.emit(
+          'connectionFailed',
+          `Connection failed: The provided room code is in use with a different host.`
         );
         return;
       }
-      rooms[roomCode] = new Game(
-        menu,
-        numPlayers,
-        roomCode,
-        username,
-        clientIp,
-        socket.id
-      );
 
-      socketToRoom[socket.id] = roomCode;
-      console.log(`${username} joined ${socket.id}`);
-      io.to(roomCode).emit('getRoomCode', roomCode);
-      io.to(roomCode).emit('getActivePlayers', [username], menu);
+      socket.join([roomCode], e => {
+        if (e) {
+          socket.emit(
+            'connectionFailed',
+            `Connection failed: Error joining room: ${e}`
+          );
+          return;
+        }
+        rooms[roomCode] = new Game(
+          menu,
+          numPlayers,
+          roomCode,
+          username,
+          clientIp,
+          socket.id
+        );
+
+        socketToRoom[socket.id] = roomCode;
+        console.log(
+          `${username} with socketId ${socket.id} joined ${roomCode}`
+        );
+
+        const playerData = { name: username, socketId: socket.id };
+        io.to(roomCode).emit('gameInformation', menu, roomCode);
+        io.to(roomCode).emit('getActivePlayers', [playerData]);
+        io.to(roomCode).emit('getNumPlayers', numPlayers);
+      });
+    } else {
+      const roomCode = socketToRoom[socket.id];
+      console.log(`${username} already in room ${roomCode} => likely reusing room`);
+
+      if (!!rooms[roomCode]) {
+        rooms[roomCode].newGame(menu, numPlayers, username);
+      } else {
+        rooms[roomCode] = new Game(
+          menu,
+          numPlayers,
+          roomCode,
+          username,
+          socket.id
+        );
+      }
+
+      let activePlayers = rooms[roomCode].players.map(p => ({
+        name: p.name,
+        socketId: p.socketId,
+      }));
+
+      io.to(roomCode).emit('gameInformation', menu, roomCode);
+      io.to(roomCode).emit('getActivePlayers', activePlayers);
       io.to(roomCode).emit('getNumPlayers', numPlayers);
-    });
+    }
   };
 
   socket.on('hostGame', handleHostGame);
@@ -98,13 +145,13 @@ io.on('connection', socket => {
       const game = rooms[roomCode];
       if (!game) {
         socket.emit(
-          'getActivePlayers',
+          'connectionFailed',
           `Connection failed: Invalid room code "${roomCode}".`
         );
         return;
-      } else if (game.players.length === game.numPlayers) {
+      } else if (game.players.length === game.numPlayers || game.players.length >= 8) {
         socket.emit(
-          'getActivePlayers',
+          'connectionFailed',
           `Connection failed: Room with code "${roomCode}" is already full.`
         );
         return;
@@ -114,7 +161,7 @@ io.on('connection', socket => {
         }, false)
       ) {
         socket.emit(
-          'getActivePlayers',
+          'connectionFailed',
           `Connection failed: Player name ${username} is already in use, please use a different name.`
         );
         return;
@@ -126,7 +173,7 @@ io.on('connection', socket => {
       //   return;     
       } else if (e) {
         socket.emit(
-          'getActivePlayers',
+          'connectionFailed',
           `Connection failed: Error joining room: ${e}`
         );
         return;
@@ -136,33 +183,35 @@ io.on('connection', socket => {
       const { players } = game;
 
       socketToRoom[socket.id] = roomCode;
-      console.log(`joined ${socket.id}`);
+      console.log(`${username} with socketId ${socket.id} joined ${roomCode}`);
 
+      io.to(roomCode).emit('gameInformation', game.deck && game.deck.menu, roomCode);
       io.to(roomCode).emit(
         'getActivePlayers',
-        players.map(p => p.name),
-        game.deck.menu
+        players.map(p => ({
+          name: p.name,
+          socketId: p.socketId,
+        }))
       );
       io.to(roomCode).emit('getNumPlayers', game.numPlayers);
-
-      if (players.length === game.numPlayers) {
-        game.startRound();
-      }
     });
   });
 
   socket.on('autoPlayers', (menu, numPlayers, username) => {
     handleHostGame(menu, numPlayers, username).then(() => {
-      let game = rooms[socketToRoom[socket.id]];
+      const roomCode = socketToRoom[socket.id];
+      let game = rooms[roomCode];
 
       for (let i = 2; i <= numPlayers; i++) {
         game.addPlayer(`Player${i}`, i, true);
       }
-      socket.emit('getNumPlayers', game.numPlayers);
+
       socket.emit(
         'getActivePlayers',
-        game.players.map(p => p.name),
-        game.deck.menu
+        game.players.map(p => ({
+          name: p.name,
+          socketId: p.socketId,
+        }))
       );
       game.startRound();
     });
@@ -170,8 +219,11 @@ io.on('connection', socket => {
 
   socket.on('gameInitiated', roomCode => {
     const game = rooms[roomCode];
+    game.startRound();
     game.gameStarted = true;
+
     io.to(roomCode).emit('startGame', roomCode);
+    io.to(roomCode).emit('updateRoundNumber', 1);
   });
 
   socket.on('boardLoaded', (roomCode, sendMenu) => {
@@ -179,7 +231,9 @@ io.on('connection', socket => {
     if (
       game &&
       game.players &&
-      game.players.find(val => val.socketId === socket.id)
+      game.players.find(val => val.socketId === socket.id) &&
+      !game.isGameOver &&
+      game.gameStarted
     ) {
       const player = game.players.find(val => val.socketId === socket.id);
 
@@ -209,6 +263,12 @@ io.on('connection', socket => {
     }
   });
 
+  // update the data in the WaitingRoom so that other players can see the changes in the selection
+  socket.on('broadcastSelection', (menu, numPlayers, roomCode) => {
+    socket.to(roomCode).emit('gameInformation', menu, roomCode); // socket emit because don't need to update menu in HostGame (don't emit to sender)
+    io.to(roomCode).emit('getNumPlayers', numPlayers); // io emit so that the WaitingRoom in HostGame updates (do emit to sender)
+  });
+
   const sendTurnData = (socketId, hand, otherPlayerData) =>
     io.to(socketId).emit('sendTurnData', hand, otherPlayerData);
 
@@ -221,6 +281,9 @@ io.on('connection', socket => {
         io.to(p.socketId).emit('waitForAction', playerName, specialCard.name);
       }
     });
+
+  const updateRound = (roomCode, roundNumber) =>
+    io.to(roomCode).emit('updateRoundNumber', roundNumber);
 
   const sendGameResults = (socketId, playerData, isHost) =>
     io.to(socketId).emit('gameResults', playerData, isHost);
@@ -238,7 +301,13 @@ io.on('connection', socket => {
 
       // keeping those seperate for now
       // might change to everyone can see everyones points rather than only seeing your own
-      game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults, sendLogEntry);
+      game.finishedTurn(
+        sendTurnData,
+        doSpecialAction,
+        sendGameResults,
+        updateRound,
+        sendLogEntry
+      );
 
       const playersData = game.getPlayersData();
       let count = 0;
@@ -248,6 +317,7 @@ io.on('connection', socket => {
         }
         playersData.push(playersData.shift());
       }
+
     }
   });
 
@@ -263,8 +333,34 @@ io.on('connection', socket => {
         game.handleSpecialAction(player, speCard, chosenCard, sendLogEntry);
         game.specialActions.shift();
         socket.to(roomCode).emit('completedSpecialAction');
-        game.finishedTurn(sendTurnData, doSpecialAction, sendGameResults, sendLogEntry);
+        game.finishedTurn(
+          sendTurnData,
+          doSpecialAction,
+          sendGameResults,
+          sendLogEntry
+        );
       }
+    }
+  });
+
+  // client emit when they continue after game is over
+  socket.on('resetRoom', (roomCode, playerName) => {
+    const game = rooms[roomCode];
+    if (!!socketToRoom[socket.id]) {
+      if (game.hostPlayer.socketId === socket.id) {
+        game.players.unshift(game.hostPlayer);
+      } else {
+        game.addPlayer(playerName, socket.id);
+      }
+      io.to(roomCode).emit(
+        'getActivePlayers',
+        game.players.map(p => ({
+          name: p.name,
+          socketId: p.socketId,
+        }))
+      );
+      io.to(roomCode).emit('getNumPlayers', game.numPlayers);
+      socket.emit('gameInformation', null, roomCode);
     }
   });
 
@@ -274,10 +370,10 @@ io.on('connection', socket => {
     let roomCode = socketToRoom[socket.id];
     const game = rooms[roomCode];
     if (game) {
-      if (game.gameStarted && socket.id === game.hostPlayer.socketId) {
+      if (socket.id === game.hostPlayer.socketId) {
         socket.to(roomCode).emit('quitGame');
         delete rooms[roomCode];
-      } else if (game.gameStarted) {
+      } else if (game.gameStarted && !game.isGameOver) {
         const index = game.players.findIndex(p => p.socketId === socket.id);
         game.players[index].isAuto = true;
         game.players[index].socketId = null;
@@ -288,12 +384,13 @@ io.on('connection', socket => {
         game.players = game.players.filter(p => p.socketId !== socket.id);
         socket.to(roomCode).emit(
           'getActivePlayers',
-          game.players.map(p => p.name),
-          game.deck.menu
+          game.players.map(p => ({
+            name: p.name,
+            socketId: p.socketId,
+          }))
         );
       }
     }
-    // TODO: If the host leaves, end game
   });
 });
 

@@ -1,0 +1,28 @@
+.container-hostgame {
+  margin-bottom: 30px;
+}
+
+.toggle-player-number .hovertext {
+  display: inline-block;
+  opacity: 1;
+  font-size: small;
+
+  /* Positioning for the hovertext */
+  bottom: 105%;
+  left: -30%;
+}
+
+.toggle-player-number .hovertext::after {
+  content: ' ';
+  position: absolute;
+  top: 100%; /* At the bottom of the tooltip */
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
+}
+
+.toggle-player-number.disabled:hover .hovertext {
+  visibility: visible;
+}

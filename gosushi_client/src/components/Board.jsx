@@ -10,7 +10,7 @@ import CardToggle from './CardToggle';
 import Card from './Card';
 import './board.scss';
 import Drawer from './MenuDrawer';
-import SpecActionsLog from './SpecActionsLog'
+import SpecActionsLog from './SpecActionsLog';
 
 const Board = ({ socket }) => {
   const params = useParams();
@@ -18,6 +18,7 @@ const Board = ({ socket }) => {
   const [hand, setHand] = useState([]);
   const [menu, setMenu] = useState({});
   const [playersData, setPlayersData] = useState([]);
+  const [roundNumber, updateRoundNumber] = useState(1);
 
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
@@ -56,6 +57,10 @@ const Board = ({ socket }) => {
       history.push('/');
     };
 
+    const handleRoundUpdate = roundNum => {
+      updateRoundNumber(roundNum);
+    };
+
     const handleQuitGame = () => {
       history.push('/join');
     };
@@ -72,6 +77,7 @@ const Board = ({ socket }) => {
     socket.on('sendMenuData', handleMenuData);
     socket.on('playerStatus', handlePlayerStatus);
     socket.on('unknownGame', handleUnknownGame);
+    socket.on('updateRoundNumber', handleRoundUpdate);
     socket.on('quitGame', handleQuitGame);
     // socket.on('playerQuit', handlePlayerQuit);
     socket.on('playerRejoin', handlePlayerRejoin);
@@ -81,6 +87,7 @@ const Board = ({ socket }) => {
       socket.off('sendMenuData', handleMenuData);
       socket.off('playerStatus', handlePlayerStatus);
       socket.off('unknownGame', handleUnknownGame);
+      socket.off('updateRoundNumber', handleRoundUpdate);
       socket.off('quitGame', handleQuitGame);
       // socket.off('playerQuit', handlePlayerQuit);
       socket.off('playerRejoin', handlePlayerRejoin);
@@ -148,6 +155,7 @@ const Board = ({ socket }) => {
   const renderActions = () => {
     return (
       <div className="container-buttons">
+        <div>Round Number: {roundNumber}</div>
         <div>Your points: {currPlayer && currPlayer.points}</div>
         <Button
           className="button"
@@ -165,13 +173,17 @@ const Board = ({ socket }) => {
     );
   };
 
-  const cardsToShow = currPlayer ? (showPlayedCards ? currPlayer.playedCards : currPlayer.dessertCards) : null;
+  const cardsToShow = currPlayer
+    ? showPlayedCards
+      ? currPlayer.playedCards
+      : currPlayer.dessertCards
+    : null;
 
   return (
     <div className="board">
       {!_.isEmpty(menu) && <Drawer menu={menu} />}
       <SpecialModal socket={socket} />
-      <ResultsModal socket={socket} />
+      <ResultsModal socket={socket} playerName={currPlayer ? currPlayer.name : ""} />
       <SpecActionsLog socket={socket} />
       <OtherPlayerGrid data={otherPlayerData} />
       <div className="played-cards">
