@@ -27,7 +27,13 @@ const rooms = {};   // room code to Game obj
 const socketToRoom = {};    // socket id to room code
 
 io.on('connection', socket => {
-  var clientIp = socket.request.connection.remoteAddress;
+  var clientIp = socket.request.headers["x-forwarded-for"];
+  if (clientIp){
+    var list = clientIp.split(",");
+    clientIp = list[list.length-1];
+  } else {
+    clientIp = socket.request.connection.remoteAddress; // Routing ip inside of Heroku network, useless fallback if no real ip is found
+  }
   console.log(`New client connected from address ${clientIp}`);
 
   const existingGames = Object.entries(rooms).filter(roomPair => {
@@ -176,7 +182,7 @@ io.on('connection', socket => {
       //     'getActivePlayers',
       //     `Connection failed: You are already in this game session.`
       //   );
-      //   return;     
+      //   return;
       } else if (e) {
         socket.emit(
           'connectionFailed',
