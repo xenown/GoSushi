@@ -1,9 +1,10 @@
 class Card {
-  constructor(card, data = null) {
+  constructor(card, id, data = null) {
     if (typeof card === 'string') {
       this.isFlipped = false;
       this.name = card;
       this.data = data;
+      this.id = id;
     } else if (typeof card === 'object') {
       // copy constructor
       Object.assign(this, card);

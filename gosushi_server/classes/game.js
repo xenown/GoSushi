@@ -310,7 +310,7 @@ class Game {
         // update played special card log
         specialLogEntry.chosenCard = chosenCards[0];
 
-        // the player to the left of another is the one before it in the array
+        // the player to the left of another is the one before it in the array (at a smaller)
         const nextLeftPlayerIndex = idx =>
           (idx - 1 + this.numPlayers) % this.numPlayers;
 
