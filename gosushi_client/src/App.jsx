@@ -15,8 +15,8 @@ import Board from './components/Board';
 import RejoinModal from './components/RejoinModal';
 import ConnectionModal from './components/ConnectionModal';
 
-const serverport = process.env.SERVERPORT || 4001;
-const ENDPOINT = 'http://127.0.0.1:' + serverport;
+const port = process.env.PORT || 5000;
+const ENDPOINT = window ? window.location.origin.toString() : 'http://127.0.0.1:'+ port;
 // const ENDPOINT = 'http://192.168.1.106:' + serverport;
 console.log(ENDPOINT);
 const socket = socketIOClient(ENDPOINT);

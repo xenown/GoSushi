@@ -26,11 +26,11 @@ class Deck {
     let arr = [];
     for (let i = 0; i < 12; i++) {
       if (i < 4) {
-        arr[i] = new Card(cardNameEnum.EGG);
+        arr[i] = new Card(cardNameEnum.EGG, i);
       } else if (i > 8) {
-        arr[i] = new Card(cardNameEnum.SQUID);
+        arr[i] = new Card(cardNameEnum.SQUID, i);
       } else {
-        arr[i] = new Card(cardNameEnum.SALMON);
+        arr[i] = new Card(cardNameEnum.SALMON, i);
       }
     }
     return arr;
@@ -42,27 +42,27 @@ class Deck {
       case cardNameEnum.MAKI:
         for (let i = 0; i < 12; i++) {
           if (i < 4) {
-            arr[i] = new Card(cardNameEnum.MAKI, 1);
+            arr[i] = new Card(cardNameEnum.MAKI, i, 1);
           } else if (i > 8) {
-            arr[i] = new Card(cardNameEnum.MAKI, 3);
+            arr[i] = new Card(cardNameEnum.MAKI, i, 3);
           } else {
-            arr[i] = new Card(cardNameEnum.MAKI, 2);
+            arr[i] = new Card(cardNameEnum.MAKI, i, 2);
           }
         }
         break;
       case cardNameEnum.TEMAKI:
         for (let i = 0; i < 12; i++) {
-          arr[i] = new Card(cardNameEnum.TEMAKI);
+          arr[i] = new Card(cardNameEnum.TEMAKI, i);
         }
         break;
       case cardNameEnum.URAMAKI:
         for (let i = 0; i < 12; i++) {
           if (i < 4) {
-            arr[i] = new Card(cardNameEnum.URAMAKI, 3);
+            arr[i] = new Card(cardNameEnum.URAMAKI, i, 3);
           } else if (i > 7) {
-            arr[i] = new Card(cardNameEnum.URAMAKI, 5);
+            arr[i] = new Card(cardNameEnum.URAMAKI, i, 5);
           } else {
-            arr[i] = new Card(cardNameEnum.URAMAKI, 4);
+            arr[i] = new Card(cardNameEnum.URAMAKI, i, 4);
           }
         }
         break;
@@ -77,18 +77,18 @@ class Deck {
     if (appetizerName === cardNameEnum.ONIGIRI) {
       for (let i = 0; i < 8; i++) {
         if (i % 4 === 0) {
-          arr[i] = new Card(cardNameEnum.ONIGIRI, onigiriNameEnum.CIRCLE);
+          arr[i] = new Card(cardNameEnum.ONIGIRI, i, onigiriNameEnum.CIRCLE);
         } else if (i % 4 === 1) {
-          arr[i] = new Card(cardNameEnum.ONIGIRI, onigiriNameEnum.TRIANGLE);
+          arr[i] = new Card(cardNameEnum.ONIGIRI, i, onigiriNameEnum.TRIANGLE);
         } else if (i % 4 === 2) {
-          arr[i] = new Card(cardNameEnum.ONIGIRI, onigiriNameEnum.SQUARE);
+          arr[i] = new Card(cardNameEnum.ONIGIRI, i, onigiriNameEnum.SQUARE);
         } else {
-          arr[i] = new Card(cardNameEnum.ONIGIRI, onigiriNameEnum.RECTANGLE);
+          arr[i] = new Card(cardNameEnum.ONIGIRI, i, onigiriNameEnum.RECTANGLE);
         }
       }
     } else if (Object.values(cardNameEnum).includes(appetizerName)) {
       for (let i = 0; i < 8; i++) {
-        arr[i] = new Card(appetizerName);
+        arr[i] = new Card(appetizerName, i);
       }
     } else {
       console.log('Invalid appetizer name.');
@@ -100,15 +100,15 @@ class Deck {
     let arr = [];
     for (let i = 0; i < 3; i++) {
       if (specialName === cardNameEnum.CHOPSTICKS) {
-        arr[i] = new Card(cardNameEnum.CHOPSTICKS, i + 1);
+        arr[i] = new Card(cardNameEnum.CHOPSTICKS, i, i + 1);
       } else if (specialName === cardNameEnum.SPOON) {
-        arr[i] = new Card(cardNameEnum.SPOON, i + 4);
+        arr[i] = new Card(cardNameEnum.SPOON, i, i + 4);
       } else if (specialName === cardNameEnum.MENU) {
-        arr[i] = new Card(cardNameEnum.MENU, i + 7);
+        arr[i] = new Card(cardNameEnum.MENU, i, i + 7);
       } else if (specialName === cardNameEnum.TAKEOUT_BOX) {
-        arr[i] = new Card(cardNameEnum.TAKEOUT_BOX, i + 10);
+        arr[i] = new Card(cardNameEnum.TAKEOUT_BOX, i, i + 10);
       } else if (Object.values(cardNameEnum).includes(specialName)) {
-        arr[i] = new Card(specialName);
+        arr[i] = new Card(specialName, i);
       } else {
         console.log('Invalid special name.');
         break;
@@ -127,7 +127,7 @@ class Deck {
         } else {
           fruit = fruitCombos[Math.floor((i - 9) / 2) + 3];
         }
-        arr[i] = new Card(cardNameEnum.FRUIT, fruit);
+        arr[i] = new Card(cardNameEnum.FRUIT, i, fruit);
       }
       if (numPlayers < 6) {
         arr = _.slice(_.shuffle(arr), 5);
@@ -138,7 +138,7 @@ class Deck {
     ) {
       const num = numPlayers > 5 ? 15 : 10;
       for (let i = 0; i < num; i++) {
-        arr[i] = new Card(dessertName);
+        arr[i] = new Card(dessertName, i);
       }
     } else {
       console.log('Invalid dessert name.');

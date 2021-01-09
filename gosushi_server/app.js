@@ -2,8 +2,9 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 
-const port = process.env.SERVERPORT;
+const port = process.env.PORT || 5000;
 const index = require('./routes/index');
+const path = require('path');
 
 const app = express();
 // const cors = require('cors');
@@ -11,6 +12,11 @@ const app = express();
 app.set('port', port);
 // app.use(cors());
 app.use(index);
+
+app.use(express.static(path.resolve(__dirname, '../gosushi_client/build')));
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../gosushi_client/build', 'index.html'));
+})
 
 const server = http.createServer(app);
 const io = socketIo(server);
@@ -21,7 +27,13 @@ const rooms = {};   // room code to Game obj
 const socketToRoom = {};    // socket id to room code
 
 io.on('connection', socket => {
-  var clientIp = socket.request.connection.remoteAddress;
+  var clientIp = socket.request.headers["x-forwarded-for"];
+  if (clientIp){
+    var list = clientIp.split(",");
+    clientIp = list[list.length-1];
+  } else {
+    clientIp = socket.request.connection.remoteAddress; // Routing ip inside of Heroku network, useless fallback if no real ip is found
+  }
   console.log(`New client connected from address ${clientIp}`);
 
   const existingGames = Object.entries(rooms).filter(roomPair => {
@@ -170,7 +182,7 @@ io.on('connection', socket => {
       //     'getActivePlayers',
       //     `Connection failed: You are already in this game session.`
       //   );
-      //   return;     
+      //   return;
       } else if (e) {
         socket.emit(
           'connectionFailed',
