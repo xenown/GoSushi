@@ -518,7 +518,6 @@ describe('calculateSpecialPoints', function () {
       new Card(cardNameEnum.TAKEOUT_BOX),
 
       // Other colour cards
-      new Card(cardNameEnum.EEL),
 
       // Repeat colour cards
       new Card(cardNameEnum.EGG),
@@ -533,7 +532,6 @@ describe('calculateSpecialPoints', function () {
 
       // Other colour cards
       new Card(cardNameEnum.EEL),
-      new Card(cardNameEnum.TOFU),
 
       // Repeat colour cards
       new Card(cardNameEnum.EGG),
@@ -552,7 +550,6 @@ describe('calculateSpecialPoints', function () {
 
       // Other colour cards
       new Card(cardNameEnum.PUDDING),
-      new Card(cardNameEnum.TOFU),
 
       // Repeat colour cards
       new Card(cardNameEnum.EGG),

@@ -385,7 +385,11 @@ calculateTofuPoints = players => {
 
 // Special Functions
 calculateSoySaucePoints = players => {
-  let colourCount = players.map(p => {
+  let soysaucePlayers = players.filter(
+    p => p.playedCards.findIndex(c => c.name == cardNameEnum.SOY_SAUCE) != -1
+  );
+
+  let colourCount = soysaucePlayers.map(p => {
     let map = {};
     p.playedCards.forEach(c => {
       if (c.name.includes('Nigiri') || c.name.includes('Wasabi')) {
@@ -399,7 +403,7 @@ calculateSoySaucePoints = players => {
   });
 
   let max = _.max(colourCount);
-  players.forEach((p, idx) => {
+  soysaucePlayers.forEach((p, idx) => {
     if (colourCount[idx] === max) {
       let soysauce = p.playedCards.filter(
         card => card.name == cardNameEnum.SOY_SAUCE
