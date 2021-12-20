@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node gosushi_server/app",
+    "start": "node gosushi_server/dist/app",
     "build": "cd gosushi_client && npm install && npm run build",
     "test": "npx jasmine"
   },
@@ -14,9 +14,14 @@
   "dependencies": {
     "express": "^4.17.1",
     "lodash": "^4.17.19",
-    "socket.io": "^2.3.0"
+    "socket.io": "^3.1.2"
   },
   "devDependencies": {
-    "jasmine": "^3.5.0"
+    "@types/express": "^4.17.13",
+    "@types/jest": "^27.0.3",
+    "@types/lodash": "^4.14.178",
+    "@types/node": "^17.0.1",
+    "jasmine": "^3.5.0",
+    "typescript": "^4.5.4"
   }
 }
