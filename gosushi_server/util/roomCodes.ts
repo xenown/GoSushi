@@ -12,9 +12,9 @@ const words = Object.freeze([
     "Meat"
 ]);
 
-const generateRoomCode = (existingGames) => {
+const generateRoomCode = (existingGames: Set<string>) => {
     for (let i = 0; i < 10; i++){
-        let code = generateCode(existingGames);
+        let code = generateCode();
         if (!existingGames.has(code)){
             return code;
         }
@@ -22,13 +22,12 @@ const generateRoomCode = (existingGames) => {
     return false;
 }
 
-const generateCode = (existingGames) => {    
+const generateCode = () => {    
     let code = "";
-    for (i = 0; i < 3; i++){
+    for (let i = 0; i < 3; i++){
         code += words[Math.floor(Math.random() * words.length)];
     }
     return code;
 }
 
-module.exports = generateRoomCode;
-
+export default generateRoomCode;

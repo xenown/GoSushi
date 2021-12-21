@@ -6,8 +6,8 @@ const {
   calculateRoundPoints,
   calculateTurnPoints,
 } = require('../../util/calculatePoints');
-const cardNameEnum = require('../../util/cardNameEnum');
-const onigiriEnum = require('../../util/onigiriNameEnum');
+const cardNameEnum = require('../../types/cardNameEnum');
+const onigiriEnum = require('../../types/onigiriNameEnum');
 const menus = require('../../util/suggestedMenus');
 
 // Add an array of players to a game

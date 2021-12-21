@@ -7,6 +7,7 @@ import Game from './classes/game';
 import Player from './classes/player';
 import index from './routes/index';
 import IMenu from './types/IMenu';
+import IPlayer from './types/IPlayer'
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -272,7 +273,7 @@ io.on('connection', (socket: Socket) => {
     io.to(roomCode).emit('getNumPlayers', numPlayers); // io emit so that the WaitingRoom in HostGame updates (do emit to sender)
   });
 
-  const sendTurnData = (socketId: string, hand: Card[], otherPlayerData: Player[]) =>
+  const sendTurnData = (socketId: string, hand: Card[], otherPlayerData: IPlayer[]) =>
     io.to(socketId).emit('sendTurnData', hand, otherPlayerData);
 
   const doSpecialAction = (playerName: string, players: Player[], specialCard: Card, data: Card[] | string[]): void =>
@@ -287,7 +288,7 @@ io.on('connection', (socket: Socket) => {
   const updateRound = (roomCode: string, roundNumber: number) =>
     io.to(roomCode).emit('updateRoundNumber', roundNumber);
 
-  const sendGameResults = (socketId: string, playerData: Player[], isHost: boolean) =>
+  const sendGameResults = (socketId: string, playerData: IPlayer[], isHost: boolean) =>
     io.to(socketId).emit('gameResults', playerData, isHost);
 
   socket.on('finishTurn', (roomCode: string, card: Card, specials: Card[]) => {

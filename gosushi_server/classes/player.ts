@@ -1,4 +1,5 @@
 import { findIndex, isEqual } from 'lodash';
+import CardNameEnum from '../types/cardNameEnum';
 import Card from './card';
 
 class Player {
@@ -32,9 +33,9 @@ class Player {
     this.hasAutoPlayedCard = false;
   } // constructor
 
-  private castCard(card: Card | string): Card {
-    if (typeof card === 'string') {
-      return new Card(card);
+  private castCard(card: Card | CardNameEnum): Card {
+    if (!(card instanceof Card)) {
+      return new Card(card); 
     }
     return card;
   } // castCard
@@ -44,14 +45,14 @@ class Player {
   } // getIndexFromList
 
   // find the chosen card in the hand and add it to the turnCards array
-  playCardFromHand(card: Card | string) {
+  playCardFromHand(card: Card) {
     card = this.castCard(card);
     const index = this.getIndexFromList(this.hand, card);
     this.turnCards = this.turnCards.concat(this.hand[index]);
   } // playCardFromHand
 
   // find the chosen card and remove from the hand
-  removeCardFromHand(card: Card | string) {
+  removeCardFromHand(card: Card | CardNameEnum) {
     card = this.castCard(card);
     const index = this.getIndexFromList(this.hand, card);
     if (index >= 0) {
@@ -60,14 +61,14 @@ class Player {
   } // removeCardFromHand
 
   // find and move a played card to be reused???
-  playUsedCard(card: Card | string) {
+  playUsedCard(card: Card | CardNameEnum) {
     card = this.castCard(card);
     const index = this.getIndexFromList(this.playedCards, card);
     this.turnCardsReuse = this.turnCardsReuse.concat(this.playedCards[index]);
   } // playUsedCard
 
   // find and remove a played card
-  removePlayedCard(card: Card | string) {
+  removePlayedCard(card: Card | CardNameEnum) {
     card = this.castCard(card);
     const index = this.getIndexFromList(this.playedCards, card);
     if (index >= 0) {

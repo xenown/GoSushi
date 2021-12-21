@@ -1,6 +1,10 @@
 const dev = process.env.SHORT;
 
-const handSizeMap = dev ? 
+interface INumberMap {
+  [key: number]: number;
+}
+
+const handSizeMap: INumberMap = dev ? 
 {
   2: 1,
   3: 1,
@@ -21,4 +25,4 @@ const handSizeMap = dev ?
   8: 7,
 };
 
-module.exports = handSizeMap;
+export default handSizeMap;

@@ -2,7 +2,7 @@ import Card from './card';
 import CardNameEnum from '../types/cardNameEnum';
 import IMenu from '../types/IMenu';
 import OnigiriNameEnum from '../types/onigiriNameEnum';
-import { cloneDeep, drop, findIndex, isEqual, remove, shuffle, slice, take } from 'lodash';
+import { drop, findIndex, isEqual, remove, shuffle, slice, take } from 'lodash';
 import fruitCombos from '../util/fruitCombos';
 
 class Deck {
@@ -21,7 +21,7 @@ class Deck {
       .concat(this.createSpecial(menu.specials[0]))
       .concat(this.createSpecial(menu.specials[1]));
     this.desserts = this.createDesserts(menu.dessert, numPlayers);
-    this.activeDeck = cloneDeep(this.playableCards);
+    this.activeDeck = this.playableCards.map((c: Card) =>  new Card(c));
   }
 
   shuffle() {

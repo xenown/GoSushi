@@ -1,11 +1,12 @@
-import { cloneDeepWith, findIndex, isEqual, omit, remove } from 'lodash';
+import { findIndex, isEqual, remove } from 'lodash';
 import Card from './card';
 import Deck from './deck';
 import Player from './player';
 import CardNameEnum from '../types/cardNameEnum';
 import IMenu from '../types/IMenu';
+import IPlayer from '../types/IPlayer'
 import ISpecialAction from '../types/ISpecialAction';
-import { IUramakiCountMap, IUramakiStanding } from '../types/IUramaki';
+import { ICountMap, IMoreLessPoints, IUramakiStanding } from '../types/IPoints';
 import {
   specialActionsHand,
   specialActionsPlayed,
@@ -27,22 +28,14 @@ interface ISpecialLogEntry {
   boxCards: number;
 }
 
-type TSendGameResult = (socketId: string, playerData: Player[], isHost: boolean) => void
+type TSendGameResult = (socketId: string, playerData: IPlayer[], isHost: boolean) => void
 type TSendLogEntry = (roomCode: string, specialLogEntry: ISpecialLogEntry) => void
-type TSendPlayerData = (socketId: string, hand: Card[], tempPlayers: Player[]) => void
+type TSendPlayerData = (socketId: string, hand: Card[], tempPlayers: IPlayer[]) => void
 type TSendSpecialAction = (playerName: string, players: Player[], card: Card, data: Card[] | string[]) => void
 type TUpdateRound = (roomCode: string, round: number) => void
 
-interface INumDesserts {
-  less: {
-    [key: number]: number
-  },
-  more: {
-    [key: number]: number
-  }
-}
 
-const numDesserts: INumDesserts = {
+const numDesserts: IMoreLessPoints = {
   less: {
     1: 5,
     2: 3,
@@ -64,7 +57,7 @@ class Game {
   round: number = 1;
   hands: Card[][] = [];
   playedTurn: number = 0;
-  uramakiCountMap: IUramakiCountMap = {};
+  uramakiCountMap: ICountMap = {};
   uramakiStanding: IUramakiStanding = { value: 1 };
   specialActions: ISpecialAction[] = [];
   gameStarted: boolean = false;
@@ -153,7 +146,7 @@ class Game {
     sendLogEntry: TSendLogEntry,
   ) {
     this.playedTurn++; // increment number of players that have finished their turn
-    console.log(this.playedTurn);
+    console.log('playedTurn' + this.playedTurn);
     const numRealPlayers = this.players.reduce(
       (acc, p) => (p.isAuto ? acc : acc + 1),
       0
@@ -165,6 +158,7 @@ class Game {
         // if auto playing and the auto players haven't done an initial action yet, play cards
         if (p.isAuto && !p.hasAutoPlayedCard) {
           p.hasAutoPlayedCard = true;
+          // p.playCardFromHand(p.hand[0]);
         }
         // Remove everyone's chosen cards from their hand
         p.turnCards.forEach(card => {
@@ -226,7 +220,7 @@ class Game {
       this.uramakiCountMap,
       this.uramakiStanding
     );
-    let tempPlayers: Player[] = [];
+    let tempPlayers: IPlayer[] = [];
     this.rotateHands(this.players.map(p => p.hand));
     if (this.players[0].hand.length === 0) {
       // no more cards in the hand
@@ -270,11 +264,13 @@ class Game {
 
   // get the data that needs to be sent to the front-end, only clone necessary information
   getPlayersData() {
-    let tempPlayers: Player[] = [];
-    const notCloned = ['hand', 'makiCount', 'uramakiCount'];
+    let tempPlayers: IPlayer[] = [];
     this.players.forEach(p => {
-      const data = cloneDeepWith(omit(p, notCloned));
-      data.isFinished = p.turnCards.length !== 0;
+      const { hand, makiCount, uramakiCount, ...rest } = p;
+      const data: IPlayer = {
+        ...rest,
+        isFinished: p.turnCards.length !== 0,
+      };
       tempPlayers.push(data);
     });
     return tempPlayers;

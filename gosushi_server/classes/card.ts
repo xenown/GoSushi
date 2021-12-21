@@ -1,15 +1,17 @@
+import CardNameEnum from "../types/cardNameEnum";
+
 class Card {
   isFlipped: boolean = false;
-  name: string = "";
+  name: CardNameEnum = CardNameEnum.EGG;
   id: number = 0;
   data: any;
 
-  constructor(card: Card | string, id: number = 0, data: any = null) {
-    if (card instanceof Card) {
+  constructor(card: Card | CardNameEnum, id: number = 0, data: any = null, isFlipped = false) {
+    if (typeof card === 'object') {
       // copy constructor
       Object.assign(this, card);
-    } else if (typeof card === 'string') {
-      this.isFlipped = false;
+    } else {
+      this.isFlipped = isFlipped;
       this.name = card;
       this.data = data;
       this.id = id;

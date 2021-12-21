@@ -1,4 +1,4 @@
-const CardNameEnum = require('./cardNameEnum');
+import CardNameEnum from '../types/cardNameEnum';
 
 const nigiris = [CardNameEnum.EGG, CardNameEnum.SALMON, CardNameEnum.SQUID];
 
@@ -40,7 +40,7 @@ const specialActionsHand = [
 
 const specialActionsPlayed = [CardNameEnum.CHOPSTICKS, CardNameEnum.SPOON];
 
-module.exports = {
+export {
   nigiris,
   appetizers,
   rolls,

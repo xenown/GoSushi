@@ -31,4 +31,4 @@ const fruitCombos = Object.freeze([
   },
 ]);
 
-module.exports = fruitCombos;
+export default fruitCombos;

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node gosushi_server/dist/app",
+    "start": "npx tsc -p ./gosushi_server && node gosushi_server/dist/app",
     "build": "cd gosushi_client && npm install && npm run build",
     "test": "npx jasmine"
   },
