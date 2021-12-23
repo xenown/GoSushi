@@ -6,11 +6,15 @@ To run locally:
 2. Run `node app.js` in the gosushi_server folder
 3. Run `npm start` in the gosushi_client folder
 
-Creating and running unit tests:
+Running unit tests:
     
-1. Go to gosushi_server
-2. run `npm test` or `npx jasmine` to run all test files
-3. run `npx jasmine spec/_filename_.test.js` to run tests in only individual files
-4. All unit tests must be terminated by .test.js and must be within the spec/tests folder.
-   They can be placed within subfolders if necessary. See jasmine.test.js for an example.
+1. Go to root folder
+2. run `npm test` to run all test files
+3. run `npx jasmine <filename> --random=false` to run tests in only individual files
+   Filename should point to the corresponding .js file located in the `gosushi_server/dist/spec` folder
+
+Creating unit tests:
+
+1. All unit tests must be terminated by .test.ts and must be within the spec/tests folder.
+   They can be placed within subfolders if necessary. See jasmine.test.ts for an example.
 

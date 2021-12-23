@@ -146,7 +146,6 @@ class Game {
     sendLogEntry: TSendLogEntry,
   ) {
     this.playedTurn++; // increment number of players that have finished their turn
-    console.log('playedTurn' + this.playedTurn);
     const numRealPlayers = this.players.reduce(
       (acc, p) => (p.isAuto ? acc : acc + 1),
       0
@@ -158,7 +157,7 @@ class Game {
         // if auto playing and the auto players haven't done an initial action yet, play cards
         if (p.isAuto && !p.hasAutoPlayedCard) {
           p.hasAutoPlayedCard = true;
-          // p.playCardFromHand(p.hand[0]);
+          p.playCardFromHand(p.hand[0]);
         }
         // Remove everyone's chosen cards from their hand
         p.turnCards.forEach(card => {
@@ -170,9 +169,9 @@ class Game {
       if (this.specialActions.length > 0) {
         this.playedTurn -= 1;
 
-        let { card, playerName } = this.specialActions[0];
-
-        // console.log(`player ${playerName} plays special card: ${card.name}`);
+        // pop first element from specialActions to process
+        let { card, playerName } = this.specialActions.shift()!;
+        console.log(`player ${playerName} plays special card: ${card.name}`);
 
         let index = this.players.findIndex(p => p.name === playerName);
         let data = this.getSpecialData(playerName, card);

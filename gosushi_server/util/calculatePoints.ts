@@ -58,7 +58,7 @@ const calculateTurnPoints = (players: Player[], menu: IMenu, uramakiCountMap: IC
               repeat.turnCards,
               el => el.name === CardNameEnum.MISO_SOUP
             );
-            miso.forEach(c => (c.data = value));
+            miso.forEach(c => c.data = value);
             repeat.playedCards = repeat.playedCards.concat(miso);
           });
           // Update current player's card

@@ -1,7 +1,6 @@
 {
-  "spec_dir": "spec",
+  "spec_dir": "gosushi_server/dist/spec",
   "spec_files": ["**/*[tT]est.js"],
-  "helpers": ["helpers/**/*.js"],
   "stopSpecOnExpectationFailure": false,
   "random": false
 }
