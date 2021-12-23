@@ -1,15 +1,38 @@
-import React, { useState, useRef } from 'react';
-import { useSpring, useChain, animated, config } from 'react-spring';
-import { getCardImage } from '../utils/getCardImage';
+import React, { useState } from 'react';
 import { Spinner } from 'react-bootstrap';
+import { useSpring, useSpringRef, useChain, animated, config } from '@react-spring/web';
 
-const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth, startHeight, scaleUpFactor, transform, imageClass}) => {
-  const [hoverTimer, setHoverTimer] = useState(null);
+import { getCardImage } from '../utils/getCardImage';
+import ICard from '../types/ICard';
+
+interface ICardHoverStyles {
+  hover: string | undefined;
+  noHover: string | undefined;
+  hoverSelected: string | undefined;
+  noHoverSelected: string | undefined;
+  selected: string | undefined;
+}
+
+interface ICardProps {
+  className: string;
+  card: ICard;
+  index: number;
+  isSelected: boolean;
+  handleSelectCard: (index: number) => void;
+  startWidth: number;
+  startHeight: number;
+  scaleUpFactor: number;
+  transform: ICardHoverStyles;
+  imageClass: string;
+}
+
+const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth, startHeight, scaleUpFactor, transform, imageClass }: ICardProps) => {
+  const [hoverTimer, setHoverTimer] = useState<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [isHover, setHover] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
 
-  const posRef = useRef();
-  const posProps= useSpring({
+  const posRef = useSpringRef();
+  const posProps = useSpring({
     ref: posRef,
     to: isHover ? { zIndex: 1 } : { zIndex: 0 },
     immediate: true
@@ -27,7 +50,7 @@ const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth
   // eslint-disable-next-line
   const scaleDirectNoHover = height ? { height: `${height}vh` } : width ? { width: `${width}vw` } : {};
 
-  const sizeRef = useRef();
+  const sizeRef = useSpringRef();
   const sizeProps = useSpring({
     ref: sizeRef,
     to: { transform: isHover ? isSelected ? transformHoverSelected : transformHover : isSelected ? transformNoHoverSelected : transformNoHover },
@@ -37,15 +60,14 @@ const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth
   useChain([posRef, sizeRef]);
 
   const finalClassName = className ? className : "card-playable";
-  const onClick = handleSelectCard ? handleSelectCard : () => {};
   return (
       <animated.div
         className={finalClassName}
         onMouseEnter={() => setHoverTimer(setTimeout(() => { setHover(true); }, 1000))}
-        onMouseLeave={() => { clearTimeout(hoverTimer); setHover(false); }}
+        onMouseLeave={() => { hoverTimer && clearTimeout(hoverTimer); setHover(false); }}
         style={{...posProps, ...sizeProps, position: "relative"}}
         key={index}
-        onClick={() => onClick(index)}
+        onClick={() => handleSelectCard(index)}
       >
         <img
           className={imageClass}

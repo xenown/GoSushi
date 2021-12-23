@@ -1,7 +1,12 @@
 import React from 'react';
 import { Modal } from 'react-bootstrap';
 
-const ConnectionModal = ({ open, message }) => {
+interface IConnectionModalProps {
+  open: boolean;
+  message: string;
+};
+
+const ConnectionModal = ({ open, message }: IConnectionModalProps) => {
   return (
     <Modal
       show={open}

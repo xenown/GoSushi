@@ -4,7 +4,12 @@ import { Desserts, Sushi } from '../utils/toggleImages';
 
 import './cardToggle.scss';
 
-const cardToggle = ({ checked, onClick }) => {
+interface ICardToggleProps {
+  checked: boolean;
+  onClick: () => void;
+}
+
+const CardToggle = ({ checked, onClick }: ICardToggleProps) => {
   const toggleImage = checked ? Sushi : Desserts;
   const altToggleImageText = checked ? 'Sushi' : 'Desserts';
 
@@ -24,4 +29,4 @@ const cardToggle = ({ checked, onClick }) => {
   );
 };
 
-export default cardToggle;
+export default CardToggle;

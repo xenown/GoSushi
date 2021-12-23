@@ -2,12 +2,14 @@ import React from 'react';
 import _ from 'lodash';
 import './menuSelection.scss';
 import {
-  rollsEnum,
-  appetizersEnum,
-  specialsEnum,
-  dessertsEnum,
+  RollsEnum,
+  AppetizersEnum,
+  SpecialsEnum,
+  DessertsEnum,
+} from '../types/cardNameEnum';
+import {
+  getMenuCardImage,
   invalidMenuOptions,
-  menuCardImageMap,
 } from '../utils/menuSelectionUtils';
 import { suggestedMenus } from '../utils/suggestedMenus';
 
@@ -124,9 +126,9 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                 id="v-pills-rolls"
                 role="tabpanel"
               >
-                {Object.values(rollsEnum).map(item => (
+                {Object.values(RollsEnum).map(item => (
                   <img
-                    src={menuCardImageMap[item]}
+                    src={getMenuCardImage(item)}
                     alt={item}
                     className={getCardStyle(item) + (menu.roll === item ? " select-roll" : "")}
                     key={item}
@@ -139,10 +141,10 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                 id="v-pills-appetizers"
                 role="tabpanel"
               >
-                {Object.values(appetizersEnum).map(item => (
+                {Object.values(AppetizersEnum).map(item => (
                   <div key={item} className={getCardStyle(item) + (menu.appetizers.includes(item) ? " select-appetizer": "")}>
                     <img
-                      src={menuCardImageMap[item]}
+                      src={getMenuCardImage(item)}
                       alt={item}
                       className="img"
                       onClick={() => selectMultiCourse(item, "appetizers")}
@@ -156,10 +158,10 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                 id="v-pills-specials"
                 role="tabpanel"
               >
-                {Object.values(specialsEnum).map(item => (
+                {Object.values(SpecialsEnum).map(item => (
                   <div key={item} className={getCardStyle(item) + (menu.specials.includes(item) ? " select-special": "")}>
                     <img
-                      src={menuCardImageMap[item]}
+                      src={getMenuCardImage(item)}
                       alt={item}
                       className="img"
                       onClick={() => selectMultiCourse(item, "specials")}
@@ -173,9 +175,9 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                 id="v-pills-desserts"
                 role="tabpanel"
               >
-                {Object.values(dessertsEnum).map(item => (
+                {Object.values(DessertsEnum).map(item => (
                   <img
-                    src={menuCardImageMap[item]}
+                    src={getMenuCardImage(item)}
                     alt={item}
                     className={getCardStyle(item) + (menu.dessert === item ? " select-dessert" : "")}
                     key={item}

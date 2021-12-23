@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 
-import { menuCardImageMap } from '../utils/menuSelectionUtils';
+import { getMenuCardImage } from '../utils/menuSelectionUtils';
 import './menuDrawer.scss';
 
 const MenuDrawer = ({ menu }) => {
@@ -13,20 +13,20 @@ const MenuDrawer = ({ menu }) => {
       <div className="menu-drawer-body center vertical">
         <img
           className="menu-card"
-          src={menuCardImageMap['Nigiri']}
+          src={getMenuCardImage('Nigiri')}
           alt="Nigiri"
           key="Nigiri"
         />
         <img
           className="menu-card"
-          src={menuCardImageMap[menu.roll]}
+          src={getMenuCardImage(menu.roll)}
           alt={menu.roll}
           key={menu.roll}
         />
         {menu.appetizers.map(item => (
           <img
             className="menu-card"
-            src={menuCardImageMap[item]}
+            src={getMenuCardImage(item)}
             alt={item}
             key={item}
           />
@@ -34,14 +34,14 @@ const MenuDrawer = ({ menu }) => {
         {menu.specials.map(item => (
           <img
             className="menu-card"
-            src={menuCardImageMap[item]}
+            src={getMenuCardImage(item)}
             alt={item}
             key={item}
           />
         ))}
         <img
           className="menu-card"
-          src={menuCardImageMap[menu.dessert]}
+          src={getMenuCardImage(menu.dessert)}
           alt={menu.dessert}
           key={menu.dessert}
         />

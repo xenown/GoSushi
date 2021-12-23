@@ -1,17 +1,28 @@
+import { Socket } from 'socket.io-client';
 import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
+import IPlayer from '../types/IPlayer';
 
 import './resultsModal.scss';
 
-const ResultsModal = ({ socket, playerName }) => {
+interface IParams {
+  roomCode: string;
+};
+
+interface IResultsModalProps {
+  socket: Socket;
+  playerName: string;
+};
+
+const ResultsModal = ({ socket, playerName }: IResultsModalProps) => {
   const history = useHistory();
-  const params = useParams();
-  const [playersData, setPlayersData] = useState([]);
+  const params: IParams = useParams();
+  const [playersData, setPlayersData] = useState<IPlayer[]>([]);
   const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
-    const handleEndGame = (playersData, isHost) => {
+    const handleEndGame = (playersData: IPlayer[], isHost: boolean) => {
       setPlayersData(playersData);
       setIsHost(isHost);
     };

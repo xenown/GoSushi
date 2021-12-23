@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Alert, Button, Modal } from 'react-bootstrap';
 
-import { menuCardImageMap } from '../utils/menuSelectionUtils';
+import { getMenuCardImage } from '../utils/menuSelectionUtils';
 import { getCardImage } from '../utils/getCardImage';
 import './specialModal.scss';
 
@@ -93,7 +93,7 @@ const SpecialModal = ({ socket }) => {
       >
         <img
           className="card-special"
-          src={isCard ? getCardImage(card) : menuCardImageMap[card]}
+          src={isCard ? getCardImage(card) : getMenuCardImage(card)}
           alt={isCard ? card.name : card}
           key={`card-image-${card}-${index}`}
         />
