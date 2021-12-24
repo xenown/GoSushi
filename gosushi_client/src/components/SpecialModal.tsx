@@ -1,30 +1,40 @@
+import { Socket } from 'socket.io-client';
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Alert, Button, Modal } from 'react-bootstrap';
 
+import { MenuCardNameEnum } from '../types/cardNameEnum';
+import ICard from '../types/ICard';
+import IRouteParams from '../types/IRouteParams';
 import { getMenuCardImage } from '../utils/menuSelectionUtils';
 import { getCardImage } from '../utils/getCardImage';
 import './specialModal.scss';
 
-const SpecialModal = ({ socket }) => {
-  const params = useParams();
-  const [specialCard, setSpecialCard] = useState(null);
-  const [data, setSpecialData] = useState([]);
-  const [selectedIndices, setSelectedIndices] = useState([]);
+type TSpecialData = MenuCardNameEnum | ICard;
+
+interface ISpecialModalProps {
+  socket: Socket;
+};
+
+const SpecialModal = ({ socket }: ISpecialModalProps) => {
+  const params: IRouteParams = useParams();
+  const [specialCard, setSpecialCard] = useState<ICard | undefined>(undefined);
+  const [data, setSpecialData] = useState<TSpecialData[]>([]);
+  const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [alertText, setAlertText] = useState('');
 
   useEffect(() => {
-    const handleSpecialAction = (specialCard, data) => {
+    const handleSpecialAction = (specialCard: ICard, data: TSpecialData[]) => {
       setSpecialCard(specialCard);
       setSpecialData(data);
     };
 
-    const handleWaitingForAction = (playerName, cardName) => {
+    const handleWaitingForAction = (playerName: string, cardName: string) => {
       setAlertText(`Waiting for ${playerName} to finish ${cardName} actions.`);
     };
 
     const handleCompleteAction = () => {
-      setSpecialCard(null);
+      setSpecialCard(undefined);
       setSpecialData([]);
       setAlertText('');
     };
@@ -41,14 +51,14 @@ const SpecialModal = ({ socket }) => {
   }, [params.roomCode, socket]);
 
   const handleFinish = () => {
-    let cards = [];
+    let cards: TSpecialData[] = [];
     data.forEach((card, index) => {
       if (selectedIndices.includes(index)) {
         cards.push(card);
       }
     });
     socket.emit('handleSpecialAction', params.roomCode, specialCard, cards);
-    setSpecialCard(null);
+    setSpecialCard(undefined);
     setSpecialData([]);
     setSelectedIndices([]);
     setAlertText('');
@@ -64,8 +74,10 @@ const SpecialModal = ({ socket }) => {
     }
   };
 
-  const displayCard = (card, index) => {
-    let isCard = card.name !== undefined;
+  const displayCard = (card: TSpecialData, index: number) => {
+    const castedCard = card  as ICard;
+    const isCard: boolean = !!(castedCard?.name);
+
     let className = 'card-playable-special';
 
     if (selectedIndices.includes(index)) {
@@ -77,9 +89,9 @@ const SpecialModal = ({ socket }) => {
         className={className}
         key={`cards-for-special-action-${index}`}
         onClick={() => {
-          if (specialCard.name === 'Menu' && card.name === 'Menu') {
+          if (specialCard?.name === 'Menu' && isCard && castedCard.name === 'Menu') {
             setAlertText('You cannot choose a menu card');
-          } else if (specialCard.name === 'Takeout Box') {
+          } else if (specialCard?.name === 'Takeout Box') {
             setSelectedIndices(
               selectedIndices.includes(index)
                 ? selectedIndices.filter(val => val !== index)
@@ -93,8 +105,8 @@ const SpecialModal = ({ socket }) => {
       >
         <img
           className="card-special"
-          src={isCard ? getCardImage(card) : getMenuCardImage(card)}
-          alt={isCard ? card.name : card}
+          src={isCard ? getCardImage(castedCard) : getMenuCardImage(card as MenuCardNameEnum)}
+          alt={isCard ? castedCard.name : card as MenuCardNameEnum}
           key={`card-image-${card}-${index}`}
         />
       </div>
@@ -108,7 +120,7 @@ const SpecialModal = ({ socket }) => {
   const disableFinish =
     data.length > 0 &&
     selectedIndices.length === 0 &&
-    specialCard.name !== 'Takeout Box';
+    specialCard?.name !== 'Takeout Box';
 
   return (
     <Modal

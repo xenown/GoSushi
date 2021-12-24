@@ -19,14 +19,27 @@ interface ICardProps {
   index: number;
   isSelected: boolean;
   handleSelectCard: (index: number) => void;
-  scaleUpFactor: number;
   imageClass: string;
+  scaleUpFactor?: number;
   startWidth?: number;
   startHeight?: number;
   transform?: ICardHoverStyles;
 };
 
-const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth, startHeight, scaleUpFactor, transform, imageClass }: ICardProps) => {
+const Card = (
+  {
+    className,
+    card,
+    index,
+    handleSelectCard,
+    imageClass,
+    isSelected,
+    scaleUpFactor = 1,
+    startWidth,
+    startHeight,
+    transform
+  }: ICardProps
+) => {
   const [hoverTimer, setHoverTimer] = useState<ReturnType<typeof setTimeout> | undefined>(undefined);
   const [isHover, setHover] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);

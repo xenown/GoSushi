@@ -1,14 +1,22 @@
+import { Socket } from 'socket.io-client';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button, Modal, Container, Form } from 'react-bootstrap';
 
-const RejoinModal = ({ socket, rooms, open, hide }) => {
+interface IRejoinModalProps {
+  socket: Socket;
+  rooms: string[];
+  open: () => void;
+  hide: () => void;
+};
+
+const RejoinModal = ({ socket, rooms, open, hide }: IRejoinModalProps) => {
   const history = useHistory();
   const [roomIndex, setRoomIndex] = useState(0);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const handleRejoinGame = (roomCode) => {
+    const handleRejoinGame = (roomCode: string) => {
       if (roomCode) {
         hide();
         history.push(`/game/${roomCode}`);
@@ -24,7 +32,7 @@ const RejoinModal = ({ socket, rooms, open, hide }) => {
     };
   }, [socket, hide, history]);
 
-  const rejoinGame = (roomCode) => {
+  const rejoinGame = (roomCode: string) => {
     socket.emit('rejoinGame', roomCode);
   }
 

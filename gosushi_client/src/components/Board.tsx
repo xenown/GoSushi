@@ -37,7 +37,7 @@ const Board = ({ socket }: IBoardProps) => {
   const [selectedPlayedCards, setSelectedPlayedCards] = useState<number[]>([]);
 
   useEffect(() => {
-    socket.emit('boardLoaded', params.roomCode, menu);
+    socket.emit('boardLoaded', params.roomCode, !menu);
 
     const handleDealHand = (hand: ICard[], playersData: IPlayer[]) => {
       setHand(hand);

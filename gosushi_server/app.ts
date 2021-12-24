@@ -268,7 +268,7 @@ io.on('connection', (socket: Socket) => {
   });
 
   // update the data in the WaitingRoom so that other players can see the changes in the selection
-  socket.on('broadcastSelection', (menu: IMenu, numPlayers: number, roomCode: string) => {
+  socket.on('broadcastSelection', (menu: IMenu, numPlayers: number, roomCode: string) => { // TODO: might need to change to optional menu!!
     socket.to(roomCode).emit('gameInformation', menu, roomCode); // socket emit because don't need to update menu in HostGame (don't emit to sender)
     io.to(roomCode).emit('getNumPlayers', numPlayers); // io emit so that the WaitingRoom in HostGame updates (do emit to sender)
   });
@@ -327,7 +327,7 @@ io.on('connection', (socket: Socket) => {
     io.to(roomCode).emit('newLogEntry', entry);
   };
 
-  socket.on('handleSpecialAction', (roomCode, speCard, chosenCard) => {
+  socket.on('handleSpecialAction', (roomCode: string, speCard: Card, chosenCard: Card[] | string[]) => {
     const game = rooms[roomCode];
     if (game && game.players) {
       let player = game.players.find(val => val.socketId === socket.id);
