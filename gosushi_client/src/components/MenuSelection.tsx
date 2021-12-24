@@ -1,21 +1,30 @@
+import { cloneDeep, remove } from 'lodash';
 import React from 'react';
-import _ from 'lodash';
 import './menuSelection.scss';
 import {
+  MenuCardNameEnum,
   RollsEnum,
   AppetizersEnum,
   SpecialsEnum,
   DessertsEnum,
 } from '../types/cardNameEnum';
+import IMenu, { CourseEnum, IOptionalMenu } from '../types/IMenu';
 import {
   getMenuCardImage,
   invalidMenuOptions,
+  MENU_APPETIZER_COUNT,
+  MENU_SPECIAL_COUNT,
 } from '../utils/menuSelectionUtils';
 import { suggestedMenus } from '../utils/suggestedMenus';
 
-const SideList = ({ menuList, handleSuggestedMenu }) => (
+interface ISideListProps {
+  menuList: CourseEnum[];
+  handleSuggestedMenu: (() => void)[];
+}
+
+const SideList = ({ menuList, handleSuggestedMenu }: ISideListProps) => (
   <div className="btn-group-vertical">
-    {menuList.map((value, index) => (
+    {menuList.map((value: CourseEnum, index) => (
       <button
         className={
           'btn btn-primary default-menu-btn ' +
@@ -30,42 +39,78 @@ const SideList = ({ menuList, handleSuggestedMenu }) => (
   </div>
 );
 
-const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
-  const validMenuOption = item => invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(numPlayers) : true;
-  const getCardStyle = item => "menu-item game-card" + (validMenuOption(item) ? "": " disable-card");
+interface IMenuSelectionProps {
+  handleMenu: (menu: IOptionalMenu) => void;
+  menu: IOptionalMenu;
+  numPlayers: number;
+}
 
-  const selectSingleCourse = (item, course) => {
-    let menucopy = _.cloneDeep(menu);
-    menucopy[course] = item;
+const MenuSelection = ({ handleMenu, menu, numPlayers }: IMenuSelectionProps) => {
+  const validMenuOption = (item: MenuCardNameEnum) => invalidMenuOptions[item] ? !invalidMenuOptions[item].includes(numPlayers) : true;
+  const getCardStyle = (item: MenuCardNameEnum) => "menu-item game-card" + (validMenuOption(item) ? "": " disable-card");
+
+  const selectSingleCourse = (item: RollsEnum | DessertsEnum, course: CourseEnum.ROLL | CourseEnum.DESSERT) => {
+    let menucopy = cloneDeep(menu);
+    switch (course) {
+      case CourseEnum.ROLL:
+        menucopy.roll = item as RollsEnum;
+        break;
+      case CourseEnum.DESSERT:
+        menucopy.dessert = item as DessertsEnum;
+        break;
+      default:
+        console.log(`Error: invalid`);
+        break;
+    }
     handleMenu(menucopy);
   };
 
-  const selectMultiCourse = (item, course) => {
-    if (!validMenuOption(item)){
+  const selectMultiCourse = (item: MenuCardNameEnum, course: CourseEnum.APPETIZERS | CourseEnum.SPECIALS) => {
+    // selected menu item must satisfy player number limitations
+    if (!validMenuOption(item)) {
       return;
-    }
+    } // if
 
-    const maxItems = course === "appetizers" ? 3 : 2;
-    let menucopy = _.cloneDeep(menu);
-    let newCourse = menu[course].slice();
-    if (menu[course].includes(item)) {
-      _.remove(newCourse, i => i === item);
-      menucopy[course] = newCourse;
-    } else if (menu[course].length < maxItems) {
-      newCourse.push(item);
-      menucopy[course] = newCourse;
-    }
+    const setMultiCourse = (menu: IOptionalMenu, items: MenuCardNameEnum[]) => {
+      switch (course) {
+        case CourseEnum.APPETIZERS:
+          menu.appetizers = items as AppetizersEnum[];
+          break;
+        case CourseEnum.SPECIALS:
+          menu.specials = items as SpecialsEnum[];
+          break;
+        default:
+          console.log(`Error: invalid`);
+          break;
+      } // switch
+    } // setMultiCourse
+
+    const maxItems = course === "appetizers" ? MENU_APPETIZER_COUNT : MENU_SPECIAL_COUNT;
+
+    const parseMultiMenuItems = (menucopy: IOptionalMenu, items: MenuCardNameEnum[], item: MenuCardNameEnum): void => {
+      if (items.includes(item)) {
+        remove(items, i => i === item);
+        setMultiCourse(menucopy, items);
+      } else if (items.length < maxItems) {
+        items.push(item);
+        setMultiCourse(menucopy, items);
+      } // if
+    } // parseMultiMenuItems
+
+    let menucopy = cloneDeep(menu);
+    parseMultiMenuItems(menucopy, menu[course].slice(), item);
     handleMenu(menucopy);
   };
 
   const suggestedMenuOnClicks = Object.keys(suggestedMenus).map(name => {
     return () => {
-      let menu = {};
-      menu.roll = suggestedMenus[name]['roll'];
-      menu.appetizers = suggestedMenus[name]['appetizers'];
-      menu.specials = suggestedMenus[name]['specials'];
-      menu.dessert = suggestedMenus[name]['dessert'];
-      handleMenu(_.cloneDeep(menu));
+      let menu: IMenu = {
+        roll: suggestedMenus[name].roll,
+        appetizers: suggestedMenus[name].appetizers,
+        specials: suggestedMenus[name].specials,
+        dessert: suggestedMenus[name].dessert,
+      };
+      handleMenu(cloneDeep(menu));
     };
   });
 
@@ -132,7 +177,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                     alt={item}
                     className={getCardStyle(item) + (menu.roll === item ? " select-roll" : "")}
                     key={item}
-                    onClick={() => selectSingleCourse(item, "roll")}
+                    onClick={() => selectSingleCourse(item, CourseEnum.ROLL)}
                   />
                 ))}
               </div>
@@ -147,7 +192,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                       src={getMenuCardImage(item)}
                       alt={item}
                       className="img"
-                      onClick={() => selectMultiCourse(item, "appetizers")}
+                      onClick={() => selectMultiCourse(item, CourseEnum.APPETIZERS)}
                     />
                     <span className="hovertext">This menu item cannot be chosen when there are {numPlayers} players.</span>
                   </div>
@@ -164,7 +209,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                       src={getMenuCardImage(item)}
                       alt={item}
                       className="img"
-                      onClick={() => selectMultiCourse(item, "specials")}
+                      onClick={() => selectMultiCourse(item, CourseEnum.SPECIALS)}
                     />
                     <span className="hovertext">This menu item cannot be chosen when there are {numPlayers} players.</span>
                   </div>
@@ -181,7 +226,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
                     alt={item}
                     className={getCardStyle(item) + (menu.dessert === item ? " select-dessert" : "")}
                     key={item}
-                    onClick={() => selectSingleCourse(item, "dessert")}
+                    onClick={() => selectSingleCourse(item, CourseEnum.DESSERT)}
                   />
                 ))}
               </div>
@@ -191,7 +236,7 @@ const MenuSelection = ({ handleMenu, menu, numPlayers }) => {
         <div className="col-3 menu-right-pane">
           <div className="menu-subheader">Default Menus</div>
           <SideList
-            menuList={Object.keys(suggestedMenus)}
+            menuList={Object.keys(suggestedMenus) as CourseEnum[]}
             handleSuggestedMenu={suggestedMenuOnClicks}
           />
         </div>

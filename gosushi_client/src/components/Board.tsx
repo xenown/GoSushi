@@ -1,55 +1,65 @@
-import _ from 'lodash';
+import { includes, isEqual } from 'lodash';
 import React, { useState, useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
 import { Button } from 'react-bootstrap';
+import { useParams, useHistory } from 'react-router-dom';
+import { Socket } from 'socket.io-client';
 
-import SpecialModal from './SpecialModal';
-import ResultsModal from './ResultsModal';
-import OtherPlayerGrid from './OtherPlayerGrid';
-import CardToggle from './CardToggle';
 import Card from './Card';
-import './board.scss';
+import CardToggle from './CardToggle';
 import Drawer from './MenuDrawer';
+import ResultsModal from './ResultsModal';
 import SpecActionsLog from './SpecActionsLog';
+import SpecialModal from './SpecialModal';
+import OtherPlayerGrid from './OtherPlayerGrid';
+import './board.scss';
 
-const Board = ({ socket }) => {
-  const params = useParams();
+import ICard from '../types/ICard';
+import IMenu from '../types/IMenu';
+import IPlayer from '../types/IPlayer';
+import IRouteParams from '../types/IRouteParams';
+
+interface IBoardProps {
+  socket: Socket;
+}
+
+const Board = ({ socket }: IBoardProps) => {
+  const params= useParams() as IRouteParams;
   const history = useHistory();
-  const [hand, setHand] = useState([]);
-  const [menu, setMenu] = useState({});
-  const [playersData, setPlayersData] = useState([]);
+  const [hand, setHand] = useState<ICard[]>([]);
+  const [menu, setMenu] = useState<IMenu | undefined>(undefined);
+  const [playersData, setPlayersData] = useState<IPlayer[]>([]);
   const [roundNumber, updateRoundNumber] = useState(1);
 
   const [showPlayedCards, toggleShowPlayedCards] = useState(true);
 
-  const [selectedHandCards, setSelectedHandCards] = useState([]);
+  const [selectedHandCards, setSelectedHandCards] = useState<number[]>([]);
   const [played, setPlayed] = useState(false);
-  const [selectedPlayedCards, setSelectedPlayedCards] = useState([]);
+  const [selectedPlayedCards, setSelectedPlayedCards] = useState<number[]>([]);
 
   useEffect(() => {
-    socket.emit('boardLoaded', params.roomCode, _.isEmpty(menu));
+    socket.emit('boardLoaded', params.roomCode, menu);
 
-    const handleDealHand = (hand, playersData) => {
+    const handleDealHand = (hand: ICard[], playersData: IPlayer[]) => {
       setHand(hand);
       setPlayersData(playersData);
-      let selectedIndices = [];
+      let selectedIndices: number[] = [];
       playersData[0].turnCards.forEach(card => {
-        selectedIndices.push(hand.findIndex(handCard => _.isEqual(handCard, card)));
+        selectedIndices.push(hand.findIndex(handCard => isEqual(handCard, card)));
       })
       setSelectedHandCards(selectedIndices);
       selectedIndices = [];
       playersData[0].turnCardsReuse.forEach(card => {
-        selectedIndices.push(playersData[0].playedCards.findIndex(playedCard => _.isEqual(playedCard, card)));
+        selectedIndices.push(playersData[0].playedCards.findIndex(playedCard => isEqual(playedCard, card)));
       })
       setSelectedPlayedCards(selectedIndices);
       setPlayed(playersData[0].isFinished);
     };
 
-    const handleMenuData = menuData => {
+    const handleMenuData = (menuData: IMenu) => {
       setMenu(menuData);
     };
 
-    const handlePlayerStatus = playersData => {
+    const handlePlayerStatus = (playersData: IPlayer[]) => {
       setPlayersData(playersData);
     };
 
@@ -57,7 +67,7 @@ const Board = ({ socket }) => {
       history.push('/');
     };
 
-    const handleRoundUpdate = roundNum => {
+    const handleRoundUpdate = (roundNum: number) => {
       updateRoundNumber(roundNum);
     };
 
@@ -65,7 +75,7 @@ const Board = ({ socket }) => {
       history.push('/join');
     };
 
-    const handlePlayerRejoin = username => {
+    const handlePlayerRejoin = (username: string) => {
       console.log(`${username} has reconnected.`);
     }
 
@@ -91,22 +101,22 @@ const Board = ({ socket }) => {
   const currPlayer = playersData[0];
   const otherPlayerData = playersData.slice(1);
 
-  const handleSelectCardIndex = index => {
+  const handleSelectCardIndex = (index: number) => {
     if (!played) {
       setSelectedHandCards(index === selectedHandCards[0] ? [] : [index]);
     }
   };
 
-  const handleSelectPlayedCard = index => {
+  const handleSelectPlayedCard = (index: number) => {
     if (!played) {
-      const newSelected = _.includes(selectedPlayedCards, index)
+      const newSelected = includes(selectedPlayedCards, index)
         ? selectedPlayedCards.filter(el => el !== index)
         : selectedPlayedCards.concat(index);
       setSelectedPlayedCards(newSelected);
     }
   };
 
-  const displayPlayedCard = (card, index) => {
+  const displayPlayedCard = (card: ICard, index: number) => {
     let canUse =
       (card.name === 'Chopsticks' || card.name === 'Spoon') && hand.length > 1;
 
@@ -123,7 +133,7 @@ const Board = ({ socket }) => {
         card={card}
         index={index}
         className={className}
-        isSelected={showPlayedCards && _.includes(selectedPlayedCards, index)}
+        isSelected={showPlayedCards && includes(selectedPlayedCards, index)}
         handleSelectCard={canUse ? handleSelectPlayedCard : () => {}}
         scaleUpFactor={2}
         imageClass="card-image-played"
@@ -175,14 +185,14 @@ const Board = ({ socket }) => {
 
   return (
     <div className="board">
-      {!_.isEmpty(menu) && <Drawer menu={menu} />}
+      {menu && <Drawer menu={menu} />}
       <SpecialModal socket={socket} />
       <ResultsModal socket={socket} playerName={currPlayer ? currPlayer.name : ""} />
       <SpecActionsLog socket={socket} />
       <OtherPlayerGrid data={otherPlayerData} />
       <div className="played-cards">
         <div className="container-played-cards">
-          {currPlayer && cardsToShow.map(displayPlayedCard)}
+          {currPlayer && cardsToShow?.map(displayPlayedCard)}
         </div>
       </div>
       <div className="action-bar">

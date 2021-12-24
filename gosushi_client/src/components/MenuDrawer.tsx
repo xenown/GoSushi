@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { Button, Modal } from 'react-bootstrap';
 
-import { getMenuCardImage } from '../utils/menuSelectionUtils';
 import './menuDrawer.scss';
+import { getMenuCardImage } from '../utils/menuSelectionUtils';
+import IMenu from '../types/IMenu';
 
-const MenuDrawer = ({ menu }) => {
+interface IMenuDrawerProps {
+  menu: IMenu;
+}
+
+const MenuDrawer = ({ menu }: IMenuDrawerProps) => {
   const [show, setShow] = useState(false);
   const handleHide = () => setShow(false);
 

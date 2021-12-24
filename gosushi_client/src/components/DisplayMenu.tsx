@@ -1,15 +1,19 @@
 import React from 'react';
-import _ from 'lodash';
 import './menuSelection.scss';
+import { IOptionalMenu } from '../types/IMenu';
 import { getMenuCardImage } from '../utils/menuSelectionUtils';
 
-const DisplayMenu = ({ menu }) => {
-  return !_.isEmpty(menu) ? (
+interface IDisplayMenuProps {
+  menu: IOptionalMenu;
+}
+
+const DisplayMenu = ({ menu }: IDisplayMenuProps) => {
+  return menu ? (
     <div>
       <h4>Selected Menu</h4>
       <div style={{ fontSize: 'medium' }}>
         <img className="game-card" src={getMenuCardImage('Nigiri')} alt="Nigiri" key="Nigiri" />
-        {menu.roll !== "" ? <img
+        {menu.roll ? <img
           className="game-card" 
           src={getMenuCardImage(menu.roll)}
           alt={menu.roll}
@@ -21,7 +25,7 @@ const DisplayMenu = ({ menu }) => {
         {menu.specials.map(item => (
           <img className="game-card" src={getMenuCardImage(item)} alt={item} key={item} />
         ))}
-        {menu.dessert !== "" ?
+        {menu.dessert ?
         <img
           className="game-card" 
           src={getMenuCardImage(menu.dessert)}

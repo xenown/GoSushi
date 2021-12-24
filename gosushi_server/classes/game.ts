@@ -26,13 +26,13 @@ interface ISpecialLogEntry {
   player: string;
   playedCard: string;
   boxCards: number;
-}
+};
 
-type TSendGameResult = (socketId: string, playerData: IPlayer[], isHost: boolean) => void
-type TSendLogEntry = (roomCode: string, specialLogEntry: ISpecialLogEntry) => void
-type TSendPlayerData = (socketId: string, hand: Card[], tempPlayers: IPlayer[]) => void
-type TSendSpecialAction = (playerName: string, players: Player[], card: Card, data: Card[] | string[]) => void
-type TUpdateRound = (roomCode: string, round: number) => void
+type TSendGameResult = (socketId: string, playerData: IPlayer[], isHost: boolean) => void;
+type TSendLogEntry = (roomCode: string, specialLogEntry: ISpecialLogEntry) => void;
+type TSendPlayerData = (socketId: string, hand: Card[], tempPlayers: IPlayer[]) => void;
+type TSendSpecialAction = (playerName: string, players: Player[], card: Card, data: Card[] | string[]) => void;
+type TUpdateRound = (roomCode: string, round: number) => void;
 
 
 const numDesserts: IMoreLessPoints = {

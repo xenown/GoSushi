@@ -1,16 +1,29 @@
+import { Socket } from 'socket.io-client';
 import React, { useState, useEffect } from 'react';
 import { Popover, OverlayTrigger, Button, Badge } from 'react-bootstrap'
 import './SpecActionsLog.scss';
 
-const SpecActionsLog = ({ socket }) => {
-  const [entries, setEntries] = useState([]);
+interface ISpecialLogEntry {
+  chosenCard: string;
+  stolenFromPlayer: string;
+  player: string;
+  playedCard: string;
+  boxCards: number;
+};
+
+interface ISpecActionsLogProps {
+  socket: Socket;
+};
+
+const SpecActionsLog = ({ socket }: ISpecActionsLogProps) => {
+  const [entries, setEntries] = useState<JSX.Element[]>([]);
   const [numNewEntries, setNumNewEntries] = useState(0);
 
   useEffect(() => {
-    const processEntry = (entry) => {
+    const processEntry = (entry: ISpecialLogEntry) => {
       let details = null;
       const plCardCN = 'log-' + entry.playedCard.replace(/\s/g, '').toLowerCase();
-      const cCardCN = (entry.chosenCard)? 'log-' + entry.chosenCard.replace(/\s/g, '').toLowerCase() : null;
+      const cCardCN = (entry.chosenCard)? 'log-' + entry.chosenCard.replace(/\s/g, '').toLowerCase() : undefined;
       switch (entry.playedCard) {
         case 'Chopsticks':
           details = <span>, taking an extra <b className={cCardCN}>{entry.chosenCard}</b> from their hand.</span> 
@@ -40,9 +53,9 @@ const SpecActionsLog = ({ socket }) => {
       return <span>
         <b>{entry.player}</b> played <b className={plCardCN}>{entry.playedCard}</b>{details}
       </span>
-    }
+    }; // processEntry
 
-    const handleNewLogEntry = (entry) => {
+    const handleNewLogEntry = (entry: ISpecialLogEntry) => {
       setNumNewEntries(numNewEntries + 1);
       setEntries([processEntry(entry)].concat(entries));
     };

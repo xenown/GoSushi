@@ -1,9 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import './common.scss';
-const logo = require('../assets/sushigologo.png');
+import logo from '../assets/sushigologo.png';
 
-const Home = ({ hasExistingGames, handleJoinExisiting}) => {
+interface IHomeProps {
+  hasExistingGames: boolean,
+  handleJoinExisting: () => void;
+};
+
+const Home = ({ hasExistingGames, handleJoinExisting}: IHomeProps) => {
   return (
     <>
       <div className="App-logo">
@@ -14,7 +19,7 @@ const Home = ({ hasExistingGames, handleJoinExisiting}) => {
         <Link className="btn btn-danger" to="/host">
           Host Game
         </Link>
-        {hasExistingGames && <div className="btn btn-warning btn-pad" onClick={handleJoinExisiting}>Join Existing Game</div>}
+        {hasExistingGames && <div className="btn btn-warning btn-pad" onClick={handleJoinExisting}>Join Existing Game</div>}
         <Link className="btn btn-success btn-pad" to="/join">
           Join Game
         </Link>

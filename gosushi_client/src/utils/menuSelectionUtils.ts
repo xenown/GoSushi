@@ -6,6 +6,7 @@ import {
   SpecialsEnum,
   DessertsEnum,
 } from '../types/cardNameEnum';
+import { IOptionalMenu } from '../types/IMenu';
 
 export const invalidMenuOptions: { [key: string]: number[] } = Object.freeze({
   Edamame: [2],
@@ -70,3 +71,22 @@ export const getMenuCardImage = (cardName: MenuCardNameEnum) => {
 
 export const MENU_APPETIZER_COUNT = 3;
 export const MENU_SPECIAL_COUNT = 2;
+
+export const checkValidMenu = (menu: IOptionalMenu) => {
+  let msg = '';
+  if (!menu.roll) {
+    msg += 'Missing a roll.\n';
+  }
+  if (menu.appetizers.length < MENU_APPETIZER_COUNT) {
+    let diff = MENU_APPETIZER_COUNT - menu.appetizers.length;
+    msg += `Missing ${diff} appetizer${diff > 1 ? 's' : ''}.\n`;
+  }
+  if (menu.specials.length < MENU_SPECIAL_COUNT) {
+    let diff = MENU_SPECIAL_COUNT - menu.specials.length;
+    msg += `Missing ${diff} special${diff > 1 ? 's' : ''}.\n`;
+  }
+  if (!menu.dessert) {
+    msg += 'Missing a dessert.\n';
+  }
+  return msg;
+};

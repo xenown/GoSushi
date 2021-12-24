@@ -6,12 +6,12 @@ import { getCardImage } from '../utils/getCardImage';
 import ICard from '../types/ICard';
 
 interface ICardHoverStyles {
-  hover: string | undefined;
-  noHover: string | undefined;
-  hoverSelected: string | undefined;
-  noHoverSelected: string | undefined;
-  selected: string | undefined;
-}
+  hover?: string;
+  noHover?: string;
+  hoverSelected?: string;
+  noHoverSelected?: string;
+  selected?: string;
+};
 
 interface ICardProps {
   className: string;
@@ -19,12 +19,12 @@ interface ICardProps {
   index: number;
   isSelected: boolean;
   handleSelectCard: (index: number) => void;
-  startWidth: number;
-  startHeight: number;
   scaleUpFactor: number;
-  transform: ICardHoverStyles;
   imageClass: string;
-}
+  startWidth?: number;
+  startHeight?: number;
+  transform?: ICardHoverStyles;
+};
 
 const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth, startHeight, scaleUpFactor, transform, imageClass }: ICardProps) => {
   const [hoverTimer, setHoverTimer] = useState<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -38,12 +38,12 @@ const Card = ({ className, card, index, isSelected, handleSelectCard, startWidth
     immediate: true
   });
 
-  const transformHover = transform && transform.hover && transform.noHover ? transform.hover : "scale(2) translateY(-25%)";
-  const transformNoHover = transform && transform.hover && transform.noHover ? transform.noHover : "scale(1) translateY(0%)";
-  const transformHoverSelected = transform && transform.hoverSelected ? transform.hoverSelected : "scale(2) translateY(-35%)";
-  const transformNoHoverSelected = transform && transform.noHoverSelected ? transform.noHoverSelected : "scale(1) translateY(-10%)";
-  const width = startWidth ? startWidth : null;
-  const height = startHeight ? startHeight : null;
+  const transformHover = transform?.hover && transform?.noHover ? transform.hover : "scale(2) translateY(-25%)";
+  const transformNoHover = transform?.hover && transform?.noHover ? transform.noHover : "scale(1) translateY(0%)";
+  const transformHoverSelected = transform?.hoverSelected || "scale(2) translateY(-35%)";
+  const transformNoHoverSelected = transform?.noHoverSelected || "scale(1) translateY(-10%)";
+  const width = startWidth;
+  const height = startHeight;
 
   // eslint-disable-next-line
   const scaleDirectHover = height ? { height: `${height * scaleUpFactor}vh` } : width ? { width: `${width * scaleUpFactor}vw` } : {};

@@ -1,6 +1,11 @@
 import ICard from './ICard'
 
-export default interface IPlayer {
+export interface ISimplePlayer {
+  name: string;
+  socketId: string;
+}
+
+export default interface IPlayer extends ISimplePlayer {
   name: string;
   ip: string;
   socketId: string;

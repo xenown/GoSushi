@@ -3,10 +3,14 @@ import { Container, Row, Col } from 'react-bootstrap';
 
 import OtherPlayerTile from './OtherPlayerTile';
 import './otherPlayerGrid.scss';
+import IPlayer from '../types/IPlayer';
 
-const OtherPlayerGrid = ({ data }) => {
+interface IOtherPlayerGrid {
+  data: IPlayer[];
+};
 
-  const displayPlayerData = player => (
+const OtherPlayerGrid = ({ data }: IOtherPlayerGrid) => {
+  const displayPlayerData = (player: IPlayer) => (
     <Col key={player.name}>
       <OtherPlayerTile player={player} isFinished={player.isFinished}/>
     </Col>

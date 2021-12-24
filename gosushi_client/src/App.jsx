@@ -72,7 +72,7 @@ const App = () => {
               <Board socket={socket} />
             </Route>
             <Route exact path="/">
-              <Home hasExistingGames={existingGames.length > 0} handleJoinExisiting={() => { setModalOpen(true); }} />
+              <Home hasExistingGames={existingGames.length > 0} handleJoinExisting={() => { setModalOpen(true); }} />
             </Route>
             <Redirect from="/*" to="/" />
           </Switch>

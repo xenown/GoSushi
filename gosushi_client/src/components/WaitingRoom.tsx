@@ -1,22 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
+import { Socket } from 'socket.io-client';
 import DisplayMenu from './DisplayMenu';
 import './menuSelection.scss';
 import './waitingRoom.scss';
+import { IOptionalMenu } from '../types/IMenu';
+import { ISimplePlayer } from '../types/IPlayer';
 
-const WaitingRoom = ({ name, roomCode, menu, shouldDisplayMenu, socket }) => {
+interface IWaitingRoomProps {
+  name: string;
+  roomCode: string;
+  menu: IOptionalMenu;
+  shouldDisplayMenu: boolean;
+  socket: Socket;
+}
+
+const WaitingRoom = ({ name, roomCode, menu, shouldDisplayMenu, socket }: IWaitingRoomProps) => {
   const history = useHistory();
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState<ISimplePlayer[]>([]);
   const [numPlayers, setNumPlayers] = useState(0);
 
   useEffect(() => {
-    const handleActivePlayer = dataPlayers => {
+    const handleActivePlayer = (dataPlayers: ISimplePlayer[]) => {
       setPlayers(dataPlayers);
     };
 
-    const handleNumPlayers = data => setNumPlayers(data);
+    const handleNumPlayers = (data: number) => setNumPlayers(data);
 
-    const handleStartGame = code => {
+    const handleStartGame = (code: string) => {
       history.push(`/game/${code}`);
     };
 

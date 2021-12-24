@@ -3,12 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
 import IPlayer from '../types/IPlayer';
+import IRouteParams from '../types/IRouteParams';
 
 import './resultsModal.scss';
-
-interface IParams {
-  roomCode: string;
-};
 
 interface IResultsModalProps {
   socket: Socket;
@@ -17,7 +14,7 @@ interface IResultsModalProps {
 
 const ResultsModal = ({ socket, playerName }: IResultsModalProps) => {
   const history = useHistory();
-  const params: IParams = useParams();
+  const params: IRouteParams = useParams();
   const [playersData, setPlayersData] = useState<IPlayer[]>([]);
   const [isHost, setIsHost] = useState(false);
 

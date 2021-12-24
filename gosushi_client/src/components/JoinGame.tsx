@@ -1,42 +1,39 @@
+import { Socket } from 'socket.io-client';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
+import IMenu, { IOptionalMenu, getEmptyMenu } from '../types/IMenu';
+import { ISimplePlayer } from '../types/IPlayer';
 
-const JoinGame = ({ socket }) => {
+interface IJoinGameProps {
+  socket: Socket;
+}
+
+const JoinGame = ({ socket }: IJoinGameProps) => {
   const [name, setName] = useState('');
   const [roomCode, setRoomCode] = useState('');
   const [isJoining, setIsJoining] = useState(true);
   const [message, setMessage] = useState('');
-  const [menu, setMenu] = useState({
-    roll: '',
-    appetizers: [],
-    specials: [],
-    dessert: '',
-  });
+  const [menu, setMenu] = useState<IOptionalMenu>(getEmptyMenu());
   const history = useHistory();
 
   useEffect(() => {
-    const handleActivePlayer = data => {
-      let currPlayer = data.find(obj => obj.socketId === socket.id);
+    const handleActivePlayer = (data: ISimplePlayer[]) => {
+      let currPlayer = data.find(obj => obj.socketId === socket.id)!;
       setName(currPlayer.name);
     };
 
-    const handleGameInfo = (menu, roomCode) => {
-      setMenu(menu);
+    const handleGameInfo = (menu: IMenu, roomCode: string) => {
+      setMenu(menu || getEmptyMenu());
       setRoomCode(roomCode);
       setIsJoining(false);
     };
 
-    const handleError = err => setMessage(err);
+    const handleError = (err: string) => setMessage(err);
 
     const handleQuitGame = () => {
       setName('');
-      setMenu({
-        roll: '',
-        appetizers: [],
-        specials: [],
-        dessert: '',
-      });
+      setMenu(getEmptyMenu());
       setRoomCode('');
       setIsJoining(true);
       setMessage('Host disconnected - game terminated.');
@@ -102,20 +99,12 @@ const JoinGame = ({ socket }) => {
     </div>
   );
 
-  const waitingRoomProps = {
-    name,
-    roomCode,
-    menu,
-    socket,
-    shouldDisplayMenu: !isJoining,
-  };
-
   return (
     <div className="full row center">
       <div className="col">
         <h1>Join Game</h1>
         {isJoining && joinForm}
-        <WaitingRoom {...waitingRoomProps} />
+        <WaitingRoom name={name} roomCode={roomCode} menu={menu} socket={socket} shouldDisplayMenu={!isJoining} />
       </div>
     </div>
   );
