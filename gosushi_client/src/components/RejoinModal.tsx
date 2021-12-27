@@ -6,11 +6,11 @@ import { Button, Modal, Container, Form } from 'react-bootstrap';
 interface IRejoinModalProps {
   socket: Socket;
   rooms: string[];
-  open: () => void;
-  hide: () => void;
+  isOpen: boolean;
+  handleHide: () => void;
 };
 
-const RejoinModal = ({ socket, rooms, open, hide }: IRejoinModalProps) => {
+const RejoinModal = ({ socket, rooms, isOpen, handleHide }: IRejoinModalProps) => {
   const history = useHistory();
   const [roomIndex, setRoomIndex] = useState(0);
   const [message, setMessage] = useState("");
@@ -18,7 +18,7 @@ const RejoinModal = ({ socket, rooms, open, hide }: IRejoinModalProps) => {
   useEffect(() => {
     const handleRejoinGame = (roomCode: string) => {
       if (roomCode) {
-        hide();
+        handleHide();
         history.push(`/game/${roomCode}`);
       } else {
         setMessage("Unable to join room.");
@@ -30,7 +30,7 @@ const RejoinModal = ({ socket, rooms, open, hide }: IRejoinModalProps) => {
     return () => {
       socket.off('rejoinGameResult', handleRejoinGame);
     };
-  }, [socket, hide, history]);
+  }, [socket, handleHide, history]);
 
   const rejoinGame = (roomCode: string) => {
     socket.emit('rejoinGame', roomCode);
@@ -62,9 +62,9 @@ const RejoinModal = ({ socket, rooms, open, hide }: IRejoinModalProps) => {
 
   return (
     <Modal
-      show={open}
+      show={isOpen}
       keyboard={false}
-      onHide={() => hide()}
+      onHide={() => handleHide()}
     >
       <Modal.Header>
         <Modal.Title>Existing Games</Modal.Title>

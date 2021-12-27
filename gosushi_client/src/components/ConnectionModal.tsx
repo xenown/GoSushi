@@ -2,14 +2,14 @@ import React from 'react';
 import { Modal } from 'react-bootstrap';
 
 interface IConnectionModalProps {
-  open: boolean;
+  isOpen: boolean;
   message: string;
 };
 
-const ConnectionModal = ({ open, message }: IConnectionModalProps) => {
+const ConnectionModal = ({ isOpen, message }: IConnectionModalProps) => {
   return (
     <Modal
-      show={open}
+      show={isOpen}
       keyboard={false}
       backdrop="static"
     >

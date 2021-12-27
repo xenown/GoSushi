@@ -5,7 +5,7 @@ import {
   Route,
   Switch,
 } from 'react-router-dom';
-import socketIOClient from 'socket.io-client';
+import { io } from "socket.io-client";
 
 import './App.scss';
 import Home from './components/Home';
@@ -19,26 +19,26 @@ const port = process.env.PORT || 5000;
 const ENDPOINT = window ? window.location.origin.toString() : 'http://127.0.0.1:'+ port;
 // const ENDPOINT = 'http://192.168.1.106:' + serverport;
 console.log(ENDPOINT);
-const socket = socketIOClient(ENDPOINT);
+const socket = io(ENDPOINT);
 
 const App = () => {
-  const [existingGames, setExistingGames] = useState([]);
+  const [existingGames, setExistingGames] = useState<string[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [connected, setConnected] = useState(false);
   const [disconnectedMsg, setDisconnectedMsg] = useState("");
 
   useEffect(() => {
-    const handleRejoinOptions = (rooms) => { setExistingGames(rooms); setModalOpen(true); };
+    const handleRejoinOptions = (rooms: string[]) => { setExistingGames(rooms); setModalOpen(true); };
     const handleConnect = () => { 
       setConnected(true); 
       setDisconnectedMsg("");
     };
-    const handleConnectError = (error) => {
+    const handleConnectError = () => {
       setConnected(false);
       setDisconnectedMsg("Unable to connect. Trying again...");
       socket.connect();
     };
-    const handleDisconnection = (reason) => {
+    const handleDisconnection = (reason: string) => {
       setConnected(false);
       setDisconnectedMsg(reason === 'io server disconnect' ? "Server disconnected. Reconnecting..." : "Client disconnected. Reconnecting...");
       socket.connect();
@@ -76,8 +76,8 @@ const App = () => {
             </Route>
             <Redirect from="/*" to="/" />
           </Switch>
-          <RejoinModal socket={socket} rooms={existingGames} open={modalOpen} hide={() => setModalOpen(false)} />
-          <ConnectionModal open={!connected} message={disconnectedMsg} />
+          <RejoinModal socket={socket} rooms={existingGames} isOpen={modalOpen} handleHide={() => setModalOpen(false)} />
+          <ConnectionModal isOpen={!connected} message={disconnectedMsg} />
         </div>
       </div>
     </Router>
