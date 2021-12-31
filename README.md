@@ -3,7 +3,7 @@
 To run locally:
 
 1. Set your SERVERPORT environment variable. (setx SERVERPORT <numnber> or set SERVPORT=<number> or export SERVERPORT <number>). On Windows, you'll need to relaunch your cmd. Choose a number that isn't 3000 or set your PORT environment variable as well.
-2. Run `node app.js` in the gosushi_server folder
+2. Run `npm start` in the root folder
 3. Run `npm start` in the gosushi_client folder
 
 Running unit tests:

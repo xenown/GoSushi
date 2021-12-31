@@ -14,6 +14,7 @@ import JoinGame from './components/JoinGame';
 import Board from './components/Board';
 import RejoinModal from './components/RejoinModal';
 import ConnectionModal from './components/ConnectionModal';
+import SocketEventEnum, { IRejoinOptionProps } from './types/socketEvents';
 
 const port = process.env.PORT || 5000;
 const ENDPOINT = window ? window.location.origin.toString() : 'http://127.0.0.1:'+ port;
@@ -28,7 +29,7 @@ const App = () => {
   const [disconnectedMsg, setDisconnectedMsg] = useState("");
 
   useEffect(() => {
-    const handleRejoinOptions = (rooms: string[]) => { setExistingGames(rooms); setModalOpen(true); };
+    const handleRejoinOptions = ({ rooms }: IRejoinOptionProps) => { setExistingGames(rooms); setModalOpen(true); };
     const handleConnect = () => { 
       setConnected(true); 
       setDisconnectedMsg("");
@@ -47,13 +48,13 @@ const App = () => {
     socket.on('connect', handleConnect);
     socket.on('connect_error', handleConnectError);
     socket.on('disconnect', handleDisconnection);
-    socket.on('rejoinOption', handleRejoinOptions);
+    socket.on(SocketEventEnum.REJOIN_OPTION, handleRejoinOptions);
 
     return () => {
       socket.off('connect', handleConnect);
       socket.off('connect_error', handleConnectError);
       socket.off('disconnect', handleDisconnection);
-      socket.off('rejoinOption', handleRejoinOptions);
+      socket.off(SocketEventEnum.REJOIN_OPTION, handleRejoinOptions);
     };
   });
 

@@ -1,11 +1,12 @@
 import { findIndex, isEqual, remove } from 'lodash';
 import Card from './card';
 import Deck from './deck';
+import { IConnection } from './myConnection';
 import Player from './player';
 import CardNameEnum from '../types/cardNameEnum';
 import IMenu from '../types/IMenu';
 import IPlayer from '../types/IPlayer'
-import ISpecialAction from '../types/ISpecialAction';
+import ISpecialAction, { ISpecialLogEntry, TSpecialData } from '../types/ISpecialAction';
 import { ICountMap, IMoreLessPoints, IUramakiStanding } from '../types/IPoints';
 import {
   specialActionsHand,
@@ -19,21 +20,6 @@ import {
 import handSize from '../util/handSize';
 
 const dev = process.env.SHORT;
-
-interface ISpecialLogEntry {
-  chosenCard: string;
-  stolenFromPlayer: string;
-  player: string;
-  playedCard: string;
-  boxCards: number;
-};
-
-type TSendGameResult = (socketId: string, playerData: IPlayer[], isHost: boolean) => void;
-type TSendLogEntry = (roomCode: string, specialLogEntry: ISpecialLogEntry) => void;
-type TSendPlayerData = (socketId: string, hand: Card[], tempPlayers: IPlayer[]) => void;
-type TSendSpecialAction = (playerName: string, players: Player[], card: Card, data: Card[] | string[]) => void;
-type TUpdateRound = (roomCode: string, round: number) => void;
-
 
 const numDesserts: IMoreLessPoints = {
   less: {
@@ -63,6 +49,8 @@ class Game {
   gameStarted: boolean = false;
   isGameOver: boolean = false;
 
+  connection: IConnection;
+
   constructor(
     menu: IMenu,
     playerNum: number,
@@ -70,12 +58,15 @@ class Game {
     hostPlayerName: string,
     hostIp: string,
     socketId: string,
+    conn: IConnection,
   ) {
     this.deck = new Deck(menu, playerNum);
     this.numPlayers = playerNum;
     this.roomCode = roomCode;
     this.hostPlayer = new Player(hostPlayerName, hostIp, socketId);
     this.players = [this.hostPlayer];
+
+    this.connection = conn;
   } // constructor
 
   // start a new game, reset values
@@ -138,13 +129,7 @@ class Game {
   } // checkForSpecialActions
 
   // handle when a player finishes their turn
-  finishedTurn(
-    sendPlayerData: TSendPlayerData,
-    notifySpecialAction: TSendSpecialAction,
-    sendGameResults: TSendGameResult,
-    updateRound: TUpdateRound,
-    sendLogEntry: TSendLogEntry,
-  ) {
+  finishedTurn() {
     this.playedTurn++; // increment number of players that have finished their turn
     const numRealPlayers = this.players.reduce(
       (acc, p) => (p.isAuto ? acc : acc + 1),
@@ -181,38 +166,25 @@ class Game {
             this.players[index],
             card,
             data.slice(0, 1),
-            sendLogEntry
-          );
-          this.finishedTurn(
-            sendPlayerData,
-            notifySpecialAction,
-            sendGameResults,
-            updateRound,
-            sendLogEntry
           );
         } else {
-          notifySpecialAction(
+          this.connection.doSpecialAction(
             playerName,
             this.players,
             card,
-            this.getSpecialData(playerName, card)
+            this.getSpecialData(playerName, card),
           );
         }
-
         // TODO: notify others to wait for 'playerName' player to finish 'card.name' action
       } else {
         this.playedTurn = 0;
         this.players.forEach(p => (p.hasAutoPlayedCard = false));
-        this.handleFinishedTurnActions(
-          sendPlayerData,
-          sendGameResults,
-          updateRound
-        );
+        this.handleFinishedTurnActions();
       } // if
     } // if
   } // finishedTurn
 
-  handleFinishedTurnActions(sendPlayerData: TSendPlayerData, sendGameResults: TSendGameResult, updateRound: TUpdateRound) {
+  handleFinishedTurnActions() {
     calculateTurnPoints(
       this.players,
       this.deck.menu,
@@ -236,7 +208,7 @@ class Game {
       if (this.round < maxRound) {
         // go to next round
         this.round++;
-        updateRound(this.roomCode, this.round);
+        this.connection.updateRound(this.roomCode, this.round);
         console.log('End of round');
 
         // reset uramaki standing
@@ -246,16 +218,16 @@ class Game {
         this.startRound();
         tempPlayers = this.getPlayersData();
         this.players.forEach(p => {
-          sendPlayerData(p.socketId, p.hand, tempPlayers);
+          this.connection.sendTurnData(p.socketId, p.hand, tempPlayers);
           tempPlayers.push(tempPlayers.shift()!);
         });
       } else {
-        this.handleEndGame(sendPlayerData, sendGameResults);
+        this.handleEndGame();
       }
     } else {
       tempPlayers = this.getPlayersData();
       this.players.forEach(p => {
-        sendPlayerData(p.socketId, p.hand, tempPlayers);
+        this.connection.sendTurnData(p.socketId, p.hand, tempPlayers);
         tempPlayers.push(tempPlayers.shift()!);
       });
     }
@@ -308,8 +280,7 @@ class Game {
   handleSpecialAction(
     player: Player,
     specialCard: Card,
-    chosenCards: Card[] | string[],
-    sendLogEntry: TSendLogEntry,
+    specialData: TSpecialData[],
   ) {
     let specialLogEntry: ISpecialLogEntry = {
       chosenCard: '',
@@ -321,7 +292,7 @@ class Game {
 
     let specialCardCasted = new Card(specialCard);
     player.removePlayedCard(specialCardCasted);
-    if (chosenCards.length === 0) {
+    if (specialData.length === 0) {
       remove(player.turnCards, (c: Card) => isEqual(c, specialCardCasted));
       return;
     }
@@ -336,40 +307,38 @@ class Game {
       );
     }
 
+    const selectedCards = specialData as Card[];
+    const selectedMenuCards = specialData as string[];
     switch (specialCard.name) {
       case 'Chopsticks':
-        chosenCards = chosenCards as Card[];
         // add card to player's turn cards from their hand
-        player.playCardFromHand(chosenCards[0]);
+        player.playCardFromHand(selectedCards[0]);
         player.hand.push(player.turnCardsReuse.splice(indexOfSpe, 1)[0]);
 
         // update played special card log
-        specialLogEntry.chosenCard = chosenCards[0].name;
+        specialLogEntry.chosenCard = selectedCards[0].name;
         break;
       case 'Menu':
-        chosenCards = chosenCards as Card[];
         // choose a card from the top 4 in the unused deck, shuffle the rest
-        let cardFromDeck = this.deck.removeOneAndShuffle(chosenCards[0]);
+        let cardFromDeck = this.deck.removeOneAndShuffle(selectedCards[0]);
 
         //remove special card from turn cards and add the one from the deck
         player.turnCards.splice(indexOfSpe, 1, cardFromDeck);
 
         // update played special card log
-        specialLogEntry.chosenCard = chosenCards[0].name;
+        specialLogEntry.chosenCard = selectedCards[0].name;
         break;
       case 'Special Order':
-        chosenCards = chosenCards as Card[];
         // add the card to the player's turn cards
-        let duplicate = new Card(chosenCards[0]);
+        let duplicate = new Card(selectedCards[0]);
 
         //remove special card from turn cards (the chosen card is duplicated and replaces it)
         player.turnCards.splice(indexOfSpe, 1, duplicate);
 
         // update played special card log
-        specialLogEntry.chosenCard = chosenCards[0].name;
+        specialLogEntry.chosenCard = selectedCards[0].name;
         break;
       case 'Spoon':
-        chosenCards = chosenCards as string[];
         // find the first person on the left (at the back of the players array) who has chosenCard in their hand
         // swap it with the spoon
         let indexCurrPlayer = this.players.findIndex(
@@ -377,7 +346,7 @@ class Game {
         );
 
         // update played special card log
-        specialLogEntry.chosenCard = chosenCards[0];
+        specialLogEntry.chosenCard = selectedMenuCards[0];
 
         // the player to the left of another is the one before it in the array (at a smaller)
         const nextLeftPlayerIndex = (idx: number) =>
@@ -389,7 +358,7 @@ class Game {
           let p = this.players[i];
 
           //note for the spoon case, chosenCard is a string containing the name, not a Card object
-          let cardInHand = p.hand.findIndex(c => c.name === chosenCards[0]);
+          let cardInHand = p.hand.findIndex(c => c.name === selectedMenuCards[0]);
           if (cardInHand !== -1) {
             player.playedCards.push(p.hand[cardInHand]);
             p.hand[cardInHand] = specialCardCasted;
@@ -401,23 +370,22 @@ class Game {
         player.turnCardsReuse.splice(indexOfSpe, 1);
         break;
       case 'Takeout Box':
-        chosenCards = chosenCards as Card[];
         // replace chosen card with takeout box
         let indexChosen = 0;
         for (let c in player.playedCards) {
           if (
-            isEqual(player.playedCards[c], new Card(chosenCards[indexChosen]))
+            isEqual(player.playedCards[c], new Card(selectedCards[indexChosen]))
           ) {
             player.playedCards[c] = specialCardCasted;
             indexChosen++;
           }
         }
         player.turnCards.splice(indexOfSpe, 1);
-        specialLogEntry.boxCards = chosenCards.length;
+        specialLogEntry.boxCards = selectedCards.length;
         break;
       default:
     }
-    sendLogEntry(this.roomCode, specialLogEntry);
+    this.connection.sendLogEntry(this.roomCode, specialLogEntry);
   } // handleSpecialAction
 
   startRound() {
@@ -431,12 +399,12 @@ class Game {
     this.rotateHands(hands);
   } // startRound
 
-  handleEndGame(sendPlayerData: TSendPlayerData, sendGameResults: TSendGameResult) {
+  handleEndGame() {
     this.isGameOver = true;
     calculateGamePoints(this.players, this.deck.menu);
     let tempPlayers = this.getPlayersData();
     this.players.forEach(p => {
-      sendPlayerData(p.socketId, p.hand, tempPlayers);
+      this.connection.sendTurnData(p.socketId, p.hand, tempPlayers);
       tempPlayers.push(tempPlayers.shift()!);
     });
 
@@ -445,7 +413,7 @@ class Game {
 
     // end game + display results
     this.players.forEach(p => {
-      sendGameResults(
+      this.connection.sendGameResults(
         p.socketId,
         tempPlayers,
         p.socketId === this.hostPlayer.socketId

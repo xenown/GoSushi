@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Button, Modal, Container, Form } from 'react-bootstrap';
 
+import SocketEventEnum, { IRejoinGameProps, IRejoinGameResultProps } from '../types/socketEvents';
+
 interface IRejoinModalProps {
   socket: Socket;
   rooms: string[];
@@ -16,7 +18,7 @@ const RejoinModal = ({ socket, rooms, isOpen, handleHide }: IRejoinModalProps) =
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const handleRejoinGame = (roomCode: string) => {
+    const handleRejoinGame = ({ roomCode }: IRejoinGameResultProps) => {
       if (roomCode) {
         handleHide();
         history.push(`/game/${roomCode}`);
@@ -25,15 +27,15 @@ const RejoinModal = ({ socket, rooms, isOpen, handleHide }: IRejoinModalProps) =
       }
     };
 
-    socket.on('rejoinGameResult', handleRejoinGame);
+    socket.on(SocketEventEnum.REJOIN_GAME_RESULT, handleRejoinGame);
 
     return () => {
-      socket.off('rejoinGameResult', handleRejoinGame);
+      socket.off(SocketEventEnum.REJOIN_GAME_RESULT, handleRejoinGame);
     };
   }, [socket, handleHide, history]);
 
   const rejoinGame = (roomCode: string) => {
-    socket.emit('rejoinGame', roomCode);
+    socket.emit(SocketEventEnum.REJOIN_GAME, { roomCode } as IRejoinGameProps);
   }
 
   const bodyContent = () => {

@@ -30,7 +30,7 @@ const OtherPlayerGrid = ({ data }: IOtherPlayerGrid) => {
 
   return (
     <Container>
-      <Row className="other-player-cards" xs={1} sm={2} md={numPerRow} noGutters>
+      <Row className="other-player-cards" xs={1} sm={2} md={numPerRow}>
         {data.map(displayPlayerData)}
       </Row>
     </Container>

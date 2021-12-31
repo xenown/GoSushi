@@ -4,6 +4,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { Button, Modal, Container, Row, Col } from 'react-bootstrap';
 import IPlayer from '../types/IPlayer';
 import IRouteParams from '../types/IRouteParams';
+import SocketEventEnum, { IGameResultsProps, IResetRoomProps } from '../types/socketEvents';
 
 import './resultsModal.scss';
 
@@ -19,20 +20,20 @@ const ResultsModal = ({ socket, playerName }: IResultsModalProps) => {
   const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
-    const handleEndGame = (playersData: IPlayer[], isHost: boolean) => {
+    const handleEndGame = ({ playersData, isHost }: IGameResultsProps) => {
       setPlayersData(playersData);
       setIsHost(isHost);
     };
 
-    socket.on('gameResults', handleEndGame);
+    socket.on(SocketEventEnum.GAME_RESULTS, handleEndGame);
 
     return () => {
-      socket.off('gameResults', handleEndGame);
+      socket.off(SocketEventEnum.GAME_RESULTS, handleEndGame);
     };
   }, [params.roomCode, socket]);
 
   const onClose = () => {
-    socket.emit('resetRoom', params.roomCode, playerName);
+    socket.emit(SocketEventEnum.RESET_ROOM, { roomCode: params.roomCode, playerName } as IResetRoomProps);
     if (isHost) {
       history.push(`/host`);
     } else {

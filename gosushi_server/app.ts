@@ -4,10 +4,10 @@ import { resolve } from 'path';
 import { Server, Socket } from 'socket.io';
 import Card from './classes/card';
 import Game from './classes/game';
-import Player from './classes/player';
+import MyConnection from './classes/myConnection';
 import index from './routes/index';
 import IMenu from './types/IMenu';
-import IPlayer from './types/IPlayer'
+import SocketEventEnum, * as sEvents from './types/socketEvents';
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -48,12 +48,14 @@ io.on('connection', (socket: Socket) => {
 
   if (existingGames.length !== 0) {
     socket.emit(
-      'rejoinOption',
-      existingGames.map(pair => { return pair[0]; })
+      SocketEventEnum.REJOIN_OPTION,
+      { rooms: existingGames.map(pair => { return pair[0]; }) } as sEvents.IRejoinOptionProps
     );
   };
 
-  socket.on('rejoinGame', (roomCode: string) => {
+  const myConnection = new MyConnection(io);
+
+  socket.on(SocketEventEnum.REJOIN_GAME, ({ roomCode }: sEvents.IRejoinGameProps) => {
     const game = rooms[roomCode];
     if (game) {
       const playerIndex = game.players.findIndex(player => {
@@ -69,16 +71,16 @@ io.on('connection', (socket: Socket) => {
         game.players[playerIndex].isAuto = false;
 
         // send sucessful rejoin result
-        socket.emit('rejoinGameResult', roomCode);
-        sendLogEntry(roomCode, {player: game.players[playerIndex].name, playedCard: "Player Reconnect"});
+        socket.emit(SocketEventEnum.REJOIN_GAME_RESULT, { roomCode } as sEvents.IRejoinGameResultProps );
+        myConnection.sendLogEntry(roomCode, { player: game.players[playerIndex].name, playedCard: 'Player Reconnect' });
       } else {
         // send unsucessful rejoin result
-        socket.emit('rejoinGameResult');
+        socket.emit(SocketEventEnum.REJOIN_GAME_RESULT);
       } // if
     } // if
   });
 
-  const handleHostGame = async (menu: IMenu, numPlayers: number, username: string) => {
+  const handleHostGame = async ({ menu, numPlayers, username }: sEvents.IHostGameProps) => {
     //Assuming menu contains roll, appetizers, specials, dessert
 
     if (!socketToRoom[socket.id]) {
@@ -86,8 +88,8 @@ io.on('connection', (socket: Socket) => {
 
       if (roomCode === false) {
         socket.emit(
-          'connectionFailed',
-          `Connection failed: Could not generate unique room code.`
+          SocketEventEnum.CONNECTION_FAILED,
+          { error: 'Connection failed: Could not generate unique room code.' } as sEvents.IConnectionFailedProps
         );
         return;
       } else if (
@@ -95,8 +97,8 @@ io.on('connection', (socket: Socket) => {
         rooms[roomCode].hostPlayer.socketId != socket.id
       ) {
         socket.emit(
-          'connectionFailed',
-          `Connection failed: The provided room code is in use with a different host.`
+          SocketEventEnum.CONNECTION_FAILED,
+          { error: 'Connection failed: The provided room code is in use with a different host.'} as sEvents.IConnectionFailedProps
         );
         return;
       }
@@ -110,6 +112,7 @@ io.on('connection', (socket: Socket) => {
         username,
         clientIp,
         socket.id,
+        myConnection
       );
 
       socketToRoom[socket.id] = roomCode;
@@ -118,9 +121,9 @@ io.on('connection', (socket: Socket) => {
       );
 
       const playerData = { name: username, socketId: socket.id };
-      io.to(roomCode).emit('gameInformation', menu, roomCode);
-      io.to(roomCode).emit('getActivePlayers', [playerData]);
-      io.to(roomCode).emit('getNumPlayers', numPlayers);
+      io.to(roomCode).emit(SocketEventEnum.GAME_INFORMATION, { menu, roomCode } as sEvents.IGameInformationProps);
+      io.to(roomCode).emit(SocketEventEnum.GET_ACTIVE_PLAYERS, { activePlayers: [ playerData ] } as sEvents.IGetActivePlayersProps);
+      io.to(roomCode).emit(SocketEventEnum.GET_NUMBER_PLAYERS, { numPlayers } as sEvents.IGetNumberPlayersProps);
     } else {
       const roomCode = socketToRoom[socket.id];
       console.log(`${username} already in room ${roomCode} => likely reusing room`);
@@ -135,6 +138,7 @@ io.on('connection', (socket: Socket) => {
           username,
           clientIp,
           socket.id,
+          myConnection
         );
       }
 
@@ -143,27 +147,27 @@ io.on('connection', (socket: Socket) => {
         socketId: p.socketId,
       }));
 
-      io.to(roomCode).emit('gameInformation', menu, roomCode);
-      io.to(roomCode).emit('getActivePlayers', activePlayers);
-      io.to(roomCode).emit('getNumPlayers', numPlayers);
+      io.to(roomCode).emit(SocketEventEnum.GAME_INFORMATION, { menu, roomCode } as sEvents.IGameInformationProps);
+      io.to(roomCode).emit(SocketEventEnum.GET_ACTIVE_PLAYERS, { activePlayers } as sEvents.IGetActivePlayersProps);
+      io.to(roomCode).emit(SocketEventEnum.GET_NUMBER_PLAYERS, { numPlayers } as sEvents.IGetNumberPlayersProps);
     }
   };
 
-  socket.on('hostGame', handleHostGame);
+  socket.on(SocketEventEnum.HOST_GAME, handleHostGame);
 
-  socket.on('joinGame', (username: string, roomCode: string) => {
+  socket.on(SocketEventEnum.JOIN_GAME, ({ username, roomCode }: sEvents.IJoinGameProps) => {
     socket.join(roomCode);
     const game = rooms[roomCode];
     if (!game) {
       socket.emit(
-        'connectionFailed',
-        `Connection failed: Invalid room code "${roomCode}".`
+        SocketEventEnum.CONNECTION_FAILED,
+        { error: `Connection failed: Invalid room code "${roomCode}".` } as sEvents.IConnectionFailedProps
       );
       return;
     } else if (game.players.length === game.numPlayers || game.players.length >= 8) {
       socket.emit(
-        'connectionFailed',
-        `Connection failed: Room with code "${roomCode}" is already full.`
+        SocketEventEnum.CONNECTION_FAILED,
+        { error: `Connection failed: Room with code "${roomCode}" is already full.` } as sEvents.IConnectionFailedProps
       );
       return;
     } else if (
@@ -172,13 +176,13 @@ io.on('connection', (socket: Socket) => {
       }, false)
     ) {
       socket.emit(
-        'connectionFailed',
-        `Connection failed: Player name ${username} is already in use, please use a different name.`
+        SocketEventEnum.CONNECTION_FAILED,
+        { error: `Connection failed: Player name ${username} is already in use, please use a different name.` } as sEvents.IConnectionFailedProps
       );
       return;
     // } else if (game.players.find(player => { return clientIp === player.ip; })) {
     //   socket.emit(
-    //     'getActivePlayers',
+    //     SocketEventEnum.GET_ACTIVE_PLAYERS,
     //     `Connection failed: You are already in this game session.`
     //   );
     //   return;
@@ -190,19 +194,24 @@ io.on('connection', (socket: Socket) => {
     socketToRoom[socket.id] = roomCode;
     console.log(`${username} with socketId ${socket.id} joined ${roomCode}`);
 
-    io.to(roomCode).emit('gameInformation', game.deck && game.deck.menu, roomCode);
     io.to(roomCode).emit(
-      'getActivePlayers',
-      players.map(p => ({
-        name: p.name,
-        socketId: p.socketId,
-      }))
+      SocketEventEnum.GAME_INFORMATION, 
+      { menu: game.deck && game.deck.menu, roomCode } as sEvents.IGameInformationProps
     );
-    io.to(roomCode).emit('getNumPlayers', game.numPlayers);
+    io.to(roomCode).emit(
+      SocketEventEnum.GET_ACTIVE_PLAYERS,
+      { 
+        activePlayers: players.map(p => ({
+          name: p.name,
+          socketId: p.socketId,
+        }))
+      } as sEvents.IGetActivePlayersProps
+    );
+    io.to(roomCode).emit(SocketEventEnum.GET_NUMBER_PLAYERS, { numPlayers: game.numPlayers } as sEvents.IGetNumberPlayersProps);
   });
 
-  socket.on('autoPlayers', (menu: IMenu, numPlayers: number, username: string) => {
-    handleHostGame(menu, numPlayers, username).then(() => {
+  socket.on(SocketEventEnum.AUTO_PLAYERS, ({ menu, numPlayers, username }: sEvents.IAutoPlayersProps) => {
+    handleHostGame({ menu, numPlayers, username } as sEvents.IHostGameProps).then(() => {
       const roomCode = socketToRoom[socket.id];
       let game = rooms[roomCode];
 
@@ -211,26 +220,28 @@ io.on('connection', (socket: Socket) => {
       }
 
       socket.emit(
-        'getActivePlayers',
-        game.players.map(p => ({
-          name: p.name,
-          socketId: p.socketId,
-        }))
+        SocketEventEnum.GET_ACTIVE_PLAYERS,
+        {
+          activePlayers: game.players.map(p => ({
+            name: p.name,
+            socketId: p.socketId,
+          }))
+        } as sEvents.IGetActivePlayersProps
       );
       game.startRound();
     });
   });
 
-  socket.on('gameInitiated', (roomCode: string) => {
+  socket.on(SocketEventEnum.GAME_INITIATED, ({ roomCode }: sEvents.IGameInitiatedProps) => {
     const game = rooms[roomCode];
     game.startRound();
     game.gameStarted = true;
 
-    io.to(roomCode).emit('startGame', roomCode);
-    io.to(roomCode).emit('updateRoundNumber', 1);
+    io.to(roomCode).emit(SocketEventEnum.START_GAME, { roomCode } as sEvents.IStartGameProps);
+    io.to(roomCode).emit(SocketEventEnum.UPDATE_ROUND_NUMBER, { roundNumber: 1 } as sEvents.IUpdateRoundNumberProps);
   });
 
-  socket.on('boardLoaded', (roomCode: string, sendMenu: boolean) => {
+  socket.on(SocketEventEnum.BOARD_LOADED, ({ roomCode, sendMenu }: sEvents.IBoardLoadedProps) => {
     const game = rooms[roomCode];
     if (
       game &&
@@ -250,48 +261,32 @@ io.on('connection', (socket: Socket) => {
         playersData.push(playersData.shift()!);
       }
       if (sendMenu) {
-        socket.emit('sendMenuData', game.deck.menu);
+        socket.emit(SocketEventEnum.SEND_MENU_DATA, { menu: game.deck.menu } as sEvents.ISendMenuDataProps);
       }
-      socket.emit('sendTurnData', player ? player.hand : [], playersData);
+      socket.emit(SocketEventEnum.SEND_TURN_DATA, { hand: player ? player.hand : [], players: playersData } as sEvents.ISendTurnDataProps);
       if (game.specialActions.length > 0) {   // everyone has played their cards, now performing special actions
         let { card, playerName } = game.specialActions[0];
         if (playerName === player.name) {
           let data = game.getSpecialData(playerName, card);
-          io.to(player.socketId).emit('doSpecialAction', card, data);
+          io.to(player.socketId).emit(SocketEventEnum.DO_SPECIAL_ACTION, { specialCard: card, specialData: data } as sEvents.IDoSpecialActionProps);
         } else {
-          io.to(player.socketId).emit('waitForAction', playerName, card.name);
+          io.to(player.socketId).emit(SocketEventEnum.WAIT_FOR_ACTION, { playerName, cardName: card.name } as sEvents.IWaitForSpecialActionProps);
         }
       }
     } else {
-      socket.emit('unknownGame');
+      socket.emit(SocketEventEnum.UNKNOWN_GAME);
     }
   });
 
   // update the data in the WaitingRoom so that other players can see the changes in the selection
-  socket.on('broadcastSelection', (menu: IMenu, numPlayers: number, roomCode: string) => { // TODO: might need to change to optional menu!!
-    socket.to(roomCode).emit('gameInformation', menu, roomCode); // socket emit because don't need to update menu in HostGame (don't emit to sender)
-    io.to(roomCode).emit('getNumPlayers', numPlayers); // io emit so that the WaitingRoom in HostGame updates (do emit to sender)
+  socket.on(SocketEventEnum.BROADCAST_SELECTION, ({ menu, numPlayers, roomCode }: sEvents.IBroadcastSelectionProps) => { // TODO: might need to change to optional menu!!
+    socket.to(roomCode).emit( // socket emit because don't need to update menu in HostGame (don't emit to sender)
+      SocketEventEnum.GAME_INFORMATION,
+      { menu, roomCode } as sEvents.IGameInformationProps);
+    io.to(roomCode).emit(SocketEventEnum.GET_NUMBER_PLAYERS, { numPlayers } as sEvents.IGetNumberPlayersProps); // io emit so that the WaitingRoom in HostGame updates (do emit to sender)
   });
 
-  const sendTurnData = (socketId: string, hand: Card[], otherPlayerData: IPlayer[]) =>
-    io.to(socketId).emit('sendTurnData', hand, otherPlayerData);
-
-  const doSpecialAction = (playerName: string, players: Player[], specialCard: Card, data: Card[] | string[]): void =>
-    players.forEach(p => {
-      if (p.name === playerName) {
-        io.to(p.socketId).emit('doSpecialAction', specialCard, data);
-      } else {
-        io.to(p.socketId).emit('waitForAction', playerName, specialCard.name);
-      }
-    });
-
-  const updateRound = (roomCode: string, roundNumber: number) =>
-    io.to(roomCode).emit('updateRoundNumber', roundNumber);
-
-  const sendGameResults = (socketId: string, playerData: IPlayer[], isHost: boolean) =>
-    io.to(socketId).emit('gameResults', playerData, isHost);
-
-  socket.on('finishTurn', (roomCode: string, card: Card, specials: Card[]) => {
+  socket.on(SocketEventEnum.FINISH_TURN, ({ roomCode, card, specials }: sEvents.IFinishTurnProps) => {
     const game = rooms[roomCode];
     if (
       game &&
@@ -304,50 +299,34 @@ io.on('connection', (socket: Socket) => {
 
       // keeping those seperate for now
       // might change to everyone can see everyones points rather than only seeing your own
-      game.finishedTurn(
-        sendTurnData,
-        doSpecialAction,
-        sendGameResults,
-        updateRound,
-        sendLogEntry
-      );
+      game.finishedTurn();
 
       const playersData = game.getPlayersData();
       let count = 0;
       while (playersData && playersData[0] && count++ < playersData.length) {
         if (playersData[0].socketId) {
-          io.to(playersData[0].socketId).emit('playerStatus', playersData);
+          io.to(playersData[0].socketId).emit(SocketEventEnum.PLAYER_STATUS, { playersData } as sEvents.IPlayerStatusProps);
         }
         playersData.push(playersData.shift()!);
       }
     }
   });
 
-  const sendLogEntry = (roomCode: string, entry: any) => {
-    io.to(roomCode).emit('newLogEntry', entry);
-  };
-
-  socket.on('handleSpecialAction', (roomCode: string, speCard: Card, chosenCard: Card[] | string[]) => {
+  socket.on(SocketEventEnum.HANDLE_SPECIAL_ACTION, ({ roomCode, specialCard, specialData }: sEvents.IHandleSpecialActionProps) => {
     const game = rooms[roomCode];
     if (game && game.players) {
       let player = game.players.find(val => val.socketId === socket.id);
       if (player) {
-        game.handleSpecialAction(player, speCard, chosenCard, sendLogEntry);
+        game.handleSpecialAction(player, specialCard, specialData);
         game.specialActions.shift();
-        socket.to(roomCode).emit('completedSpecialAction');
-        game.finishedTurn(
-          sendTurnData,
-          doSpecialAction,
-          sendGameResults,
-          updateRound,
-          sendLogEntry
-        );
+        socket.to(roomCode).emit(SocketEventEnum.COMPLETED_SPECIAL_ACTION);
+        game.finishedTurn();
       }
     }
   });
 
   // client emit when they continue after game is over
-  socket.on('resetRoom', (roomCode, playerName) => {
+  socket.on(SocketEventEnum.RESET_ROOM, ({ roomCode, playerName }: sEvents.IResetRoomProps) => {
     const game = rooms[roomCode];
     if (!!socketToRoom[socket.id]) {
       if (game.hostPlayer.socketId === socket.id) {
@@ -356,14 +335,16 @@ io.on('connection', (socket: Socket) => {
         game.addPlayer(playerName, socket.id, clientIp);
       }
       io.to(roomCode).emit(
-        'getActivePlayers',
-        game.players.map(p => ({
-          name: p.name,
-          socketId: p.socketId,
-        }))
+        SocketEventEnum.GET_ACTIVE_PLAYERS,
+        {
+          activePlayers: game.players.map(p => ({
+            name: p.name,
+            socketId: p.socketId,
+          }))
+        } as sEvents.IGetActivePlayersProps
       );
-      io.to(roomCode).emit('getNumPlayers', game.numPlayers);
-      socket.emit('gameInformation', null, roomCode);
+      io.to(roomCode).emit(SocketEventEnum.GET_NUMBER_PLAYERS, { numPlayers: game.numPlayers } as sEvents.IGetNumberPlayersProps);
+      socket.emit(SocketEventEnum.GAME_INFORMATION, { menu: undefined, roomCode } as sEvents.IGameInformationProps );
     }
   });
 
@@ -374,22 +355,24 @@ io.on('connection', (socket: Socket) => {
     const game = rooms[roomCode];
     if (game) {
       if (socket.id === game.hostPlayer.socketId) {
-        socket.to(roomCode).emit('quitGame');
+        socket.to(roomCode).emit(SocketEventEnum.QUIT_GAME);
         delete rooms[roomCode];
       } else if (game.gameStarted && !game.isGameOver) {
         const index = game.players.findIndex(p => p.socketId === socket.id);
         game.players[index].isAuto = true;
         game.players[index].socketId = '';
         delete socketToRoom[socket.id];
-        sendLogEntry(roomCode, {player: game.players[index].name, playedCard: "Player Quit"});
+        myConnection.sendLogEntry(roomCode, {player: game.players[index].name, playedCard: "Player Quit"});
       } else {
         game.players = game.players.filter(p => p.socketId !== socket.id);
         socket.to(roomCode).emit(
-          'getActivePlayers',
-          game.players.map(p => ({
-            name: p.name,
-            socketId: p.socketId,
-          }))
+          SocketEventEnum.GET_ACTIVE_PLAYERS,
+          {
+            activePlayers: game.players.map(p => ({
+              name: p.name,
+              socketId: p.socketId,
+            }))
+          } as sEvents.IGetActivePlayersProps
         );
       } // if
     } // if

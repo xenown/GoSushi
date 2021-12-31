@@ -1,6 +1,7 @@
 import { clone, isArray, last } from 'lodash';
 import Card from '../../classes/card';
 import Game from '../../classes/game';
+import { MockConnection } from '../../classes/myConnection';
 import Player from '../../classes/player';
 import {
   calculateGamePoints,
@@ -66,7 +67,8 @@ describe('calculateTurnPoints', function () {
     roomCode,
     players[0],
     'hostIp',
-    'socketId'
+    'socketId',
+    new MockConnection(),
   );
 
   addPlayers(game, players);
@@ -233,6 +235,7 @@ describe('calculateRollPoints', function () {
       players[num][0],
       'hostId',
       'socketId',
+      new MockConnection(),
     );
 
     addPlayers(game, players[num]);
@@ -422,6 +425,7 @@ describe('calculateAppetizerPoints', function () {
     players[0],
     'hostIp',
     'socketId',
+    new MockConnection(),
   );
 
   addPlayers(game, players);
@@ -570,6 +574,7 @@ describe('calculateSpecialPoints', function () {
     players[0],
     'hostIp',
     'socketId',
+    new MockConnection(),
   );
 
   addPlayers(game, players);
@@ -700,6 +705,7 @@ describe('calculateDessertPoints', function () {
       players[0],
       'hostIp',
       'socketId',
+      new MockConnection(),
     );
 
     addPlayers(game, players);

@@ -72,7 +72,7 @@
 }
 .player-count .btn:hover,
 .player-count .btn:active { background-color: var(--tan) !important; }
-.player-count .btn.active { background-color: var(--bronze)!important; }
+.player-count .btn-check:checked + .btn { background-color: var(--bronze)!important; }
 
 .course-tab {
   background-color: var(--paper);

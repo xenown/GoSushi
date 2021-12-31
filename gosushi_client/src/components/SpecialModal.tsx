@@ -6,11 +6,11 @@ import { Alert, Button, Modal } from 'react-bootstrap';
 import { MenuCardNameEnum } from '../types/cardNameEnum';
 import ICard from '../types/ICard';
 import IRouteParams from '../types/IRouteParams';
+import { TSpecialData } from '../types/ISpecial';
 import { getMenuCardImage } from '../utils/menuSelectionUtils';
 import { getCardImage } from '../utils/getCardImage';
 import './specialModal.scss';
-
-type TSpecialData = MenuCardNameEnum | ICard;
+import SocketEventEnum, { IDoSpecialActionProps, IHandleSpecialActionProps, IWaitForSpecialActionProps } from '../types/socketEvents';
 
 interface ISpecialModalProps {
   socket: Socket;
@@ -19,17 +19,17 @@ interface ISpecialModalProps {
 const SpecialModal = ({ socket }: ISpecialModalProps) => {
   const params: IRouteParams = useParams();
   const [specialCard, setSpecialCard] = useState<ICard | undefined>(undefined);
-  const [data, setSpecialData] = useState<TSpecialData[]>([]);
+  const [specialData, setSpecialData] = useState<TSpecialData[]>([]);
   const [selectedIndices, setSelectedIndices] = useState<number[]>([]);
   const [alertText, setAlertText] = useState('');
 
   useEffect(() => {
-    const handleSpecialAction = (specialCard: ICard, data: TSpecialData[]) => {
-      setSpecialCard(specialCard);
+    const handleSpecialAction = ({ specialCard: card, specialData: data}: IDoSpecialActionProps) => {
+      setSpecialCard(card);
       setSpecialData(data);
     };
 
-    const handleWaitingForAction = (playerName: string, cardName: string) => {
+    const handleWaitingForAction = ({ playerName, cardName }: IWaitForSpecialActionProps) => {
       setAlertText(`Waiting for ${playerName} to finish ${cardName} actions.`);
     };
 
@@ -39,25 +39,28 @@ const SpecialModal = ({ socket }: ISpecialModalProps) => {
       setAlertText('');
     };
 
-    socket.on('doSpecialAction', handleSpecialAction);
-    socket.on('waitForAction', handleWaitingForAction);
-    socket.on('completedSpecialAction', handleCompleteAction);
+    socket.on(SocketEventEnum.DO_SPECIAL_ACTION, handleSpecialAction);
+    socket.on(SocketEventEnum.WAIT_FOR_ACTION, handleWaitingForAction);
+    socket.on(SocketEventEnum.COMPLETED_SPECIAL_ACTION, handleCompleteAction);
 
     return () => {
-      socket.off('doSpecialAction', handleSpecialAction);
-      socket.off('waitForAction', handleWaitingForAction);
-      socket.off('completedSpecialAction', handleCompleteAction);
+      socket.off(SocketEventEnum.DO_SPECIAL_ACTION, handleSpecialAction);
+      socket.off(SocketEventEnum.WAIT_FOR_ACTION, handleWaitingForAction);
+      socket.off(SocketEventEnum.COMPLETED_SPECIAL_ACTION, handleCompleteAction);
     };
   }, [params.roomCode, socket]);
 
   const handleFinish = () => {
-    let cards: TSpecialData[] = [];
-    data.forEach((card, index) => {
+    let selectedSpecialData: TSpecialData[] = [];
+    specialData.forEach((card, index) => {
       if (selectedIndices.includes(index)) {
-        cards.push(card);
+        selectedSpecialData.push(card);
       }
     });
-    socket.emit('handleSpecialAction', params.roomCode, specialCard, cards);
+    socket.emit(
+      SocketEventEnum.HANDLE_SPECIAL_ACTION,
+      { roomCode: params.roomCode, specialCard, specialData: selectedSpecialData } as IHandleSpecialActionProps
+    );
     setSpecialCard(undefined);
     setSpecialData([]);
     setSelectedIndices([]);
@@ -65,9 +68,9 @@ const SpecialModal = ({ socket }: ISpecialModalProps) => {
   };
 
   const bodyContent = () => {
-    if (data.length > 0) {
-      return data.map(displayCard);
-    } else if (specialCard && data.length === 0) {
+    if (specialData.length > 0) {
+      return specialData.map(displayCard);
+    } else if (specialCard && specialData.length === 0) {
       return (
         <Alert variant="info">{'No cards available to choose from'}</Alert>
       );
@@ -75,7 +78,7 @@ const SpecialModal = ({ socket }: ISpecialModalProps) => {
   };
 
   const displayCard = (card: TSpecialData, index: number) => {
-    const castedCard = card  as ICard;
+    const castedCard = card as ICard;
     const isCard: boolean = !!(castedCard?.name);
 
     let className = 'card-playable-special';
@@ -118,7 +121,7 @@ const SpecialModal = ({ socket }: ISpecialModalProps) => {
     : 'Waiting for others';
 
   const disableFinish =
-    data.length > 0 &&
+    specialData.length > 0 &&
     selectedIndices.length === 0 &&
     specialCard?.name !== 'Takeout Box';
 

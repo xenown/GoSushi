@@ -6,6 +6,11 @@ import './menuSelection.scss';
 import './waitingRoom.scss';
 import { IOptionalMenu } from '../types/IMenu';
 import { ISimplePlayer } from '../types/IPlayer';
+import SocketEventEnum, {
+  IGetActivePlayersProps,
+  IGetNumberPlayersProps,
+  IStartGameProps,
+} from '../types/socketEvents';
 
 interface IWaitingRoomProps {
   name: string;
@@ -21,14 +26,17 @@ const WaitingRoom = ({ name, roomCode, menu, shouldDisplayMenu, socket }: IWaiti
   const [numPlayers, setNumPlayers] = useState(0);
 
   useEffect(() => {
-    const handleActivePlayer = (dataPlayers: ISimplePlayer[]) => {
-      setPlayers(dataPlayers);
+    const handleActivePlayer = ({ activePlayers }: IGetActivePlayersProps) => {
+      setPlayers(activePlayers);
     };
 
-    const handleNumPlayers = (data: number) => setNumPlayers(data);
+    const handleNumPlayers = ({ numPlayers: num }: IGetNumberPlayersProps) => {
+      console.log(num);
+      setNumPlayers(num);
+    }
 
-    const handleStartGame = (code: string) => {
-      history.push(`/game/${code}`);
+    const handleStartGame = ({ roomCode }: IStartGameProps) => {
+      history.push(`/game/${roomCode}`);
     };
 
     const handleQuitGame = () => {
@@ -36,16 +44,16 @@ const WaitingRoom = ({ name, roomCode, menu, shouldDisplayMenu, socket }: IWaiti
       setNumPlayers(0);
     };
 
-    socket.on('getActivePlayers', handleActivePlayer);
-    socket.on('getNumPlayers', handleNumPlayers);
-    socket.on('startGame', handleStartGame);
-    socket.on('quitGame', handleQuitGame);
+    socket.on(SocketEventEnum.GET_ACTIVE_PLAYERS, handleActivePlayer);
+    socket.on(SocketEventEnum.GET_NUMBER_PLAYERS, handleNumPlayers);
+    socket.on(SocketEventEnum.START_GAME, handleStartGame);
+    socket.on(SocketEventEnum.QUIT_GAME, handleQuitGame);
 
     return () => {
-      socket.off('getActivePlayers', handleActivePlayer);
-      socket.off('getNumPlayers', handleNumPlayers);
-      socket.off('startGame', handleStartGame);
-      socket.off('quitGame', handleQuitGame);
+      socket.off(SocketEventEnum.GET_ACTIVE_PLAYERS, handleActivePlayer);
+      socket.off(SocketEventEnum.GET_NUMBER_PLAYERS, handleNumPlayers);
+      socket.off(SocketEventEnum.START_GAME, handleStartGame);
+      socket.off(SocketEventEnum.QUIT_GAME, handleQuitGame);
     };
   }, [history, socket]);
 

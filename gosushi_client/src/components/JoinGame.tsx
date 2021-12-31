@@ -2,8 +2,9 @@ import { Socket } from 'socket.io-client';
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import WaitingRoom from './WaitingRoom';
-import IMenu, { IOptionalMenu, getEmptyMenu } from '../types/IMenu';
-import { ISimplePlayer } from '../types/IPlayer';
+import { IOptionalMenu, getEmptyMenu } from '../types/IMenu';
+
+import SocketEventEnum, * as sEvents from '../types/socketEvents';
 
 interface IJoinGameProps {
   socket: Socket;
@@ -18,18 +19,18 @@ const JoinGame = ({ socket }: IJoinGameProps) => {
   const history = useHistory();
 
   useEffect(() => {
-    const handleActivePlayer = (data: ISimplePlayer[]) => {
-      let currPlayer = data.find(obj => obj.socketId === socket.id)!;
+    const handleActivePlayer = ({ activePlayers }: sEvents.IGetActivePlayersProps) => {
+      let currPlayer = activePlayers.find(obj => obj.socketId === socket.id)!;
       setName(currPlayer.name);
     };
 
-    const handleGameInfo = (menu: IMenu, roomCode: string) => {
+    const handleGameInfo = ({ menu, roomCode }: sEvents.IGameInformationProps) => {
       setMenu(menu || getEmptyMenu());
       setRoomCode(roomCode);
       setIsJoining(false);
     };
 
-    const handleError = (err: string) => setMessage(err);
+    const handleError = ({ error }: sEvents.IConnectionFailedProps) => setMessage(error);
 
     const handleQuitGame = () => {
       setName('');
@@ -39,16 +40,16 @@ const JoinGame = ({ socket }: IJoinGameProps) => {
       setMessage('Host disconnected - game terminated.');
     };
 
-    socket.on('gameInformation', handleGameInfo);
-    socket.on('getActivePlayers', handleActivePlayer);
-    socket.on('connectionFailed', handleError);
-    socket.on('quitGame', handleQuitGame);
+    socket.on(SocketEventEnum.GAME_INFORMATION, handleGameInfo);
+    socket.on(SocketEventEnum.GET_ACTIVE_PLAYERS, handleActivePlayer);
+    socket.on(SocketEventEnum.CONNECTION_FAILED, handleError);
+    socket.on(SocketEventEnum.QUIT_GAME, handleQuitGame);
 
     return () => {
-      socket.off('gameInformation', handleGameInfo);
-      socket.off('getActivePlayers', handleActivePlayer);
-      socket.off('connectionFailed', handleError);
-      socket.off('quitGame', handleQuitGame);
+      socket.off(SocketEventEnum.GAME_INFORMATION, handleGameInfo);
+      socket.off(SocketEventEnum.GET_ACTIVE_PLAYERS, handleActivePlayer);
+      socket.off(SocketEventEnum.CONNECTION_FAILED, handleError);
+      socket.off(SocketEventEnum.QUIT_GAME, handleQuitGame);
     };
   }, [socket]);
 
@@ -57,7 +58,7 @@ const JoinGame = ({ socket }: IJoinGameProps) => {
       setMessage('Missing player name.');
       return;
     }
-    socket.emit('joinGame', name, roomCode);
+    socket.emit(SocketEventEnum.JOIN_GAME, { username: name, roomCode } as sEvents.IJoinGameProps);
     setMessage('Loading...');
   };
 

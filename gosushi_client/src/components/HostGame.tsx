@@ -1,6 +1,7 @@
 import { isEmpty, join, remove } from 'lodash';
 import React, { useState, useEffect } from 'react';
-import { ButtonGroup, ToggleButton } from 'react-bootstrap';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ToggleButton from 'react-bootstrap/ToggleButton';
 import { useHistory } from 'react-router-dom';
 import { Socket } from 'socket.io-client';
 
@@ -8,8 +9,8 @@ import DisplayMenu from './DisplayMenu';
 import MenuSelection from './MenuSelection';
 import WaitingRoom from './WaitingRoom';
 import './hostGame.scss';
-import IMenu, { IOptionalMenu, getEmptyMenu } from '../types/IMenu';
-import { ISimplePlayer } from '../types/IPlayer';
+import { IOptionalMenu, getEmptyMenu } from '../types/IMenu';
+import SocketEventEnum, * as sEvents from '../types/socketEvents';
 import {
   checkValidMenu,
   invalidMenuOptions,
@@ -34,34 +35,35 @@ const HostGame = ({ socket }: IHostGameProps) => {
 
   // handle socket events
   useEffect(() => {
-    const handleActivePlayer = (data: ISimplePlayer[]) => {
-      let currPlayer = data.find(obj => obj.socketId === socket.id)!;
+    const handleActivePlayer = ({ activePlayers }: sEvents.IGetActivePlayersProps) => {
+      let currPlayer = activePlayers.find(obj => obj.socketId === socket.id)!;
+      console.log(currPlayer);
       setName(currPlayer.name || name);
-      setNumActivePlayers(data.length);
-      setNumPlayers(Math.max(data.length, numPlayers));
+      setNumActivePlayers(activePlayers.length);
+      setNumPlayers(Math.max(activePlayers.length, numPlayers));
     };
 
-    const handleGameCreated = (menu: IMenu, roomCode: string) => {
+    const handleGameCreated = ({ menu, roomCode }: sEvents.IGameInformationProps) => {
       if (!!menu) {
         setIsCreating(false);
       }
       setRoomCode(roomCode);
     };
 
-    const handleNumPlayer = (num: number) => setNumPlayers(num);
+    const handleNumPlayer = ({ numPlayers: num }: sEvents.IGetNumberPlayersProps) => setNumPlayers(num);
 
-    const handleError = (err: string) => setMessage(err);
+    const handleError = ({ error }: sEvents.IConnectionFailedProps) => setMessage(error);
 
-    socket.on('gameInformation', handleGameCreated);
-    socket.on('getActivePlayers', handleActivePlayer);
-    socket.on('getNumPlayers', handleNumPlayer);
-    socket.on('connectionFailed', handleError);
+    socket.on(SocketEventEnum.GAME_INFORMATION, handleGameCreated);
+    socket.on(SocketEventEnum.GET_ACTIVE_PLAYERS, handleActivePlayer);
+    socket.on(SocketEventEnum.GET_NUMBER_PLAYERS, handleNumPlayer);
+    socket.on(SocketEventEnum.CONNECTION_FAILED, handleError);
 
     return () => {
-      socket.off('gameInformation', handleGameCreated);
-      socket.off('getActivePlayers', handleActivePlayer);
-      socket.off('getNumPlayers', handleNumPlayer);
-      socket.off('connectionFailed', handleError);
+      socket.off(SocketEventEnum.GAME_INFORMATION, handleGameCreated);
+      socket.off(SocketEventEnum.GET_ACTIVE_PLAYERS, handleActivePlayer);
+      socket.off(SocketEventEnum.GET_NUMBER_PLAYERS, handleNumPlayer);
+      socket.off(SocketEventEnum.CONNECTION_FAILED, handleError);
     };
   }, [socket, numActivePlayers, numPlayers, name]);
 
@@ -75,7 +77,7 @@ const HostGame = ({ socket }: IHostGameProps) => {
       return;
     }
 
-    socket.emit('hostGame', menu, numPlayers, name);
+    socket.emit(SocketEventEnum.HOST_GAME, { menu, numPlayers, username: name } as sEvents.IHostGameProps);
     setMessage('Loading...');
   };
 
@@ -107,11 +109,11 @@ const HostGame = ({ socket }: IHostGameProps) => {
 
     setMenu(menu);
     setMessage(msg);
-    socket.emit('broadcastSelection', menu, numPlayers, roomCode);
+    socket.emit(SocketEventEnum.BROADCAST_SELECTION, { menu, numPlayers, roomCode } as sEvents.IBroadcastSelectionProps);
   };
 
   const handleStartGame = () => {
-    socket.emit('gameInitiated', roomCode);
+    socket.emit(SocketEventEnum.GAME_INITIATED, { roomCode } as sEvents.IGameInitiatedProps);
   };
 
   const handleAutoPlayers = () => {
@@ -124,7 +126,7 @@ const HostGame = ({ socket }: IHostGameProps) => {
       return;
     }
 
-    socket.emit('autoPlayers', menu, numPlayers, name);
+    socket.emit(SocketEventEnum.AUTO_PLAYERS, { menu, numPlayers, username: name } as sEvents.IAutoPlayersProps);
     setMessage('Loading...');
   };
 
@@ -159,9 +161,8 @@ const HostGame = ({ socket }: IHostGameProps) => {
 
     setMenu(menu);
     setMessage(msg);
-    socket.emit('broadcastSelection', menu, num, roomCode);
+    socket.emit(SocketEventEnum.BROADCAST_SELECTION, { menu, numPlayers: num, roomCode } as sEvents.IBroadcastSelectionProps);
   };
-
   const createForm = (
     <div className="center vertical container-hostgame">
       <MenuSelection
@@ -190,8 +191,9 @@ const HostGame = ({ socket }: IHostGameProps) => {
         </div>
       </div>
 
-      <ButtonGroup className="player-count mb-3" toggle>
+      <ButtonGroup className="player-count mb-3">
         <ToggleButton
+          id={`2-player`}
           key={`2-player`}
           className="toggle-player-number"
           type="radio"
@@ -206,6 +208,7 @@ const HostGame = ({ socket }: IHostGameProps) => {
         </ToggleButton>
         {[3, 4, 5, 6, 7, 8].map((players, index) => (
           <ToggleButton
+            id={`${players}-player`}
             key={`${players}-player`}
             className="toggle-player-number"
             type="radio"
@@ -219,7 +222,7 @@ const HostGame = ({ socket }: IHostGameProps) => {
             <span className="hovertext">{`There are already ${numActivePlayers} players, cannot create a game with only ${players}.`}</span>
           </ToggleButton>
         ))}
-      </ButtonGroup>
+      </ButtonGroup >
 
       <div>
         <p>{message}</p>

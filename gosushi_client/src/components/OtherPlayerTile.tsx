@@ -38,7 +38,7 @@ const OtherPlayerTile = ({ player, isFinished }: IOtherPlayerTileProps) => {
 
   return (
     <div className={"container-player-data" + (isFinished ? " finished" : "")}>
-      <Badge className="points-circle" variant="light">{player.points}</Badge>
+      <Badge className="points-circle">{player.points}</Badge>
       <div className="toggle-row">
         <CardToggle
           checked={showPlayedCards}

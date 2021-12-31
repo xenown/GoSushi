@@ -1,15 +1,9 @@
 import { Socket } from 'socket.io-client';
 import React, { useState, useEffect } from 'react';
-import { Popover, OverlayTrigger, Button, Badge } from 'react-bootstrap'
+import { Popover, OverlayTrigger, Button, Badge } from 'react-bootstrap';
 import './SpecActionsLog.scss';
-
-interface ISpecialLogEntry {
-  chosenCard: string;
-  stolenFromPlayer: string;
-  player: string;
-  playedCard: string;
-  boxCards: number;
-};
+import { ISpecialLogEntry } from '../types/ISpecial';
+import SocketEventEnum, { INewLogEntryProps } from '../types/socketEvents';
 
 interface ISpecActionsLogProps {
   socket: Socket;
@@ -55,26 +49,26 @@ const SpecActionsLog = ({ socket }: ISpecActionsLogProps) => {
       </span>
     }; // processEntry
 
-    const handleNewLogEntry = (entry: ISpecialLogEntry) => {
+    const handleNewLogEntry = (entry: INewLogEntryProps) => {
       setNumNewEntries(numNewEntries + 1);
       setEntries([processEntry(entry)].concat(entries));
     };
 
-    socket.on('newLogEntry', handleNewLogEntry);
+    socket.on(SocketEventEnum.NEW_LOG_ENTRY, handleNewLogEntry);
 
     return () => {
-        socket.off('newLogEntry', handleNewLogEntry);
+        socket.off(SocketEventEnum.NEW_LOG_ENTRY, handleNewLogEntry);
     };
   }, [socket, entries, numNewEntries]);
 
   const popover = (
     <Popover id="popover-basic" className="spec-actions-log">
-      <Popover.Title className="popover-header" as="h3">Special Actions Log</Popover.Title>
-      <Popover.Content className="popover-body">
+      <Popover.Header className="popover-header" as="h3">Special Actions Log</Popover.Header>
+      <Popover.Body className="popover-body">
         {(entries.length !== 0)? 
           entries.map((action, index) => (<div className="log-item" key={index}>{action}</div>))
           : <div>No special cards have been played yet.</div>}
-      </Popover.Content>
+      </Popover.Body>
     </Popover>
   );
 
@@ -86,7 +80,7 @@ const SpecActionsLog = ({ socket }: ISpecActionsLogProps) => {
             </Button>
         </OverlayTrigger>
         {numNewEntries !== 0? 
-            <Badge className="new-entries-circle" variant="light">{numNewEntries}</Badge>
+            <Badge className="new-entries-circle" bg="alert">{numNewEntries}</Badge>
             : null}
     </div>
   );

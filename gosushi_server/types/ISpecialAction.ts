@@ -1,8 +1,16 @@
 import Card from '../classes/card';
 
-interface ISpecialAction {
+export default interface ISpecialAction {
     card: Card,
     playerName: string
 }
 
-export default ISpecialAction;
+export interface ISpecialLogEntry {
+  player: string;
+  playedCard: string;
+  chosenCard?: string;
+  stolenFromPlayer?: string;
+  boxCards?: number;
+};
+
+export type TSpecialData = string | Card;

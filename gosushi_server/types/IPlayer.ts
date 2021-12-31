@@ -1,5 +1,10 @@
 import Card from '../classes/card'
 
+export interface ISimplePlayer {
+  name: string;
+  socketId: string;
+}
+
 export default interface IPlayer {
   name: string;
   ip: string;
