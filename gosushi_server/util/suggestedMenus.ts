@@ -1,54 +1,54 @@
-import CardNameEnum from '../types/cardNameEnum';
+import { RollsEnum, AppetizersEnum, SpecialsEnum, DessertsEnum }  from '../types/cardNameEnum';
 import { ISuggestedMenus } from '../types/IMenu';
 
 const suggestedMenus: ISuggestedMenus = {
   firstMeal: {
-    roll: CardNameEnum.MAKI,
-    appetizers: [CardNameEnum.TEMPURA, CardNameEnum.SASHIMI, CardNameEnum.MISO_SOUP],
-    specials: [CardNameEnum.WASABI, CardNameEnum.TEA],
-    dessert: CardNameEnum.GREEN_TEA_ICE_CREAM,
+    roll: RollsEnum.MAKI,
+    appetizers: [AppetizersEnum.TEMPURA, AppetizersEnum.SASHIMI, AppetizersEnum.MISO_SOUP],
+    specials: [SpecialsEnum.WASABI, SpecialsEnum.TEA],
+    dessert: DessertsEnum.GREEN_TEA_ICE_CREAM,
   },
   sushiGo: {
-    roll: CardNameEnum.MAKI,
-    appetizers: [CardNameEnum.TEMPURA, CardNameEnum.SASHIMI, CardNameEnum.DUMPLING],
-    specials: [CardNameEnum.CHOPSTICKS, CardNameEnum.WASABI],
-    dessert: CardNameEnum.PUDDING,
+    roll: RollsEnum.MAKI,
+    appetizers: [AppetizersEnum.TEMPURA, AppetizersEnum.SASHIMI, AppetizersEnum.DUMPLING],
+    specials: [SpecialsEnum.CHOPSTICKS, SpecialsEnum.WASABI],
+    dessert: DessertsEnum.PUDDING,
   },
   partySampler: {
-    roll: CardNameEnum.TEMAKI,
-    appetizers: [CardNameEnum.TEMPURA, CardNameEnum.DUMPLING, CardNameEnum.TOFU],
-    specials: [CardNameEnum.WASABI, CardNameEnum.MENU],
-    dessert: CardNameEnum.GREEN_TEA_ICE_CREAM,
+    roll: RollsEnum.TEMAKI,
+    appetizers: [AppetizersEnum.TEMPURA, AppetizersEnum.DUMPLING, AppetizersEnum.TOFU],
+    specials: [SpecialsEnum.WASABI, SpecialsEnum.MENU],
+    dessert: DessertsEnum.GREEN_TEA_ICE_CREAM,
   },
   masterMenu: {
-    roll: CardNameEnum.TEMAKI,
-    appetizers: [CardNameEnum.ONIGIRI, CardNameEnum.TOFU, CardNameEnum.SASHIMI],
-    specials: [CardNameEnum.SPOON, CardNameEnum.TAKEOUT_BOX],
-    dessert: CardNameEnum.FRUIT
+    roll: RollsEnum.TEMAKI,
+    appetizers: [AppetizersEnum.ONIGIRI, AppetizersEnum.TOFU, AppetizersEnum.SASHIMI],
+    specials: [SpecialsEnum.SPOON, SpecialsEnum.TAKEOUT_BOX],
+    dessert: DessertsEnum.FRUIT
   },
   pointsPlatter: {
-    roll: CardNameEnum.URAMAKI,
-    appetizers: [CardNameEnum.ONIGIRI, CardNameEnum.DUMPLING, CardNameEnum.EDAMAME],
-    specials: [CardNameEnum.SPECIAL_ORDER, CardNameEnum.TEA],
-    dessert: CardNameEnum.GREEN_TEA_ICE_CREAM,
+    roll: RollsEnum.URAMAKI,
+    appetizers: [AppetizersEnum.ONIGIRI, AppetizersEnum.DUMPLING, AppetizersEnum.EDAMAME],
+    specials: [SpecialsEnum.SPECIAL_ORDER, SpecialsEnum.TEA],
+    dessert: DessertsEnum.GREEN_TEA_ICE_CREAM,
   },
   cutthroatCombo: {
-    roll: CardNameEnum.TEMAKI,
-    appetizers: [CardNameEnum.EEL, CardNameEnum.TOFU, CardNameEnum.MISO_SOUP],
-    specials: [CardNameEnum.SPOON, CardNameEnum.SOY_SAUCE],
-    dessert: CardNameEnum.PUDDING,
+    roll: RollsEnum.TEMAKI,
+    appetizers: [AppetizersEnum.EEL, AppetizersEnum.TOFU, AppetizersEnum.MISO_SOUP],
+    specials: [SpecialsEnum.SPOON, SpecialsEnum.SOY_SAUCE],
+    dessert: DessertsEnum.PUDDING,
   },
   bigBanquet: {
-    roll: CardNameEnum.MAKI,
-    appetizers: [CardNameEnum.TEMPURA, CardNameEnum.DUMPLING, CardNameEnum.EEL],
-    specials: [CardNameEnum.SPOON, CardNameEnum.CHOPSTICKS],
-    dessert: CardNameEnum.GREEN_TEA_ICE_CREAM,
+    roll: RollsEnum.MAKI,
+    appetizers: [AppetizersEnum.TEMPURA, AppetizersEnum.DUMPLING, AppetizersEnum.EEL],
+    specials: [SpecialsEnum.SPOON, SpecialsEnum.CHOPSTICKS],
+    dessert: DessertsEnum.GREEN_TEA_ICE_CREAM,
   },
   dinnerForTwo: {
-    roll: CardNameEnum.URAMAKI,
-    appetizers: [CardNameEnum.ONIGIRI, CardNameEnum.TOFU, CardNameEnum.MISO_SOUP],
-    specials: [CardNameEnum.MENU,CardNameEnum.SPECIAL_ORDER],
-    dessert: CardNameEnum.FRUIT,
+    roll: RollsEnum.URAMAKI,
+    appetizers: [AppetizersEnum.ONIGIRI, AppetizersEnum.TOFU, AppetizersEnum.MISO_SOUP],
+    specials: [SpecialsEnum.MENU,SpecialsEnum.SPECIAL_ORDER],
+    dessert: DessertsEnum.FRUIT,
   },
 };
 

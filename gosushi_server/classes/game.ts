@@ -3,7 +3,7 @@ import Card from './card';
 import Deck from './deck';
 import { IConnection } from './myConnection';
 import Player from './player';
-import CardNameEnum from '../types/cardNameEnum';
+import { AppetizersEnum, MenuCardNameEnum, RollsEnum } from '../types/cardNameEnum';
 import IMenu from '../types/IMenu';
 import IPlayer from '../types/IPlayer'
 import ISpecialAction, { ISpecialLogEntry, TSpecialData } from '../types/ISpecialAction';
@@ -247,7 +247,7 @@ class Game {
     return tempPlayers;
   }
 
-  getSpecialData(playerName: string, card: Card): Card[] | string[] {
+  getSpecialData(playerName: string, card: Card): TSpecialData[] {
     let currPlayer: Player = this.players.find(p => p.name === playerName)!;
 
     switch (card.name) {
@@ -262,13 +262,12 @@ class Game {
         return currPlayer.playedCards; // Card[]
       case 'Spoon':
         // display the menu
-        let valArray: string[] = Object.values(this.deck.menu);
-        let menuItems = ['Nigiri']; // add the Nigiri
-        menuItems.push(valArray[0]); // add the roll card from the menu
-        menuItems = menuItems.concat(valArray[1]); // add the appetizer cards from the menu
-        menuItems = menuItems.concat(valArray[2]); // add the special cards from the menu
-        menuItems.push(valArray[3]); // add the dessert card from the menu
-        return menuItems; // string[]
+        let menuItems: MenuCardNameEnum[] = ['Nigiri']; // add the Nigiri
+        menuItems.push(this.deck.menu.roll); // add the roll card from the menu
+        menuItems = menuItems.concat(this.deck.menu.appetizers); // add the appetizer cards from the menu
+        menuItems = menuItems.concat(this.deck.menu.specials); // add the special cards from the menu
+        menuItems.push(this.deck.menu.dessert); // add the dessert card from the menu
+        return menuItems;
       case 'Takeout Box':
         // display current player's played cards
         return currPlayer.playedCards; // Card[]
@@ -308,7 +307,7 @@ class Game {
     }
 
     const selectedCards = specialData as Card[];
-    const selectedMenuCards = specialData as string[];
+    const selectedMenuCards = specialData as MenuCardNameEnum[];
     switch (specialCard.name) {
       case 'Chopsticks':
         // add card to player's turn cards from their hand
@@ -431,7 +430,7 @@ class Game {
     this.deck.resetDeck(dessertsMap[this.round]);
     this.deck.shuffle();
 
-    if (this.deck.menu.roll === CardNameEnum.URAMAKI) {
+    if (this.deck.menu.roll === RollsEnum.URAMAKI) {
       this.players.forEach(p => (this.uramakiCountMap[p.name] = 0));
     }
   } // setupDeck

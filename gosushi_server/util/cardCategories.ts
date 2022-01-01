@@ -1,44 +1,44 @@
-import CardNameEnum from '../types/cardNameEnum';
+import { NigiriEnum, RollsEnum, AppetizersEnum, SpecialsEnum, DessertsEnum, CardNameEnum }  from '../types/cardNameEnum';
 
-const nigiris = [CardNameEnum.EGG, CardNameEnum.SALMON, CardNameEnum.SQUID];
+const nigiris = [NigiriEnum.EGG, NigiriEnum.SALMON, NigiriEnum.SQUID];
 
-const rolls = [CardNameEnum.MAKI, CardNameEnum.TEMAKI, CardNameEnum.URAMAKI];
+const rolls = [RollsEnum.MAKI, RollsEnum.TEMAKI, RollsEnum.URAMAKI];
 
 const appetizers = [
-  CardNameEnum.DUMPLING,
-  CardNameEnum.EDAMAME,
-  CardNameEnum.EEL,
-  CardNameEnum.ONIGIRI,
-  CardNameEnum.MISO_SOUP,
-  CardNameEnum.SASHIMI,
-  CardNameEnum.TEMPURA,
-  CardNameEnum.TOFU,
+  AppetizersEnum.DUMPLING,
+  AppetizersEnum.EDAMAME,
+  AppetizersEnum.EEL,
+  AppetizersEnum.ONIGIRI,
+  AppetizersEnum.MISO_SOUP,
+  AppetizersEnum.SASHIMI,
+  AppetizersEnum.TEMPURA,
+  AppetizersEnum.TOFU,
 ];
 
 const specials = [
-  CardNameEnum.CHOPSTICKS,
-  CardNameEnum.MENU,
-  CardNameEnum.SOY_SAUCE,
-  CardNameEnum.SPECIAL_ORDER,
-  CardNameEnum.SPOON,
-  CardNameEnum.TAKEOUT_BOX,
-  CardNameEnum.TEA,
-  CardNameEnum.WASABI,
+  SpecialsEnum.CHOPSTICKS,
+  SpecialsEnum.MENU,
+  SpecialsEnum.SOY_SAUCE,
+  SpecialsEnum.SPECIAL_ORDER,
+  SpecialsEnum.SPOON,
+  SpecialsEnum.TAKEOUT_BOX,
+  SpecialsEnum.TEA,
+  SpecialsEnum.WASABI,
 ];
 
 const desserts = [
-  CardNameEnum.PUDDING,
-  CardNameEnum.GREEN_TEA_ICE_CREAM,
-  CardNameEnum.FRUIT,
+  DessertsEnum.PUDDING,
+  DessertsEnum.GREEN_TEA_ICE_CREAM,
+  DessertsEnum.FRUIT,
 ];
 
-const specialActionsHand = [
-  CardNameEnum.MENU,
-  CardNameEnum.SPECIAL_ORDER,
-  CardNameEnum.TAKEOUT_BOX,
+const specialActionsHand: CardNameEnum[] = [
+  SpecialsEnum.MENU,
+  SpecialsEnum.SPECIAL_ORDER,
+  SpecialsEnum.TAKEOUT_BOX,
 ];
 
-const specialActionsPlayed = [CardNameEnum.CHOPSTICKS, CardNameEnum.SPOON];
+const specialActionsPlayed: CardNameEnum[] = [SpecialsEnum.CHOPSTICKS, SpecialsEnum.SPOON];
 
 export {
   nigiris,

@@ -1,10 +1,10 @@
-import CardNameEnum from './cardNameEnum';
+import { AppetizersEnum, DessertsEnum, RollsEnum, SpecialsEnum } from './cardNameEnum';
 
 export interface IMenu {
-    roll: CardNameEnum,
-    appetizers: CardNameEnum[],
-    specials: CardNameEnum[],
-    dessert: CardNameEnum,
+    roll: RollsEnum,
+    appetizers: AppetizersEnum[],
+    specials: SpecialsEnum[],
+    dessert: DessertsEnum,
 }
 
 export interface ISuggestedMenus {

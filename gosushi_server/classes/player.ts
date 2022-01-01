@@ -1,5 +1,5 @@
 import { findIndex, isEqual } from 'lodash';
-import CardNameEnum from '../types/cardNameEnum';
+import { CardNameEnum } from '../types/cardNameEnum';
 import Card from './card';
 
 class Player {

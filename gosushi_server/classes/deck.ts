@@ -1,5 +1,5 @@
 import Card from './card';
-import CardNameEnum from '../types/cardNameEnum';
+import { NigiriEnum, RollsEnum, AppetizersEnum, SpecialsEnum, DessertsEnum }  from '../types/cardNameEnum';
 import IMenu from '../types/IMenu';
 import OnigiriNameEnum from '../types/onigiriNameEnum';
 import { drop, findIndex, isEqual, remove, shuffle, slice, take } from 'lodash';
@@ -32,43 +32,43 @@ class Deck {
     let arr = [];
     for (let i = 0; i < 12; i++) {
       if (i < 4) {
-        arr[i] = new Card(CardNameEnum.EGG, i);
+        arr[i] = new Card(NigiriEnum.EGG, i);
       } else if (i > 8) {
-        arr[i] = new Card(CardNameEnum.SQUID, i);
+        arr[i] = new Card(NigiriEnum.SQUID, i);
       } else {
-        arr[i] = new Card(CardNameEnum.SALMON, i);
+        arr[i] = new Card(NigiriEnum.SALMON, i);
       } // if
     } // for
     return arr;
   }
 
-  createRoll(rollName: CardNameEnum) {
+  createRoll(rollName: RollsEnum) {
     let arr = [];
     switch (rollName) {
-      case CardNameEnum.MAKI:
+      case RollsEnum.MAKI:
         for (let i = 0; i < 12; i++) {
           if (i < 4) {
-            arr[i] = new Card(CardNameEnum.MAKI, i, 1);
+            arr[i] = new Card(RollsEnum.MAKI, i, 1);
           } else if (i > 8) {
-            arr[i] = new Card(CardNameEnum.MAKI, i, 3);
+            arr[i] = new Card(RollsEnum.MAKI, i, 3);
           } else {
-            arr[i] = new Card(CardNameEnum.MAKI, i, 2);
+            arr[i] = new Card(RollsEnum.MAKI, i, 2);
           } // if
         } // for
         break;
-      case CardNameEnum.TEMAKI:
+      case RollsEnum.TEMAKI:
         for (let i = 0; i < 12; i++) {
-          arr[i] = new Card(CardNameEnum.TEMAKI, i);
+          arr[i] = new Card(RollsEnum.TEMAKI, i);
         } // for
         break;
-      case CardNameEnum.URAMAKI:
+      case RollsEnum.URAMAKI:
         for (let i = 0; i < 12; i++) {
           if (i < 4) {
-            arr[i] = new Card(CardNameEnum.URAMAKI, i, 3);
+            arr[i] = new Card(RollsEnum.URAMAKI, i, 3);
           } else if (i > 7) {
-            arr[i] = new Card(CardNameEnum.URAMAKI, i, 5);
+            arr[i] = new Card(RollsEnum.URAMAKI, i, 5);
           } else {
-            arr[i] = new Card(CardNameEnum.URAMAKI, i, 4);
+            arr[i] = new Card(RollsEnum.URAMAKI, i, 4);
           } // if
         } // for
         break;
@@ -78,21 +78,21 @@ class Deck {
     return arr;
   }
 
-  createAppetizer(appetizerName: CardNameEnum) {
+  createAppetizer(appetizerName: AppetizersEnum) {
     let arr = [];
-    if (appetizerName === CardNameEnum.ONIGIRI) {
+    if (appetizerName === AppetizersEnum.ONIGIRI) {
       for (let i = 0; i < 8; i++) {
         if (i % 4 === 0) {
-          arr[i] = new Card(CardNameEnum.ONIGIRI, i, OnigiriNameEnum.CIRCLE);
+          arr[i] = new Card(AppetizersEnum.ONIGIRI, i, OnigiriNameEnum.CIRCLE);
         } else if (i % 4 === 1) {
-          arr[i] = new Card(CardNameEnum.ONIGIRI, i, OnigiriNameEnum.TRIANGLE);
+          arr[i] = new Card(AppetizersEnum.ONIGIRI, i, OnigiriNameEnum.TRIANGLE);
         } else if (i % 4 === 2) {
-          arr[i] = new Card(CardNameEnum.ONIGIRI, i, OnigiriNameEnum.SQUARE);
+          arr[i] = new Card(AppetizersEnum.ONIGIRI, i, OnigiriNameEnum.SQUARE);
         } else {
-          arr[i] = new Card(CardNameEnum.ONIGIRI, i, OnigiriNameEnum.RECTANGLE);
+          arr[i] = new Card(AppetizersEnum.ONIGIRI, i, OnigiriNameEnum.RECTANGLE);
         } // if
       } // for
-    } else if (Object.values(CardNameEnum).includes(appetizerName)) {
+    } else if (Object.values(AppetizersEnum).includes(appetizerName)) {
       for (let i = 0; i < 8; i++) {
         arr[i] = new Card(appetizerName, i);
       } // for
@@ -102,18 +102,18 @@ class Deck {
     return arr;
   }
 
-  createSpecial(specialName: CardNameEnum) {
+  createSpecial(specialName: SpecialsEnum) {
     let arr = [];
     for (let i = 0; i < 3; i++) {
-      if (specialName === CardNameEnum.CHOPSTICKS) {
-        arr[i] = new Card(CardNameEnum.CHOPSTICKS, i, i + 1);
-      } else if (specialName === CardNameEnum.SPOON) {
-        arr[i] = new Card(CardNameEnum.SPOON, i, i + 4);
-      } else if (specialName === CardNameEnum.MENU) {
-        arr[i] = new Card(CardNameEnum.MENU, i, i + 7);
-      } else if (specialName === CardNameEnum.TAKEOUT_BOX) {
-        arr[i] = new Card(CardNameEnum.TAKEOUT_BOX, i, i + 10);
-      } else if (Object.values(CardNameEnum).includes(specialName)) {
+      if (specialName === SpecialsEnum.CHOPSTICKS) {
+        arr[i] = new Card(SpecialsEnum.CHOPSTICKS, i, i + 1);
+      } else if (specialName === SpecialsEnum.SPOON) {
+        arr[i] = new Card(SpecialsEnum.SPOON, i, i + 4);
+      } else if (specialName === SpecialsEnum.MENU) {
+        arr[i] = new Card(SpecialsEnum.MENU, i, i + 7);
+      } else if (specialName === SpecialsEnum.TAKEOUT_BOX) {
+        arr[i] = new Card(SpecialsEnum.TAKEOUT_BOX, i, i + 10);
+      } else if (Object.values(SpecialsEnum).includes(specialName)) {
         arr[i] = new Card(specialName, i);
       } else {
         console.log('Invalid special name.');
@@ -123,9 +123,9 @@ class Deck {
     return arr;
   }
 
-  createDesserts(dessertName: CardNameEnum, numPlayers: number) {
+  createDesserts(dessertName: DessertsEnum, numPlayers: number) {
     let arr = [];
-    if (dessertName === CardNameEnum.FRUIT) {
+    if (dessertName === DessertsEnum.FRUIT) {
       for (let i = 0; i < 15; i++) {
         let fruit = {};
         if (i / 3 < 3) {
@@ -133,14 +133,14 @@ class Deck {
         } else {
           fruit = fruitCombos[Math.floor((i - 9) / 2) + 3];
         }
-        arr[i] = new Card(CardNameEnum.FRUIT, i, fruit);
+        arr[i] = new Card(DessertsEnum.FRUIT, i, fruit);
       } // for
       if (numPlayers < 6) {
         arr = slice(shuffle(arr), 5);
       } // if
     } else if (
-      dessertName === CardNameEnum.PUDDING ||
-      dessertName === CardNameEnum.GREEN_TEA_ICE_CREAM
+      dessertName === DessertsEnum.PUDDING ||
+      dessertName === DessertsEnum.GREEN_TEA_ICE_CREAM
     ) {
       const num = numPlayers > 5 ? 15 : 10;
       for (let i = 0; i < num; i++) {

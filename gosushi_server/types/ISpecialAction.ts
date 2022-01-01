@@ -1,4 +1,5 @@
 import Card from '../classes/card';
+import { MenuCardNameEnum } from './cardNameEnum';
 
 export default interface ISpecialAction {
     card: Card,
@@ -13,4 +14,4 @@ export interface ISpecialLogEntry {
   boxCards?: number;
 };
 
-export type TSpecialData = string | Card;
+export type TSpecialData = MenuCardNameEnum | Card;

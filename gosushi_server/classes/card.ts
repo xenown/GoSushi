@@ -1,8 +1,8 @@
-import CardNameEnum from "../types/cardNameEnum";
+import { CardNameEnum, NigiriEnum } from "../types/cardNameEnum";
 
 class Card {
   isFlipped: boolean = false;
-  name: CardNameEnum = CardNameEnum.EGG;
+  name: CardNameEnum = NigiriEnum.EGG;
   id: number = 0;
   data: any;
 
