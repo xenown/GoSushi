@@ -167,6 +167,7 @@ class Game {
             card,
             data.slice(0, 1),
           );
+          this.finishedTurn();
         } else {
           this.connection.doSpecialAction(
             playerName,
