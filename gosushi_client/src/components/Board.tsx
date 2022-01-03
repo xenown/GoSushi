@@ -7,6 +7,7 @@ import { Socket } from 'socket.io-client';
 import Card from './Card';
 import CardToggle from './CardToggle';
 import Drawer from './MenuDrawer';
+import PointsModal from './PointsModal';
 import ResultsModal from './ResultsModal';
 import SpecActionsLog from './SpecActionsLog';
 import SpecialModal from './SpecialModal';
@@ -43,6 +44,8 @@ const Board = ({ socket }: IBoardProps) => {
     const handleDealHand = ({ hand, players }: sEvents.ISendTurnDataProps) => {
       setHand(hand);
       setPlayersData(players);
+      console.log(players);
+
       let selectedIndices: number[] = [];
       players[0].turnCards.forEach(card => {
         selectedIndices.push(hand.findIndex(handCard => isEqual(handCard, card)));
@@ -94,6 +97,7 @@ const Board = ({ socket }: IBoardProps) => {
   }, [params.roomCode, socket, menu, history]);
 
   const currPlayer = playersData[0];
+  console.log(currPlayer)
   const otherPlayerData = playersData.slice(1);
 
   const handleSelectCardIndex = (index: number) => {
@@ -184,7 +188,8 @@ const Board = ({ socket }: IBoardProps) => {
     <div className="board">
       {menu && <Drawer menu={menu} />}
       <SpecialModal socket={socket} />
-      <ResultsModal socket={socket} playerName={currPlayer ? currPlayer.name : ""} />
+      <ResultsModal socket={socket} playerName={currPlayer ? currPlayer.name : ""} isHost={currPlayer && currPlayer.isHost} />
+      <PointsModal socket={socket} isHost={currPlayer && currPlayer.isHost} />
       <SpecActionsLog socket={socket} />
       <OtherPlayerGrid data={otherPlayerData} />
       <div className="played-cards">

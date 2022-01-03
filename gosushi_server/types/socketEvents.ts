@@ -1,6 +1,7 @@
 import Card from '../classes/card';
 import IMenu from "./IMenu";
-import IPlayer, { ISimplePlayer } from './IPlayer'
+import IPlayer, { ISimplePlayer } from './IPlayer';
+import { IPlayerResult } from '../types/IPointsResult';
 import { ISpecialLogEntry, TSpecialData } from '../types/ISpecialAction';
 
 enum SocketEventEnum {
@@ -22,6 +23,8 @@ enum SocketEventEnum {
   START_GAME = 'startGame',                             // emit
   UPDATE_ROUND_NUMBER = 'updateRoundNumber',            // emit
   BOARD_LOADED = 'boardLoaded',                         // on
+  START_ROUND = 'startRound',                           // on
+  SEND_PLAYER_RESULT = 'sendPlayerResult',              // emit
   SEND_MENU_DATA = 'sendMenuData',                      // emit
   SEND_TURN_DATA = 'sendTurnData',                      // emit
 
@@ -33,7 +36,7 @@ enum SocketEventEnum {
   UNKNOWN_GAME = 'unknownGame',                         // emit
   BROADCAST_SELECTION = 'broadcastSelection',           // on
   FINISH_TURN = 'finishTurn',                           // on
-  GAME_RESULTS = 'gameResults',                          // emit
+  GAME_RESULTS = 'gameResults',                         // emit
 
   PLAYER_STATUS = 'playerStatus',                       // emit
   NEW_LOG_ENTRY = 'newLogEntry',                        // emit
@@ -76,9 +79,18 @@ export interface IGameInitiatedProps { roomCode: string; };
 export interface IStartGameProps { roomCode: string; };
 export interface IUpdateRoundNumberProps { roundNumber: number };
 export interface IBoardLoadedProps {
-  roomCode: string,
-  sendMenu: boolean,
+  roomCode: string;
+  sendMenu: boolean;
 };
+
+export interface IStartRoundProps {
+  roomCode: string;
+}
+
+export interface ISendPlayerResultProps {
+  result: IPlayerResult;
+}
+
 export interface ISendMenuDataProps { menu: IMenu; };
 export interface ISendTurnDataProps {
   hand: Card[];

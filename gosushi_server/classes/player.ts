@@ -14,10 +14,11 @@ class Player {
   dessertCards: Card[];
   makiCount: number;
   uramakiCount: number;
-  isAuto: boolean
+  isHost: boolean;
+  isAuto: boolean;
   hasAutoPlayedCard: boolean;
 
-  constructor(name: string, ip: string, socketId: string, isAuto: boolean = false) {
+  constructor(name: string, ip: string, socketId: string, isHost: boolean = false, isAuto: boolean = false) {
     this.name = name;
     this.ip = ip;
     this.socketId = socketId;
@@ -29,6 +30,7 @@ class Player {
     this.dessertCards = [];
     this.makiCount = 0;
     this.uramakiCount = 0;
+    this.isHost = isHost;
     this.isAuto = isAuto;
     this.hasAutoPlayedCard = false;
   } // constructor

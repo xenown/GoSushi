@@ -11,18 +11,17 @@ import './resultsModal.scss';
 interface IResultsModalProps {
   socket: Socket;
   playerName: string;
+  isHost: boolean;
 };
 
-const ResultsModal = ({ socket, playerName }: IResultsModalProps) => {
+const ResultsModal = ({ socket, playerName, isHost }: IResultsModalProps) => {
   const history = useHistory();
   const params: IRouteParams = useParams();
   const [playersData, setPlayersData] = useState<IPlayer[]>([]);
-  const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
-    const handleEndGame = ({ playersData, isHost }: IGameResultsProps) => {
+    const handleEndGame = ({ playersData }: IGameResultsProps) => {
       setPlayersData(playersData);
-      setIsHost(isHost);
     };
 
     socket.on(SocketEventEnum.GAME_RESULTS, handleEndGame);

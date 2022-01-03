@@ -1,6 +1,6 @@
 import ICard from './ICard';
 import IMenu from './IMenu';
-import IPlayer, { ISimplePlayer } from './IPlayer'
+import IPlayer, { IPlayerResult, ISimplePlayer } from './IPlayer'
 import { ISpecialLogEntry, TSpecialData } from '../types/ISpecial';
 
 enum SocketEventEnum {
@@ -20,8 +20,10 @@ enum SocketEventEnum {
 
   GAME_INITIATED = 'gameInitiated',
   START_GAME = 'startGame',
+  START_ROUND = 'startRound',
   UPDATE_ROUND_NUMBER = 'updateRoundNumber',
   BOARD_LOADED = 'boardLoaded',
+  SEND_PLAYER_RESULT = 'sendPlayerResult',
   SEND_MENU_DATA = 'sendMenuData',
   SEND_TURN_DATA = 'sendTurnData',
 
@@ -76,9 +78,18 @@ export interface IGameInitiatedProps { roomCode: string; };
 export interface IStartGameProps { roomCode: string; };
 export interface IUpdateRoundNumberProps { roundNumber: number };
 export interface IBoardLoadedProps {
-  roomCode: string,
-  sendMenu: boolean,
+  roomCode: string;
+  sendMenu: boolean;
 };
+
+export interface IStartRoundProps {
+  roomCode: string;
+};
+
+export interface ISendPlayerResultProps {
+  result: IPlayerResult;
+}
+
 export interface ISendMenuDataProps { menu: IMenu; };
 export interface ISendTurnDataProps {
   hand: ICard[];
@@ -119,7 +130,6 @@ export interface IFinishTurnProps {
 
 export interface IGameResultsProps {
   playersData: IPlayer[];
-  isHost: boolean;
 };
 
 export interface IPlayerStatusProps {

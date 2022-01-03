@@ -216,7 +216,7 @@ io.on('connection', (socket: Socket) => {
       let game = rooms[roomCode];
 
       for (let i = 2; i <= numPlayers; i++) {
-        game.addPlayer(`Player${i}`, `auto-${i}`, clientIp, true);
+        game.addPlayer(`Player${i}`, `auto-${i}`, clientIp, false, true);
       }
 
       socket.emit(
@@ -275,6 +275,12 @@ io.on('connection', (socket: Socket) => {
     } else {
       socket.emit(SocketEventEnum.UNKNOWN_GAME);
     }
+  });
+
+  // set up next round 
+  socket.on(SocketEventEnum.START_ROUND, ({ roomCode }: sEvents.IStartRoundProps) => {
+    const game = rooms[roomCode];
+    game.setUpNextRound();
   });
 
   // update the data in the WaitingRoom so that other players can see the changes in the selection

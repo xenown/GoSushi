@@ -107,7 +107,7 @@ const calculateUramakiPoints = (players: Player[], resultsMap: IPointsResult, ur
     // don't need to limit to only above 10 uramaki's if the round is over
     .sort((el1, el2) => el2[1] - el1[1]);
 
-  let prevValue = 0;
+  let prevValue = -1;
   let equivStanding = uramakiStanding.value;
 
   // uramakiStanding is how many prizes are given out

@@ -66,7 +66,7 @@ class Game {
     this.deck = new Deck(menu, playerNum);
     this.numPlayers = playerNum;
     this.roomCode = roomCode;
-    this.hostPlayer = new Player(hostPlayerName, hostIp, socketId);
+    this.hostPlayer = new Player(hostPlayerName, hostIp, socketId, true);
     this.players = [this.hostPlayer];
 
     this.connection = conn;
@@ -95,8 +95,8 @@ class Game {
   } // newGame
 
   // add a player to the game
-  addPlayer(name: string, socketId: string, ip: string, isAuto = false) {
-    this.players.push(new Player(name, ip, socketId, isAuto));
+  addPlayer(name: string, socketId: string, ip: string, isHost = false, isAuto = false) {
+    this.players.push(new Player(name, ip, socketId, isHost, isAuto));
   } // addPlayer
 
   startGame() {
@@ -208,40 +208,47 @@ class Game {
       // no more cards in the hand
       calculateRoundPoints(this.players, this.resultMap, this.deck.menu);
 
-      // empty the playedCards and moved the dessert cards
       this.players.forEach(p => {
-        p.dessertCards = p.dessertCards.concat(
-          p.playedCards.filter(c => c.name === this.deck.menu.dessert)
-        );
-        p.playedCards = [];
+        this.connection.sendPlayerResult(p.socketId, this.resultMap[p.name]);
       });
-      const maxRound = dev ? 1 : 3;
-      if (this.round < maxRound) {
-        // go to next round
-        this.round++;
-        this.connection.updateRound(this.roomCode, this.round);
-        console.log('End of round');
-
-        // reset uramaki standing
-        this.uramakiStanding.value = 1;
-
-        // remove and add desserts
-        this.startRound();
-        tempPlayers = this.getPlayersData();
-        this.players.forEach(p => {
-          this.connection.sendTurnData(p.socketId, p.hand, tempPlayers);
-          tempPlayers.push(tempPlayers.shift()!);
-        });
-      } else {
-        this.handleEndGame();
-      }
     } else {
-      // continue round
+      // continue round until all cards are used/hand is empty
       tempPlayers = this.getPlayersData();
       this.players.forEach(p => {
         this.connection.sendTurnData(p.socketId, p.hand, tempPlayers);
         tempPlayers.push(tempPlayers.shift()!);
       });
+    }
+  }
+
+  setUpNextRound() {
+    // empty the playedCards and moved the dessert cards
+    this.players.forEach(p => {
+      p.dessertCards = p.dessertCards.concat(
+        p.playedCards.filter(c => c.name === this.deck.menu.dessert)
+      );
+      p.playedCards = [];
+    });
+
+    const maxRound = dev ? 1 : 3;
+    if (this.round < maxRound) {
+      // go to next round
+      this.round++;
+      this.connection.updateRound(this.roomCode, this.round);
+      console.log('End of round');
+
+      // reset uramaki standing
+      this.uramakiStanding.value = 1;
+
+      // remove and add desserts
+      this.startRound();
+      let tempPlayers = this.getPlayersData();
+      this.players.forEach(p => {
+        this.connection.sendTurnData(p.socketId, p.hand, tempPlayers);
+        tempPlayers.push(tempPlayers.shift()!);
+      });
+    } else {
+      this.handleEndGame();
     }
   }
 
@@ -429,7 +436,7 @@ class Game {
       this.connection.sendGameResults(
         p.socketId,
         tempPlayers,
-        p.socketId === this.hostPlayer.socketId
+        p.isHost,
       );
     });
     console.log('End of game');
