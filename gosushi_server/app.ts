@@ -228,14 +228,13 @@ io.on('connection', (socket: Socket) => {
           }))
         } as sEvents.IGetActivePlayersProps
       );
-      game.startRound();
+      game.startGame();
     });
   });
 
   socket.on(SocketEventEnum.GAME_INITIATED, ({ roomCode }: sEvents.IGameInitiatedProps) => {
     const game = rooms[roomCode];
-    game.startRound();
-    game.gameStarted = true;
+    game.startGame();
 
     io.to(roomCode).emit(SocketEventEnum.START_GAME, { roomCode } as sEvents.IStartGameProps);
     io.to(roomCode).emit(SocketEventEnum.UPDATE_ROUND_NUMBER, { roundNumber: 1 } as sEvents.IUpdateRoundNumberProps);

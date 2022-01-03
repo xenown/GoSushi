@@ -11,13 +11,15 @@ import { ICountMap, IMoreLessPoints, IUramakiStanding } from '../types/IPoints';
 import {
   specialActionsHand,
   specialActionsPlayed,
-} from '../util/cardCategories';
+} from '../util/specialActions';
 import {
   calculateTurnPoints,
   calculateRoundPoints,
   calculateGamePoints,
+  createEmptyResultMap,
 } from '../util/calculatePoints';
 import handSize from '../util/handSize';
+import IPointsResult from '../types/IPointsResult';
 
 const dev = process.env.SHORT;
 
@@ -45,6 +47,7 @@ class Game {
   playedTurn: number = 0;
   uramakiCountMap: ICountMap = {};
   uramakiStanding: IUramakiStanding = { value: 1 };
+  resultMap: IPointsResult = {};
   specialActions: ISpecialAction[] = [];
   gameStarted: boolean = false;
   isGameOver: boolean = false;
@@ -95,6 +98,11 @@ class Game {
   addPlayer(name: string, socketId: string, ip: string, isAuto = false) {
     this.players.push(new Player(name, ip, socketId, isAuto));
   } // addPlayer
+
+  startGame() {
+    this.startRound();
+    this.gameStarted = true;
+  } // startGame
 
   checkForSpecialActions() {
     const isInSpecialActions = (newCard: Card, newPlayerName: string) =>
@@ -188,15 +196,17 @@ class Game {
   handleFinishedTurnActions() {
     calculateTurnPoints(
       this.players,
+      this.resultMap,
       this.deck.menu,
       this.uramakiCountMap,
-      this.uramakiStanding
+      this.uramakiStanding,
     );
     let tempPlayers: IPlayer[] = [];
     this.rotateHands(this.players.map(p => p.hand));
+
     if (this.players[0].hand.length === 0) {
       // no more cards in the hand
-      calculateRoundPoints(this.players, this.deck.menu);
+      calculateRoundPoints(this.players, this.resultMap, this.deck.menu);
 
       // empty the playedCards and moved the dessert cards
       this.players.forEach(p => {
@@ -226,6 +236,7 @@ class Game {
         this.handleEndGame();
       }
     } else {
+      // continue round
       tempPlayers = this.getPlayersData();
       this.players.forEach(p => {
         this.connection.sendTurnData(p.socketId, p.hand, tempPlayers);
@@ -390,6 +401,8 @@ class Game {
 
   startRound() {
     this.setupDeck();
+    // create default empty result for the given menu
+    this.resultMap = createEmptyResultMap(this.players, this.deck.menu);
 
     const hands = [];
     for (let i = 0; i < this.numPlayers; i++) {
@@ -401,7 +414,7 @@ class Game {
 
   handleEndGame() {
     this.isGameOver = true;
-    calculateGamePoints(this.players, this.deck.menu);
+    calculateGamePoints(this.players, this.resultMap, this.deck.menu);
     let tempPlayers = this.getPlayersData();
     this.players.forEach(p => {
       this.connection.sendTurnData(p.socketId, p.hand, tempPlayers);

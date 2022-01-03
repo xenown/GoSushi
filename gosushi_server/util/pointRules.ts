@@ -1,6 +1,6 @@
 import { IMoreLessPoints, IPointsMap } from '../types/IPoints';
 
-const makiPoints: IMoreLessPoints = {
+const makiPointsMap: IMoreLessPoints = {
   less: {
     1: 6,
     2: 3,
@@ -11,13 +11,13 @@ const makiPoints: IMoreLessPoints = {
   },
 };
 
-const uramakiPoints: IPointsMap = {
+const uramakiPointsMap: IPointsMap = {
   1: 8,
   2: 5,
   3: 2,
 };
 
-const dumplingPoints: IPointsMap = {
+const dumplingPointsMap: IPointsMap = {
   0: 0,
   1: 1,
   2: 3,
@@ -26,7 +26,7 @@ const dumplingPoints: IPointsMap = {
   5: 15,
 };
 
-const fruitPoints: IPointsMap = {
+const fruitPointsMap: IPointsMap = {
   0: -2,
   1: 0,
   2: 1,
@@ -36,8 +36,8 @@ const fruitPoints: IPointsMap = {
 };
 
 export {
-  makiPoints,
-  uramakiPoints,
-  dumplingPoints,
-  fruitPoints,
+  makiPointsMap,
+  uramakiPointsMap,
+  dumplingPointsMap,
+  fruitPointsMap,
 };

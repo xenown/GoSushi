@@ -7,6 +7,7 @@ import {
   calculateGamePoints,
   calculateRoundPoints,
   calculateTurnPoints,
+  createEmptyResultMap,
 } from '../../util/calculatePoints';
 import { NigiriEnum, RollsEnum, AppetizersEnum, SpecialsEnum, DessertsEnum }  from '../../types/cardNameEnum';
 import OnigiriNameEnum from '../../types/onigiriNameEnum';
@@ -73,6 +74,7 @@ describe('calculateTurnPoints', function () {
 
   addPlayers(game, players);
   game.setupDeck();
+  game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
   // Assign hands to each player
   game.players.forEach((p: Player, index: number) => {
     // Each hand is in reverse order so we can pop off the last one when playing a card
@@ -84,6 +86,7 @@ describe('calculateTurnPoints', function () {
     game.players.forEach((p: Player) => p.turnCards.push(p.hand.pop()!));
     calculateTurnPoints(
       game.players,
+      game.resultMap,
       game.deck.menu,
       game.uramakiCountMap,
       game.uramakiStanding
@@ -93,7 +96,6 @@ describe('calculateTurnPoints', function () {
   it('should not give Miso points when 2 are played', () => {
     const misos = game.players.map((p: Player) => last(p.playedCards)!);
     expect(misos.map((el: Card) => el.data)).toEqual([0, 0, null]);
-    const temp = game.players.map((p: Player) => last(p.hand)!);
   });
 
   it('should give Miso 3 points when 1 is played', () => {
@@ -107,10 +109,28 @@ describe('calculateTurnPoints', function () {
 
   it('should give 8 points to tied 1st place winners', () => {
     expect(game.players.map((p: Player) => p.points)).toEqual([8, 8, 0]);
+    expect(game.resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 8,
+    }));
+    expect(game.resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 8,
+    }));
+    expect(game.resultMap["P3"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 0,
+    }));
   });
 
   it('should give 2 points to tied 3rd place winners', () => {
     expect(game.players.map((p: Player) => p.points)).toEqual([10, 10, 2]);
+    expect(game.resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 10,
+    }));
+    expect(game.resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 10,
+    }));
+    expect(game.resultMap["P3"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 2,
+    }));
   });
 
   it('should give no points when all prizes are taken', () => {
@@ -122,6 +142,7 @@ describe('calculateTurnPoints', function () {
     game.players.forEach((p: Player) => p.turnCards.push(p.hand.pop()!));
     calculateTurnPoints(
       game.players,
+      game.resultMap,
       game.deck.menu,
       game.uramakiCountMap,
       game.uramakiStanding
@@ -138,6 +159,7 @@ describe('calculateTurnPoints', function () {
 
     calculateTurnPoints(
       game.players,
+      game.resultMap,
       game.deck.menu,
       game.uramakiCountMap,
       game.uramakiStanding
@@ -240,6 +262,7 @@ describe('calculateRollPoints', function () {
 
     addPlayers(game, players[num]);
 
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
     game.deck.menu.roll = num === 0 ? RollsEnum.URAMAKI : RollsEnum.MAKI;
     game.setupDeck();
     game.players.forEach((p: Player, index: number) => {
@@ -252,48 +275,141 @@ describe('calculateRollPoints', function () {
 
   const games = [setupGame(0), setupGame(1), setupGame(2)];
 
+  beforeEach(() => {
+    games.forEach(game => { game.resultMap = createEmptyResultMap(game.players, game.deck.menu) });
+  });
+
   it('should give Uramaki points correctly at the end of last turn', () => {
     calculateTurnPoints(
       games[0].players,
+      games[0].resultMap,
       games[0].deck.menu,
       games[0].uramakiCountMap,
       games[0].uramakiStanding
     );
     expect(games[0].players.map((p: Player) => p.points)).toEqual([8, 2, 8, 0, 0, 0]);
+    expect(games[0].resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 8,
+    }));
+    expect(games[0].resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 2,
+    }));
+    expect(games[0].resultMap["P3"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 8,
+    }));
+    expect(games[0].resultMap["P4"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 0,
+    }));
+    expect(games[0].resultMap["P5"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 0,
+    }));
+    expect(games[0].resultMap["P6"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.URAMAKI]: 0,
+    }));
   });
 
   it('should give Maki points correctly for over 5 players', () => {
     games[0].deck.menu.roll = RollsEnum.MAKI;
-    calculateRoundPoints(games[0].players, games[0].deck.menu);
+    games[0].resultMap = createEmptyResultMap(games[0].players, games[0].deck.menu);
+    calculateRoundPoints(games[0].players, games[0].resultMap, games[0].deck.menu);
     expect(games[0].players.map((p: Player) => p.points)).toEqual([12, 6, 10, 0, 0, 0]);
+    expect(games[0].resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 4,
+    }));
+    expect(games[0].resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 4,
+    }));
+    expect(games[0].resultMap["P3"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 2,
+    }));
+    expect(games[0].resultMap["P4"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 0,
+    }));
+    expect(games[0].resultMap["P5"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 0,
+    }));
+    expect(games[0].resultMap["P6"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 0,
+    }));
   });
 
   it('should give Temaki points correctly for over 5 players', () => {
     games[0].deck.menu.roll = RollsEnum.TEMAKI;
-    calculateRoundPoints(games[0].players, games[0].deck.menu);
+    games[0].resultMap = createEmptyResultMap(games[0].players, games[0].deck.menu);
+    calculateRoundPoints(games[0].players, games[0].resultMap, games[0].deck.menu);
     expect(games[0].players.map((p: Player) => p.points)).toEqual([12, 2, 14, 4, -4, -4]);
+    expect(games[0].resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: 0,
+    }));
+    expect(games[0].resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: -4,
+    }));
+    expect(games[0].resultMap["P3"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: 4,
+    }));
+    expect(games[0].resultMap["P4"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: 4,
+    }));
+    expect(games[0].resultMap["P5"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: -4,
+    }));
+    expect(games[0].resultMap["P6"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: -4,
+    }));
   });
 
   it('should give Maki points correctly for less than 5 players', () => {
-    calculateRoundPoints(games[1].players, games[1].deck.menu);
+    calculateRoundPoints(games[1].players, games[1].resultMap, games[1].deck.menu);
     expect(games[1].players.map((p: Player) => p.points)).toEqual([6, 3]);
+    expect(games[1].resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 6,
+    }));
+    expect(games[1].resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 3,
+    }));
   });
 
   it('should give Temaki points correctly for only 2 players', () => {
     games[1].deck.menu.roll = RollsEnum.TEMAKI;
-    calculateRoundPoints(games[1].players, games[1].deck.menu);
+    games[1].resultMap = createEmptyResultMap(games[1].players, games[1].deck.menu);
+    calculateRoundPoints(games[1].players, games[1].resultMap, games[1].deck.menu);
     expect(games[1].players.map((p: Player) => p.points)).toEqual([6, 7]);
+    expect(games[0].resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: 0,
+    }));
+    expect(games[0].resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: 0,
+    }));
   });
 
   it('should give no Maki points if second place has no Maki', () => {
-    calculateRoundPoints(games[2].players, games[2].deck.menu);
+    calculateRoundPoints(games[2].players, games[2].resultMap, games[2].deck.menu);
     expect(games[2].players.map((p: Player) => p.points)).toEqual([0, 0, 6]);
+    expect(games[2].resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 0,
+    }));
+    expect(games[2].resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 0,
+    }));
+    expect(games[2].resultMap["P3"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.MAKI]: 6,
+    }));
   });
 
   it('should give no Temaki points if all have equal amounts of Temaki', () => {
     games[2].deck.menu.roll = RollsEnum.TEMAKI;
-    calculateRoundPoints(games[2].players, games[2].deck.menu);
+    games[2].resultMap = createEmptyResultMap(games[2].players, games[2].deck.menu);
+    calculateRoundPoints(games[2].players, games[2].resultMap, games[2].deck.menu);
     expect(games[2].players.map((p: Player) => p.points)).toEqual([0, 0, 6]);
+    expect(games[2].resultMap["P1"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: 0,
+    }));
+    expect(games[2].resultMap["P2"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: 0,
+    }));
+    expect(games[2].resultMap["P3"]).toEqual(jasmine.objectContaining({
+      [RollsEnum.TEMAKI]: 0,
+    }));
   });
 });
 
@@ -441,46 +557,53 @@ describe('calculateAppetizerPoints', function () {
 
   it('should give Dumpling points correctly', () => {
     game.deck.menu.appetizers = [AppetizersEnum.DUMPLING];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 1, 3, 6, 10, 15]);
   });
 
   it('should give Eel points correctly', () => {
     game.deck.menu.appetizers = [AppetizersEnum.EEL];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([0, -3, 7, 7, 7, 0]);
   });
 
   it('should give Onigiri points correctly', () => {
     game.deck.menu.appetizers = [AppetizersEnum.ONIGIRI];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 1, 4, 9, 16, 20]);
   });
 
   it('should give Sashimi points correctly', () => {
     game.deck.menu.appetizers = [AppetizersEnum.SASHIMI];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 0, 0, 10, 10, 20]);
   });
 
   it('should give Tempura points correctly', () => {
     game.deck.menu.appetizers = [AppetizersEnum.TEMPURA];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 0, 5, 5, 10, 10]);
   });
 
   it('should give Tofu points correctly', () => {
     game.deck.menu.appetizers = [AppetizersEnum.TOFU];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 2, 6, 0, 0, 0]);
   });
 
   it('should give 0 points per card when only one player has Edamame', () => {
     game.deck.menu.appetizers = [AppetizersEnum.EDAMAME];
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
     game.players.forEach((p: Player, index: number) => {
       p.playedCards = edamameHands[0][index];
     });
-    calculateRoundPoints(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 0, 0, 0, 0, 0]);
   });
 
@@ -488,7 +611,7 @@ describe('calculateAppetizerPoints', function () {
     game.players.forEach((p: Player, index: number) => {
       p.playedCards = edamameHands[1][index];
     });
-    calculateRoundPoints(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([4, 4, 4, 4, 4, 8]);
   });
 
@@ -496,7 +619,7 @@ describe('calculateAppetizerPoints', function () {
     game.players.forEach((p: Player, index: number) => {
       p.playedCards = edamameHands[2][index];
     });
-    calculateRoundPoints(game.players, game.deck.menu);
+    calculateRoundPoints(game.players, game.resultMap, game.deck.menu);
     expect(game.players.map((p: Player) => p.points)).toEqual([3, 9, 3, 3, 0, 0]);
   });
 });
@@ -595,28 +718,32 @@ describe('calculateSpecialPoints', function () {
 
   it('should give Wasabi points correctly', () => {
     game.deck.menu.specials = [SpecialsEnum.WASABI];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players,  game.resultMap, game.deck.menu);
     removeNigiriPoints();
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 4, 0, 2]);
   });
 
   it('should give Soy Sauce points correctly', () => {
     game.deck.menu.specials = [SpecialsEnum.SOY_SAUCE];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players,  game.resultMap, game.deck.menu);
     removeNigiriPoints();
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 0, 4, 8]);
   });
 
   it('should give Tea points correctly', () => {
     game.deck.menu.specials = [SpecialsEnum.TEA];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players,  game.resultMap, game.deck.menu);
     removeNigiriPoints();
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 0, 4, 8]);
   });
 
   it('should give Takeout Box points correctly', () => {
     game.deck.menu.specials = [SpecialsEnum.TAKEOUT_BOX];
-    calculateRoundPoints(game.players, game.deck.menu);
+    game.resultMap = createEmptyResultMap(game.players, game.deck.menu);
+    calculateRoundPoints(game.players,  game.resultMap, game.deck.menu);
     removeNigiriPoints();
     expect(game.players.map((p: Player) => p.points)).toEqual([0, 2, 4, 6]);
   });
@@ -726,37 +853,43 @@ describe('calculateDessertPoints', function () {
 
   it('should give Pudding points correctly with different counts', () => {
     games[0].deck.menu.dessert = DessertsEnum.PUDDING;
-    calculateGamePoints(games[0].players, games[0].deck.menu);
+    games[0].resultMap = createEmptyResultMap(games[0].players, games[0].deck.menu);
+    calculateGamePoints(games[0].players, games[0].resultMap, games[0].deck.menu);
     expect(games[0].players.map((p: Player) => p.points)).toEqual([-6, 0, 6]);
   });
 
   it('should give Pudding points correctly with same counts', () => {
     games[1].deck.menu.dessert = DessertsEnum.PUDDING;
-    calculateGamePoints(games[1].players, games[1].deck.menu);
+    games[1].resultMap = createEmptyResultMap(games[1].players, games[1].deck.menu);
+    calculateGamePoints(games[1].players, games[1].resultMap, games[1].deck.menu);
     expect(games[1].players.map((p: Player) => p.points)).toEqual([0, 0, 0]);
   });
 
   it('should give Ice Cream points correctly when count is divisible by 4', () => {
     games[0].deck.menu.dessert = DessertsEnum.GREEN_TEA_ICE_CREAM;
-    calculateGamePoints(games[0].players, games[0].deck.menu);
+    games[0].resultMap = createEmptyResultMap(games[0].players, games[0].deck.menu);
+    calculateGamePoints(games[0].players, games[0].resultMap, games[0].deck.menu);
     expect(games[0].players.map((p: Player) => p.points)).toEqual([0, 12, 24]);
   });
 
   it('should give Ice Cream points correctly when count is not divisible by 4', () => {
     games[1].deck.menu.dessert = DessertsEnum.GREEN_TEA_ICE_CREAM;
-    calculateGamePoints(games[1].players, games[1].deck.menu);
+    games[1].resultMap = createEmptyResultMap(games[1].players, games[1].deck.menu);
+    calculateGamePoints(games[1].players, games[1].resultMap, games[1].deck.menu);
     expect(games[1].players.map((p: Player) => p.points)).toEqual([0, 0, 12]);
   });
 
   it('should give Fruit points correctly for all same counts', () => {
     games[0].deck.menu.dessert = DessertsEnum.FRUIT;
-    calculateGamePoints(games[0].players, games[0].deck.menu);
+    games[0].resultMap = createEmptyResultMap(games[0].players, games[0].deck.menu);
+    calculateGamePoints(games[0].players, games[0].resultMap, games[0].deck.menu);
     expect(games[0].players.map((p: Player) => p.points)).toEqual([-6, 0, 9]);
   });
 
   it('should give Fruit points correctly for different counts', () => {
     games[1].deck.menu.dessert = DessertsEnum.FRUIT;
-    calculateGamePoints(games[1].players, games[1].deck.menu);
+    games[1].resultMap = createEmptyResultMap(games[1].players, games[1].deck.menu);
+    calculateGamePoints(games[1].players, games[1].resultMap, games[1].deck.menu);
     expect(games[1].players.map((p: Player) => p.points)).toEqual([30, 5, 0]);
   });
 });
